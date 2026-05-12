@@ -6,7 +6,7 @@ const Button = ({
 }: {
   title: string;
   className: string;
-  onClick?: () => void | Promise<boolean>;
+  onClick?: () => void | Promise<unknown>;
   disabled?: boolean;
 }) => {
   return (
