@@ -285,20 +285,20 @@ const FormComponent = () => {
       <div className="w-full flex justify-between items-center mt-8">
         <Button
           title="BACK"
-          className="border border-primary text-primary"
+          className="border border-primary text-primary hover:bg-secondary hover:border-secondary"
           onClick={prevTab}
           disabled={currentTab === 0}
         />
         {isLastTab ? (
           <Button
             title={"GET MY QUOTES"}
-            className="bg-primary text-white"
+            className="bg-primary text-white hover:bg-secondary hover:text-primary"
             onClick={() => router.push("/quote")}
           />
         ) : (
           <Button
             title={"NEXT"}
-            className="bg-primary text-white"
+            className="bg-primary text-white hover:bg-secondary hover:text-primary"
             onClick={nextTab}
           />
         )}
