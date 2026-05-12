@@ -4,10 +4,37 @@
   --background: #ffffff;
   --foreground: #141412;
   --primary: #00785e;
-  --primary-light: #069270;
+  --primary-light: #06927;
   --primary-dark: #069273;
   --secondary: #dbf7a8;
   --bright: #f2f5f2;
+  --navbar-height: 90px;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --navbar-height: 100px;
+  }
+}
+@media (min-width: 1280px) {
+  :root {
+    --navbar-height: 127px;
+  }
+}
+@media (min-width: 1536px) {
+  :root {
+    --navbar-height: 160px;
+  }
+}
+@media (min-width: 2000px) {
+  :root {
+    --navbar-height: 200px;
+  }
+}
+@media (min-width: 2500px) {
+  :root {
+    --navbar-height: 240px;
+  }
 }
 
 @theme inline {
@@ -19,10 +46,9 @@
   --color-secondary: var(--secondary);
   --color-bright: var(--bright);
   --font-sans: var(--font-poppins);
-}
 
-@theme {
   --breakpoint-3xl: 2000px;
+  --breakpoint-4xl: 2500px;
 }
 
 body {
