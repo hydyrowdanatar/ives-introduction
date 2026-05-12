@@ -132,6 +132,11 @@ const HeroTitle: FC<IProps> = ({
                 ? "text-[18px] sm:text-[20px] xl:text-[25px] 2xl:text-[30px] 3xl:text-[38px] leading-[24px] sm:leading-[25px] xl:leading-[32px] 2xl:leading-[38px] 3xl:leading-[50px]"
                 : "text-[26px] sm:text-[32px] xl:text-[40px] 2xl:text-[47px] 3xl:text-[60px] leading-[36px] sm:leading-[44px] xl:leading-[55px] 2xl:leading-[65px] 3xl:leading-[84px]"
             } font-normal`}
+            style={{
+              fontSize: extraClassName
+                ? "var(--twentyFive-size)"
+                : "var(--fourty-size)",
+            }}
           >
             {regularText}
           </span>
@@ -164,7 +169,7 @@ const HeroTitle: FC<IProps> = ({
       <div className="mt-[20px] xl:mt-[30px]">
         {coverageSubTitleWidth ? (
           <span
-            className={`block ${regularColor} w-full xl:w-[480px] xl:w-[600px] 2xl:w-[700px] xl:mx-auto text-[11px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal`}
+            className={`block ${regularColor} w-full lg:w-[480px] xl:w-[600px] 2xl:w-[700px] xl:mx-auto text-[11px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal`}
           >
             {subTitle}
           </span>
@@ -172,7 +177,7 @@ const HeroTitle: FC<IProps> = ({
           <span
             className={`block ${regularColor} ${
               extraClassName
-                ? "w-full xl:w-[530px] xl:w-[630px] 2xl:w-[700px] xl:mx-auto"
+                ? "w-full lg:w-[530px] xl:w-[630px] 2xl:w-[700px] xl:mx-auto"
                 : `w-full xl:${regularWidth}`
             } text-[11px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal`}
           >

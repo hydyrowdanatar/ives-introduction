@@ -21,7 +21,9 @@ const LandingPage = () => {
         bgImage={heroBackImage}
         regularText="Do you have the right insurance for "
         italicText="your rental property?"
-        regularWidth={"w-[380px] lg:w-[318px] xl:w-[408px] 2xl:w-[500px]"}
+        regularWidth={
+          "w-[380px] lg:w-[318px] xl:w-[408px] 2xl:w-[500px] 3xl:w-[630px]"
+        }
         italicWidth={"w-full"}
         regularColor="text-foreground"
         italicColor="text-primary"

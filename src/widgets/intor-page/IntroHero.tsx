@@ -164,7 +164,10 @@ const IntroHero: FC<IProps> = ({
 }) => {
   const router = useRouter();
   return (
-    <div className="w-full flex flex-col-reverse lg:flex-row lg:h-[580px] xl:h-[714px] 2xl:h-[820px] 3xl:h-[1000px]">
+    <div
+      className="w-full flex flex-col-reverse lg:flex-row lg:h-[580px] xl:h-[714px] 2xl:h-[820px] 3xl:h-[1000px]"
+      style={{ height: "var(--hero-height)" }}
+    >
       {/* Image: bottom on mobile, left half on desktop */}
       <div
         className="w-full h-[280px] sm:h-[360px] lg:w-1/2 lg:h-full bg-cover bg-center bg-no-repeat"

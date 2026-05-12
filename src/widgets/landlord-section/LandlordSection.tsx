@@ -102,8 +102,11 @@ const LandlordSection = () => {
       </div>
 
       <div
-        className="w-full absolute left-0 right-0 top-[400px] xl:top-[500px] 2xl:top-[590px] 3xl:top-[770px] h-[29px] xl:h-[36px] 2xl:h-[42px] 3xl:h-[56px] bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${curve.src})` }}
+        className="w-full absolute left-0 right-0 top-[399px] xl:top-[499px] 2xl:top-[589px] 3xl:top-[769px] h-[29px] xl:h-[36px] 2xl:h-[42px] 3xl:h-[56px] bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url(${curve.src})`,
+          // top: "var(--absolute-top)",
+        }}
       ></div>
     </div>
   );

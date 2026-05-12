@@ -30,7 +30,12 @@ const Hero: FC<IProps> = ({
   isBrHave,
 }) => {
   return (
-    <div className="w-full h-[580px] xl:h-[714px] 2xl:h-[820px] 3xl:h-[1000px] flex">
+    <div
+      className="w-full flex"
+      style={{
+        height: "var(--hero-height)",
+      }}
+    >
       <div
         className="w-1/2 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${bgImage.src})` }}

@@ -7,10 +7,10 @@ const Navbar = () => {
   const { closeIcon } = useGetIcons();
   return (
     <div
-      className="w-full h-[90px] lg:h-[100px] xl:h-[127px] 2xl:h-[160px] 3xl:h-[200px] 4xl:h-[245px] bg-cover bg-center bg-no-repeat flex items-center  fixed z-20"
+      className="w-full bg-cover bg-center bg-no-repeat flex items-center  fixed z-20"
       style={{
         backgroundImage: `url(${navbarBG.src})`,
-        // height: "var(--navbar-height)",
+        height: "var(--navbar-height)",
       }}
     >
       <div className="flex items-center justify-between w-[92%] mx-auto">
