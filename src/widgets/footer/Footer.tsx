@@ -42,7 +42,7 @@ const Footer = () => {
               Contact Us
             </span>
             <span
-              className="font-semibold"
+              className="font-semibold ml-1"
               style={{
                 fontSize: "var(--fourteen-size)",
               }}

@@ -176,7 +176,7 @@ const IntroHero: FC<IProps> = ({
 
       {/* Content: top on mobile, right half on desktop */}
       <div
-        className="w-full lg:w-1/2 flex items-center justify-center bg-cover bg-center bg-no-repeat py-10 px-6 sm:px-10 xl:py-0 xl:px-0"
+        className="w-full lg:w-1/2 flex items-center justify-center bg-cover bg-center bg-no-repeat py-11 px-6 lg:py-0 lg:px-0"
         style={{ backgroundImage: bgTitleImage && `url(${bgTitleImage.src})` }}
       >
         <div className="flex flex-col gap-[28px] xl:gap-[45px] ">
@@ -244,7 +244,7 @@ const IntroHero: FC<IProps> = ({
             />
           </div>
 
-          <span className="italic text-[11px] xl:text-[13px] 2xl:text-[15px] 3xl:text-[20px] -mt-2 xl:-mt-4">
+          <span className="italic text-[12px] xl:text-[13px] 2xl:text-[15px] 3xl:text-[20px] -mt-2 xl:-mt-4">
             Takes less than 2 minutes!
           </span>
         </div>

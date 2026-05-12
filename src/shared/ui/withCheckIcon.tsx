@@ -10,7 +10,7 @@ interface IProps {
 
 const WithCheckIcon: FC<IProps> = ({ check_1, check_2, check_3, check_4 }) => {
   return (
-    <div className="w-full flex items-center justify-around">
+    <div className="w-full flex-col lg:flex-row lg:items-center lg:justify-around">
       <CheckLine sentence={check_1} />
       <CheckLine sentence={check_2} />
       <CheckLine sentence={check_3} />
@@ -24,9 +24,9 @@ export default WithCheckIcon;
 const CheckLine = ({ sentence }: { sentence: string }) => {
   const { greenCheck } = useGetIcons();
   return (
-    <div className="flex items-center gap-[10px]">
+    <div className="flex items-center gap-[10px] mt-4 lg:mt-0">
       {greenCheck}
-      <span className="text-[11px] xl:text-[14px] 2xl:text-[16px] 3xl:text-[22px] font-semibold">
+      <span className="text-[13px] xl:text-[14px] 2xl:text-[16px] 3xl:text-[22px] font-semibold">
         {sentence}
       </span>
     </div>

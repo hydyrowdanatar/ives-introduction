@@ -31,17 +31,17 @@ const Hero: FC<IProps> = ({
 }) => {
   return (
     <div
-      className="w-full flex"
+      className="w-full flex flex-col-reverse lg:flex-row "
       style={{
         height: "var(--hero-height)",
       }}
     >
       <div
-        className="w-1/2 bg-cover bg-center bg-no-repeat"
+        className="w-full lg:w-1/2 h-[280px] sm:h-[360px]  lg:h-full bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${bgImage.src})` }}
       />
       <div
-        className="w-1/2 flex  items-center justify-center bg-cover bg-center bg-no-repeat"
+        className="w-full lg:w-1/2 flex  items-center justify-center bg-cover bg-center bg-no-repeat py-11 px-6 xl:py-0 xl:px-0"
         style={{ backgroundImage: bgTitleImage && `url(${bgTitleImage.src})` }}
       >
         <HeroTitle

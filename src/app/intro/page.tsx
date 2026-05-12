@@ -8,7 +8,7 @@ export default function IntroPage() {
         bgImage={heroBackImage}
         regularText="Protect your rental property with "
         italicText="smart, fast, and reliable insurance coverage."
-        regularWidth={"w-[380px] lg:w-[318px] xl:w-[408px] 2xl:w-[500px]"}
+        regularWidth={"lg:w-[380px] lg:w-[318px] xl:w-[408px] 2xl:w-[500px]"}
         italicWidth={"w-full"}
         regularColor="text-foreground"
         italicColor="text-primary"

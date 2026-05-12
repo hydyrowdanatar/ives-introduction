@@ -21,9 +21,7 @@ const LandingPage = () => {
         bgImage={heroBackImage}
         regularText="Do you have the right insurance for "
         italicText="your rental property?"
-        regularWidth={
-          "w-[380px] lg:w-[318px] xl:w-[408px] 2xl:w-[500px] 3xl:w-[630px]"
-        }
+        regularWidth={"lg:w-[318px] xl:w-[408px] 2xl:w-[500px] 3xl:w-[630px]"}
         italicWidth={"w-full"}
         regularColor="text-foreground"
         italicColor="text-primary"
@@ -51,7 +49,7 @@ in conflict."
         bgTitleImage={insuranceTitleBackImage}
         regularText="Insurance Designed for"
         italicText="Rental Property Owners"
-        regularWidth={"w-[380px] lg:w-[388px] xl:w-[498px] 2xl:w-[560px]"}
+        regularWidth={"w-full lg:w-[388px] xl:w-[498px] 2xl:w-[560px]"}
         italicWidth={"w-full"}
         regularColor="text-white"
         italicColor="text-secondary"
@@ -65,7 +63,7 @@ in conflict."
         bgImage={coverageBackImage}
         regularText="Coverage Built Around"
         italicText="Real Landlord Risks"
-        regularWidth={"w-[380px] lg:w-[368px] xl:w-[468px] 2xl:w-[560px]"}
+        regularWidth={"lg:w-[368px] xl:w-[468px] 2xl:w-[560px]"}
         italicWidth={"w-full"}
         regularColor="text-foreground"
         italicColor="text-primary"
@@ -79,7 +77,7 @@ in conflict."
         bgImage={protectionBackImage}
         regularText="Protection"
         italicText="Even During Vacancy"
-        regularWidth={"w-[380px] lg:w-[368px] xl:w-[468px] 2xl:w-[560px]"}
+        regularWidth={"w-full lg:w-[368px] xl:w-[468px] 2xl:w-[560px]"}
         italicWidth={"w-full"}
         regularColor="text-white"
         italicColor="text-secondary"
@@ -93,13 +91,13 @@ in conflict."
         bgImage={teamBackImage}
         regularText="A Team That Supports You "
         italicText="When It Matters Most"
-        regularWidth={"w-[380px] lg:w-[368px] xl:w-[468px] 2xl:w-[560px]"}
+        regularWidth={"lg:w-[368px] xl:w-[468px] 2xl:w-[560px]"}
         italicWidth={""}
         regularColor="text-foreground"
         italicColor="text-primary"
         subTitle="Our team has decades of experience working with landlords and real estate investors across the country. "
         subTitle_2="We work closely with landlords and investors every day. We understand the urgency of protecting your property and your rental income when something goes wrong."
-        isBrHave={false}
+        // isBrHave={false}
       />
 
       <InfoSection
@@ -124,7 +122,7 @@ in conflict."
         bgTitleImage={insuranceTitleBackImage}
         regularText="See If Your Rental Property Is "
         italicText="Properly Protected"
-        regularWidth={"w-[380px] lg:w-[408px] xl:w-[518px] 2xl:w-[610px]"}
+        regularWidth={"lg:w-[408px] xl:w-[518px] 2xl:w-[610px]"}
         italicWidth={"w-full"}
         regularColor="text-white"
         italicColor="text-secondary"
