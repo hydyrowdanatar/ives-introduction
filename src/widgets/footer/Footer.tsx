@@ -8,11 +8,11 @@ const Footer = () => {
         style={{ backgroundImage: `url(${curve.src})` }}
       ></div>
       <div className="w-[92%] mx-auto h-[64px] xl:h-[80px] 2xl:h-[95px] 3xl:h-[124px] text-white flex items-center justify-start">
-        <div className="flex items-end gap-3">
+        <div className="flex flex-col-reverse lg:flex-row lg:items-end gap-3">
           <p className="text-[14px] xl:text-[18px] 2xl:text-[22px] 3xl:text-[28px] font-semibold">
             Frequently Asked Questions
           </p>
-          <p className="text-[14px] xl:text-[18px] 2xl:text-[22px] 3xl:text-[28px] font-semibold">
+          <p className="hidden lg:inline-block text-[14px] xl:text-[18px] 2xl:text-[22px] 3xl:text-[28px] font-semibold">
             |
           </p>
           <p>
