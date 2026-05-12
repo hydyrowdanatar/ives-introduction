@@ -9,31 +9,101 @@
   --secondary: #dbf7a8;
   --bright: #f2f5f2;
   --navbar-height: 90px;
+  --footer-height: 64px;
+  --curve-height: 29px;
+  --absolute-bottom: 63px;
+  --absolute-top: 400px;
+  --layout-pt: 93px;
+  --eighteen-size: 12px;
+  --fourteen-size: 8px;
+  --twentyFive-size: 18px;
+  --fourty-size: 26px;
+  /* --hero-height: 580px; */
+  --hero-height: fit-content;
 }
 
+/* lg */
 @media (min-width: 1024px) {
   :root {
     --navbar-height: 100px;
+    --footer-height: 64px;
+    --curve-height: 29px;
+    --absolute-bottom: 63px;
+    --layout-pt: 70px;
+    --eighteen-size: 14px;
+    --fourteen-size: 10px;
+    --hero-height: 580px;
+    --twentyFive-size: 20px;
+    --fourty-size: 32px;
+    --absolute-top: 399px;
   }
 }
+
+/* xl */
 @media (min-width: 1280px) {
   :root {
     --navbar-height: 127px;
+    --footer-height: 80px;
+    --curve-height: 36px;
+    --absolute-bottom: 79px;
+    --layout-pt: 93px;
+    --eighteen-size: 18px;
+    --fourteen-size: 12px;
+    --hero-height: 714px;
+    --twentyFive-size: 35px;
+    --fourty-size: 40px;
+    --absolute-top: 499px;
   }
 }
+
+/* 2xl */
 @media (min-width: 1536px) {
   :root {
     --navbar-height: 160px;
+    --footer-height: 95px;
+    --curve-height: 42px;
+    --absolute-bottom: 94px;
+    --layout-pt: 110px;
+    --eighteen-size: 22px;
+    --fourteen-size: 14px;
+    --hero-height: 820px;
+    --twentyFive-size: 30px;
+    --fourty-size: 47px;
+    --absolute-top: 589px;
   }
 }
+
+/* 3xl */
 @media (min-width: 2000px) {
   :root {
     --navbar-height: 200px;
+    --footer-height: 124px;
+    --curve-height: 56px;
+    --absolute-bottom: 123px;
+    --layout-pt: 143px;
+    --eighteen-size: 28px;
+    --fourteen-size: 18px;
+    --hero-height: 1000px;
+    --twentyFive-size: 38px;
+    /* --fourty-size: 60px; */
+    /* --absolute-top: 770px; */
   }
 }
+
+/* 4xl */
 @media (min-width: 2500px) {
   :root {
     --navbar-height: 240px;
+    --footer-height: 154px;
+    --curve-height: 69px;
+    --absolute-bottom: 152px;
+    --layout-pt: 179px;
+    --eighteen-size: 34px;
+    --fourteen-size: 23px;
+    --hero-height: 1375px;
+    --twentyFive-size: 48px;
+    /* --fourty-size: 76px; */
+    /* --absolute-top: px; */
   }
 }
 
