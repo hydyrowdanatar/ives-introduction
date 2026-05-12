@@ -44,9 +44,9 @@ const InfoSection: FC<IProps> = ({
   inLine,
 }) => {
   return (
-    <div className="w-full lg:h-[400px] xl:h-[500px] 2xl:h-[590px] 3xl:h-[770px] bg-bright flex items-center justify-center">
-      <div className="w-[86%] mx-auto flex flex-col gap-[30px] items-center">
-        <div className="text-center">
+    <div className="w-full lg:h-[400px] xl:h-[500px] 2xl:h-[590px] 3xl:h-[770px] bg-bright flex items-center justify-center py-11 px-6 lg:py-0 lg:px-0">
+      <div className="w-full lg:w-[86%] mx-auto flex flex-col gap-[30px] lg:items-center">
+        <div className="lg:text-center">
           <div>
             <span
               className={`inline-block ${regularColor} mr-2 text-[20px] xl:text-[25px] 2xl:text-[30px] 3xl:text-[38px] leading-[25px] xl:leading-[32px] 2xl:leading-[38px] 3xl:leading-[50px]  font-normal`}
@@ -64,7 +64,7 @@ const InfoSection: FC<IProps> = ({
 
           <div className="mt-[30px]">
             <span
-              className={`block ${regularColor} w-[500px] xl:w-[630px] 2xl:w-[750px] mx-auto text-[11px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px]  font-normal`}
+              className={`block ${regularColor} lg:w-[500px] xl:w-[630px] 2xl:w-[750px] mx-auto text-[13px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px]  font-normal`}
             >
               {subTitle}
             </span>
@@ -87,7 +87,7 @@ const InfoSection: FC<IProps> = ({
         )}
 
         {bottomSubTitle && (
-          <p className="mt-[30px] text-center text-[16px] xl:text-[20px] 2xl:text-[24px] 3xl:text-[30px]">
+          <p className="lg:mt-[30px] lg:text-center text-[16px] xl:text-[20px] 2xl:text-[24px] 3xl:text-[30px]">
             Get a quote in minutes and see how your coverage compares.
           </p>
         )}

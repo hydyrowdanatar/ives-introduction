@@ -22,28 +22,28 @@ const whiteCheck = (
 const LandlordSection = () => {
   return (
     <div className="w-full relative">
-      <div className="w-full bg-primary-dark h-[400px] xl:h-[500px] 2xl:h-[590px] 3xl:h-[770px] flex items-center">
-        <div className="w-[86%] mx-auto flex items-center justify-around">
+      <div className="w-full bg-primary-dark lg:h-[400px] xl:h-[500px] 2xl:h-[590px] 3xl:h-[770px] flex items-center py-11 px-6 lg:py-0 lg:px-0">
+        <div className="w-full lg:w-[86%] mx-auto flex flex-col lg:flex-row items-center justify-around gap-5 lg:gap-0">
           {/* Left */}
-          <div className="w-[45%] flex flex-col gap-8">
-            <p className="w-[265px] xl:w-[334px] 2xl:w-[394px] 3xl:w-[514px] text-white text-[20px] xl:text-[25px] 2xl:text-[30px] 3xl:text-[38px] leading-[25px] xl:leading-[32px] 2xl:leading-[38px] 3xl:leading-[50px] font-normal">
+          <div className="w-full lg:w-[45%] flex flex-col gap-4 lg:gap-8">
+            <p className="lg:w-[265px] xl:w-[334px] 2xl:w-[394px] 3xl:w-[514px] text-white text-[20px] xl:text-[25px] 2xl:text-[30px] 3xl:text-[38px] leading-[28px] xl:leading-[32px] 2xl:leading-[38px] 3xl:leading-[50px] font-normal">
               Our landlord insurance program was created specifically
               <span
-                className="ml-2 text-[#DBF7A8] text-[22px] xl:text-[28px] 2xl:text-[33px] 3xl:text-[43px] leading-[26px] xl:leading-[33px] 2xl:leading-[39px] 3xl:leading-[50px] font-normal italic"
+                className="ml-2 text-[#DBF7A8] text-[22px] xl:text-[28px] 2xl:text-[33px] 3xl:text-[43px] leading-[28px] xl:leading-[33px] 2xl:leading-[39px] 3xl:leading-[50px] font-normal italic"
                 style={{ fontFamily: "var(--font-taviraj)" }}
               >
                 for property owners who rent their homes to tenants.
               </span>
             </p>
-            <p className="text-white w-[265px] xl:w-[334px] 2xl:w-[404px] 3xl:w-[514px] text-[11px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal">
+            <p className="text-white lg:w-[265px] xl:w-[334px] 2xl:w-[404px] 3xl:w-[514px] text-[13px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal">
               If your property is not insured correctly, a single claim or
               lawsuit could leave you paying significant out of pocket expenses.
             </p>
           </div>
 
           {/* Right */}
-          <div className="w-[55%] flex flex-col gap-8">
-            <div className="w-full flex items-start justify-between">
+          <div className="w-full lg:w-[55%] flex flex-col gap-8">
+            <div className="w-full flex flex-col lg:flex-row items-start justify-between gap-4 lg:gap-0">
               <div className="flex items-start gap-3">
                 <div>{whiteCheck}</div>
 
@@ -87,11 +87,11 @@ const LandlordSection = () => {
               </div>
             </div>
 
-            <p className="mt-7 text-white text-[16px] xl:text-[20px] 2xl:text-[24px] 3xl:text-[30px] font-normal text-center">
+            <p className="mt-7 text-white text-[16px] xl:text-[20px] 2xl:text-[24px] 3xl:text-[30px] font-normal lg:text-center">
               Get a quote in minutes and see how your coverage compares.
             </p>
 
-            <div className="flex justify-center">
+            <div className="flex lg:justify-center">
               <Button
                 title="VIEW MY OPTIONS"
                 className="text-primary border border-white bg-white w-fit hover:bg-primary hover:text-white cursor-pointer"
@@ -102,7 +102,7 @@ const LandlordSection = () => {
       </div>
 
       <div
-        className="w-full absolute left-0 right-0 top-[399px] xl:top-[499px] 2xl:top-[589px] 3xl:top-[769px] h-[29px] xl:h-[36px] 2xl:h-[42px] 3xl:h-[56px] bg-cover bg-center bg-no-repeat"
+        className="w-full absolute left-0 right-0 lg:top-[399px] xl:top-[499px] 2xl:top-[589px] 3xl:top-[769px] h-[29px] xl:h-[36px] 2xl:h-[42px] 3xl:h-[56px] bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: `url(${curve.src})`,
           // top: "var(--absolute-top)",

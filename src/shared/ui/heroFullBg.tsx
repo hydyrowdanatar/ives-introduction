@@ -31,11 +31,11 @@ const HeroFullBg: FC<IProps> = ({
 }) => {
   return (
     <div
-      className="w-full h-[580px] xl:h-[714px] 2xl:h-[820px] 3xl:h-[1000px] flex bg-cover bg-center bg-no-repeat"
+      className="w-full lg:h-[580px] xl:h-[714px] 2xl:h-[820px] 3xl:h-[1000px] flex flex-col-reverse lg:flex-row bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url(${bgImage.src})` }}
     >
-      <div className="w-1/2" />
-      <div className="w-1/2 flex items-center justify-center bg-[#082E26]/90">
+      <div className="w-full lg:w-1/2 h-[280px] sm:h-[360px]  lg:h-full " />
+      <div className="w-full lg:w-1/2 flex items-center justify-center bg-[#082E26]/90 py-11 px-6 lg:py-0 lg:px-0">
         <HeroTitle
           regularText={regularText}
           italicText={italicText}

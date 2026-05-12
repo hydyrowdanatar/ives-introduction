@@ -169,7 +169,7 @@ const HeroTitle: FC<IProps> = ({
       <div className="mt-[20px] xl:mt-[30px]">
         {coverageSubTitleWidth ? (
           <span
-            className={`block ${regularColor} w-full lg:w-[480px] xl:w-[600px] 2xl:w-[700px] xl:mx-auto text-[11px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal`}
+            className={`block ${regularColor}  w-full lg:w-[480px] xl:w-[600px] 2xl:w-[700px] xl:mx-auto text-[13px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal`}
           >
             {subTitle}
           </span>
@@ -178,15 +178,15 @@ const HeroTitle: FC<IProps> = ({
             className={`block ${regularColor} ${
               extraClassName
                 ? "w-full lg:w-[530px] xl:w-[630px] 2xl:w-[700px] xl:mx-auto"
-                : `w-full xl:${regularWidth}`
-            } text-[11px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal`}
+                : `w-[340px] xl:${regularWidth}`
+            } text-[13px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal`}
           >
             {subTitle}
           </span>
         )}
 
         <span
-          className={`block ${regularColor} w-full xl:${regularWidth} text-[11px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal mt-7`}
+          className={`block ${regularColor} w-[340px] xl:${regularWidth} text-[13px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal mt-7`}
         >
           {subTitle_2}
         </span>
