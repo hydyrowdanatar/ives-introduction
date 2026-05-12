@@ -1,4 +1,20 @@
 services:
+  migrate:
+    image: postgres:15
+    env_file:
+      - .env
+    volumes:
+      - ./migrations:/migrations:ro
+    command: >
+      sh -c 'for f in /migrations/*.sql; do
+        echo "Running $$f...";
+        psql "$$DATABASE_URL" -f "$$f" || exit 1;
+      done'
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
   app:
     build:
       context: .
@@ -13,9 +29,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   db:
-    image: supabase/postgres:15.8.1.060
+    image: postgres:15
     ports:
       - "5432:5432"
     env_file:
