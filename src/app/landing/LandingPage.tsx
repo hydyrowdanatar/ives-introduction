@@ -29,6 +29,7 @@ const LandingPage = () => {
         italicColor="text-primary"
         subTitle="Not all landlord insurance policies are created equal. The coverage selected and the price it is offered at are usually 
 in conflict."
+        firstHero={true}
       />
 
       <InfoSection
