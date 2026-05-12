@@ -234,7 +234,7 @@ const IntroHero: FC<IProps> = ({
               title="LEARN MORE"
               className="text-primary bg-transparent border border-primary hover:bg-secondary cursor-pointer hover:border-secondary w-1/2 lg:w-fit"
               onClick={async () => {
-                await fetch("/api/logs", {
+                await fetch("/api/leads", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ text: "learn more clicked" }),
