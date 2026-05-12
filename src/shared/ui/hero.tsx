@@ -14,6 +14,7 @@ interface IProps {
   subTitle: string;
   subTitle_2?: string;
   isBrHave?: boolean;
+  firstHero?: boolean;
 }
 
 const Hero: FC<IProps> = ({
@@ -28,6 +29,7 @@ const Hero: FC<IProps> = ({
   subTitle,
   subTitle_2,
   isBrHave,
+  firstHero = false,
 }) => {
   return (
     <div
@@ -37,11 +39,11 @@ const Hero: FC<IProps> = ({
       }}
     >
       <div
-        className="w-full lg:w-1/2 h-[280px] sm:h-[360px]  lg:h-full bg-cover bg-center bg-no-repeat"
+        className="w-full lg:w-1/2 h-[330px] sm:h-[360px]  lg:h-full bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${bgImage.src})` }}
       />
       <div
-        className="w-full lg:w-1/2 flex  items-center justify-center bg-cover bg-center bg-no-repeat py-11 px-6 xl:py-0 xl:px-0"
+        className={`w-full lg:w-1/2 flex  items-center justify-center bg-cover bg-center bg-no-repeat py-11  ${firstHero ? "pb-3" : "pb-6"} px-6 xl:py-0 xl:px-0`}
         style={{ backgroundImage: bgTitleImage && `url(${bgTitleImage.src})` }}
       >
         <HeroTitle
