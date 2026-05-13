@@ -8,8 +8,9 @@ function getPool(): Pool {
     const connectionString = process.env.POSTGRES_URL;
     if (!connectionString) throw new Error("POSTGRES_URL is not set");
     const isLocal = /@(db|localhost|127\.0\.0\.1)[:/]/.test(connectionString);
+    const cleanUrl = connectionString.replace(/[?&]sslmode=[^&]*/g, "").replace(/[?&]pgbouncer=[^&]*/g, "").replace(/[?&]$/, "");
     _pool = new Pool({
-      connectionString,
+      connectionString: cleanUrl,
       ssl: isLocal ? undefined : { rejectUnauthorized: false },
     });
   }

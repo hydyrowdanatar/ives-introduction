@@ -9,8 +9,9 @@ async function migrate() {
     return;
   }
   const isLocal = /@(db|localhost|127\.0\.0\.1)[:/]/.test(connectionString);
+  const cleanUrl = connectionString.replace(/[?&]sslmode=[^&]*/g, "").replace(/[?&]pgbouncer=[^&]*/g, "").replace(/[?&]$/, "");
   const client = new Client({
-    connectionString,
+    connectionString: cleanUrl,
     ssl: isLocal ? undefined : { rejectUnauthorized: false },
   });
   await client.connect();
