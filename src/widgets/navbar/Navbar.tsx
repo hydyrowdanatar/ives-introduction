@@ -1,10 +1,11 @@
 import navbarBG from "@/shared/assets/navbarBG.png";
 import logo from "@/shared/assets/logoIcon.svg";
+import miniLogo from "@/shared/assets/mobileLogoIcon.svg";
 import Image from "next/image";
 import useGetIcons from "@/shared/icons/getIcons";
 
 const Navbar = () => {
-  const { closeIcon } = useGetIcons();
+  const { closeIcon, miniCloseIcon } = useGetIcons();
   return (
     <div
       className="w-full bg-cover bg-center bg-no-repeat flex items-center  fixed z-20"
@@ -14,8 +15,10 @@ const Navbar = () => {
       }}
     >
       <div className="flex items-center justify-between w-[92%] mx-auto">
-        <Image src={logo} alt="logo" />
-        <div>{closeIcon}</div>
+        <Image src={logo} alt="logo" className="hidden lg:flex" />
+        <Image src={miniLogo} alt="logo" className="flex lg:hidden" />
+        <div className="hidden lg:flex">{closeIcon}</div>
+        <div className="flex lg:hidden">{miniCloseIcon}</div>
       </div>
     </div>
   );
