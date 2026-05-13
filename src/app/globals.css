@@ -91,7 +91,7 @@
 }
 
 /* 4xl */
-@media (min-width: 2500px) {
+/* @media (min-width: 2500px) {
   :root {
     --navbar-height: 240px;
     --footer-height: 154px;
@@ -102,10 +102,10 @@
     --fourteen-size: 23px;
     --hero-height: 1375px;
     --twentyFive-size: 48px;
-    /* --fourty-size: 76px; */
-    /* --absolute-top: px; */
+    --fourty-size: 76px;
+    --absolute-top: px;
   }
-}
+} */
 
 @theme inline {
   --color-background: var(--background);

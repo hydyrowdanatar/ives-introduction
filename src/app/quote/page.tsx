@@ -18,7 +18,7 @@ export default function QuotePage() {
         />
 
         {/* Select */}
-        <div className="relative w-[340px]">
+        <div className="relative w-full lg:w-[340px]">
           <select
             defaultValue=""
             className="
