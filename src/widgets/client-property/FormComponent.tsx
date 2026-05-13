@@ -11,8 +11,8 @@ import { useRouter } from "next/navigation";
 const inputCls =
   "w-full bg-[#F2F5F2] text-[#141412] placeholder:text-[#141412]/50 " +
   "text-[13px] xl:text-[15px] 2xl:text-[17px] 3xl:text-[22px] " +
-  "px-4 py-3 xl:py-3.5 2xl:py-4 outline-none focus:ring-1 focus:ring-primary/40 " +
-  "transition-all duration-150";
+  "p-[10px] outline-none focus:ring-1 focus:ring-primary/40 " +
+  "transition-all duration-150 rounded-[8px]";
 
 const selectWrapCls = "relative";
 const selectCls = inputCls + " appearance-none pr-10 cursor-pointer w-full";
@@ -35,7 +35,7 @@ function AboutYouTab() {
   const { aboutYou, setAboutYou } = useFormStore();
   return (
     <div className="flex flex-col gap-3 xl:gap-4">
-      <div className="flex gap-3 xl:gap-4">
+      <div className="flex flex-col lg:flex-row gap-2 xl:gap-4">
         <input
           className={inputCls}
           placeholder="First Name"
@@ -84,7 +84,7 @@ function PropertyDetailsTab() {
         value={propertyDetails.city}
         onChange={(e) => setPropertyDetails({ city: e.target.value })}
       />
-      <div className="flex gap-3 xl:gap-4">
+      <div className="flex flex-col lg:flex-row gap-2 xl:gap-4">
         <input
           className={inputCls}
           placeholder="State"
@@ -98,7 +98,7 @@ function PropertyDetailsTab() {
           onChange={(e) => setPropertyDetails({ zipcode: e.target.value })}
         />
       </div>
-      <div className="flex gap-3 xl:gap-4">
+      <div className="flex flex-col lg:flex-row gap-2 xl:gap-4">
         <input
           className={inputCls}
           placeholder="Square Footage"
@@ -114,7 +114,7 @@ function PropertyDetailsTab() {
           onChange={(e) => setPropertyDetails({ yearBuilt: e.target.value })}
         />
       </div>
-      <div className="flex gap-3 xl:gap-4">
+      <div className="flex flex-col lg:flex-row gap-2 xl:gap-4">
         <div className={selectWrapCls + " flex-1"}>
           <select
             className={selectCls}
@@ -154,7 +154,7 @@ function CoverageTab() {
   const { coverage, setCoverage } = useFormStore();
   return (
     <div className="flex flex-col gap-3 xl:gap-4">
-      <div className="flex gap-3 xl:gap-4">
+      <div className="flex flex-col lg:flex-row gap-2 xl:gap-4">
         <div className={selectWrapCls + " flex-1"}>
           <select
             className={selectCls}
@@ -265,7 +265,7 @@ const FormComponent = () => {
   const isLastTab = currentTab === 2;
 
   return (
-    <div className="w-[407px] xl:w-[513px] 2xl:w-[605px] 3xl:w-[790px]">
+    <div className="w-full lg:w-[407px] xl:w-[513px] 2xl:w-[605px] 3xl:w-[790px] pb-5">
       {/* Progress bar */}
       <ProgressBar step={currentTab} />
 
@@ -282,7 +282,7 @@ const FormComponent = () => {
       </div>
 
       {/* Navigation */}
-      <div className="w-full flex justify-between items-center mt-8">
+      <div className="w-full flex justify-between items-center mt-8 gap-5">
         <Button
           title="BACK"
           className="border border-primary text-primary hover:bg-secondary hover:border-secondary"

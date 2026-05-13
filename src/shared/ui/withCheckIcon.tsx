@@ -24,7 +24,7 @@ export default WithCheckIcon;
 const CheckLine = ({ sentence }: { sentence: string }) => {
   const { greenCheck } = useGetIcons();
   return (
-    <div className="flex items-center gap-[6px] mb-4 lg:mt-0">
+    <div className="flex items-center gap-[6px] mb-[15px] lg:mt-0">
       {greenCheck}
       <span className="text-[13px] xl:text-[14px] 2xl:text-[16px] 3xl:text-[22px] font-semibold">
         {sentence}

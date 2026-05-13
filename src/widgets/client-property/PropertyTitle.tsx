@@ -1,7 +1,7 @@
 const PropertyTitle = () => {
   return (
-    <div className="flex flex-col  gap-[45px] w-[407px] xl:w-[513px] 2xl:w-[605px] 3xl:w-[790px]">
-      <h1 className="text-[32px] xl:text-[40px] 2xl:text-[47px] 3xl:text-[62px] leading-[44px] xl:leading-[55px] 2xl:leading-[65px] 3xl:leading-[55px]">
+    <div className="flex flex-col  gap-[45px] lg:w-[407px] xl:w-[513px] 2xl:w-[605px] 3xl:w-[790px]">
+      <h1 className="text-[28px] lg:text-[32px] xl:text-[40px] 2xl:text-[47px] 3xl:text-[62px] leading-[44px] xl:leading-[55px] 2xl:leading-[65px] 3xl:leading-[55px]">
         To get started, we just need a few details about you and your property.
       </h1>
 

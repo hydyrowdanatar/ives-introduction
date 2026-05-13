@@ -7,17 +7,17 @@ const LandlordPolicySection = () => {
       <div className="w-full bg-primary-dark lg:h-[284px] xl:h-[358px] 2xl:h-[422px] 3xl:h-[550px] flex items-center py-11 px-6 lg:py-0 lg:px-0">
         <div className="w-full lg:w-[86%] mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-around">
           {/* left side */}
-          <div className="w-full lg:w-[60%] flex flex-col gap-8 items-start">
+          <div className="w-full lg:w-[60%] flex flex-col gap-4 lg:gap-8 items-start">
             <p className="text-white text-[20px] xl:text-[25px] 2xl:text-[30px] 3xl:text-[38px]">
               Many landlords don't realize their policy restricts coverage
               during vacancy until a claim happens.
             </p>
 
-            <ul className="ml-5 list-disc list-outside flex flex-col gap-2 lg:gap-3 ">
+            <ul className="ml-5 list-disc list-outside flex flex-col gap-2 lg:gap-3 w-full">
               <li className="text-white text-[13px] xl:text-[13px] 2xl:text-[15px] 3xl:text-[20px]">
                 Renovations and repairs take time
               </li>
-              <li className="text-white text-[13px] xl:text-[13px] 2xl:text-[15px] 3xl:text-[20px] w-[240px] xl:w-[261px] 2xl:w-[300px] 3xl:w-[337px]">
+              <li className="text-white text-[13px] xl:text-[13px] 2xl:text-[15px] 3xl:text-[20px] lg:w-[240px] xl:w-[261px] 2xl:w-[300px] 3xl:w-[337px]">
                 Tenant turnover happens- typical policy 30-60 days vacancy
                 exclusion
               </li>
