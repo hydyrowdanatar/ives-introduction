@@ -166,7 +166,7 @@ const Quotes = () => {
               <Quote type={type} />
               <Button
                 title="SELECT QUOTE"
-                className="w-full text-white bg-primary"
+                className="w-fit text-white bg-primary self-center"
                 onClick={() => handleSelectQuote(type)}
               />
             </div>
@@ -178,7 +178,7 @@ const Quotes = () => {
           <div className="flex gap-5 items-center">
             <Button
               title="BACK"
-              className="border border-primary text-primary bg-transparent"
+              className="border border-primary text-primary bg-transparent hover:bg-primary hover:text-white "
               onClick={() => router.back()}
             />
             {/* <Button
