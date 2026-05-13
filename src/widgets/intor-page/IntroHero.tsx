@@ -229,6 +229,7 @@ const IntroHero: FC<IProps> = ({
             <Button
               title="GET QUOTE"
               className="text-white bg-primary hover:bg-secondary cursor-pointer hover:text-primary w-1/2 lg:w-fit"
+              onClick={() => router.push("/quote")}
             />
             <Button
               title="LEARN MORE"
