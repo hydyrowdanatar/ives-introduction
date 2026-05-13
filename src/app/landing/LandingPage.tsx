@@ -46,6 +46,7 @@ in conflict."
         btnTitle="GET MY QUOTE"
         bottomSubTitle={true}
         isBrHave
+        href="/quote"
       />
       <Hero
         bgImage={insuranceBackImage}

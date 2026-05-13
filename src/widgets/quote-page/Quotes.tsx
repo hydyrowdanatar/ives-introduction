@@ -166,7 +166,7 @@ const Quotes = () => {
               <Quote type={type} />
               <Button
                 title="SELECT QUOTE"
-                className="w-fit text-white bg-primary self-center"
+                className="w-fit text-white bg-primary self-center hover:bg-primary/90 mt-4"
                 onClick={() => handleSelectQuote(type)}
               />
             </div>

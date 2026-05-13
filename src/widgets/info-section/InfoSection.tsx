@@ -1,6 +1,7 @@
 import Button from "@/shared/ui/btn";
 import HeroTitle from "@/shared/ui/titles/heroTitle";
 import WithCheckIcon from "@/shared/ui/withCheckIcon";
+import Link from "next/link";
 import { FC } from "react";
 
 interface IProps {
@@ -22,6 +23,7 @@ interface IProps {
   check4?: boolean;
   inLine?: boolean;
   check?: boolean;
+  href?: string;
 }
 const InfoSection: FC<IProps> = ({
   regularText,
@@ -42,6 +44,7 @@ const InfoSection: FC<IProps> = ({
   check_3,
   check_4,
   inLine,
+  href,
 }) => {
   return (
     <div className="w-full lg:h-[450px] xl:h-[500px] 2xl:h-[590px] 3xl:h-[770px] bg-bright flex items-center justify-center py-11 px-6 lg:py-0 lg:px-0">
@@ -92,10 +95,19 @@ const InfoSection: FC<IProps> = ({
           </p>
         )}
 
-        <Button
-          title={btnTitle}
-          className="text-white bg-primary w-fit lg:mt-[30px] hover:bg-secondary hover:text-primary cursor-pointer border border-primary"
-        />
+        {href ? (
+          <Link href={href}>
+            <Button
+              title={btnTitle}
+              className="text-white bg-primary w-fit lg:mt-[30px] hover:bg-secondary hover:text-primary cursor-pointer border border-primary"
+            />
+          </Link>
+        ) : (
+          <Button
+            title={btnTitle}
+            className="text-white bg-primary w-fit lg:mt-[30px] hover:bg-secondary hover:text-primary cursor-pointer border border-primary"
+          />
+        )}
       </div>
     </div>
   );

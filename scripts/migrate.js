@@ -3,7 +3,16 @@ const fs = require('fs');
 const path = require('path');
 
 async function migrate() {
-  const client = new Client({ connectionString: process.env.DATABASE_URL });
+  const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL;
+  if (!connectionString) {
+    console.error('Migration skipped: neither DIRECT_URL nor DATABASE_URL is set.');
+    return;
+  }
+  const isLocal = /@(db|localhost|127\.0\.0\.1)[:/]/.test(connectionString);
+  const client = new Client({
+    connectionString,
+    ssl: isLocal ? undefined : { rejectUnauthorized: false },
+  });
   await client.connect();
 
   try {
