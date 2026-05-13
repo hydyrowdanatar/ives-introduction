@@ -1,15 +1,25 @@
-import { Pool } from "pg";
+import { Pool, type QueryResult, type QueryResultRow } from "pg";
 
-const connectionString = process.env.POSTGRES_URL;
-if (!connectionString) {
-  throw new Error("POSTGRES_URL is not set");
+let _pool: Pool | undefined;
+
+function getPool(): Pool {
+  if (!_pool) {
+    const connectionString = process.env.POSTGRES_URL;
+    if (!connectionString) throw new Error("POSTGRES_URL is not set");
+    const isLocal = /@(db|localhost|127\.0\.0\.1)[:/]/.test(connectionString);
+    _pool = new Pool({
+      connectionString,
+      ssl: isLocal ? undefined : { rejectUnauthorized: false },
+    });
+  }
+  return _pool;
 }
 
-const isLocal = /@(db|localhost|127\.0\.0\.1)[:/]/.test(connectionString);
-
-const pool = new Pool({
-  connectionString,
-  ssl: isLocal ? undefined : { rejectUnauthorized: false },
-});
-
-export default pool;
+export default {
+  query<T extends QueryResultRow = QueryResultRow>(
+    text: string,
+    values?: unknown[]
+  ): Promise<QueryResult<T>> {
+    return getPool().query<T>(text, values);
+  },
+};
