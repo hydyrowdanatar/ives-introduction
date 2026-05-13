@@ -498,7 +498,7 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
         </div>
 
         {/* Annual Premium footer */}
-        <div className="border-t-[2px] border-primary/20 bg-primary/8">
+        <div className="border-t-2 border-primary/20 bg-primary/8">
           <div className="px-4 py-[14px] flex items-center justify-between">
             <span className="font-semibold text-primary text-[13px]">
               Annual Premium
@@ -583,7 +583,7 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
       {/* Annual Premium Footer */}
       <div
         className={[
-          "mt-auto border-t-[2px] border-primary/20",
+          "mt-auto border-t-2 border-primary/20",
           "transition-colors duration-300",
           isSelected ? "bg-primary/8" : "bg-white",
         ].join(" ")}
