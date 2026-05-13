@@ -83,21 +83,21 @@ const SelectedQuotePopup = () => {
     >
       {/* Panel — stop click propagation so clicks inside don't close */}
       <div
-        className="relative w-[460px] xl:w-[580px] 2xl:w-[685px] 3xl:w-[895px]
-                   py-[36px] xl:py-[45px] 2xl:py-[54px] 3xl:py-[70px]
-                   px-10 xl:px-[50px] 2xl:px-[60px] 3xl:px-[77px]
+        className="relative w-[350px] lg:w-[460px] xl:w-[580px] 2xl:w-[685px] 3xl:w-[895px]
+                   py-[45px] 2xl:py-[54px] 3xl:py-[70px]
+                   px-6 xl:px-[50px] 2xl:px-[60px] 3xl:px-[77px]
                    bg-primary flex flex-col items-center justify-center gap-8
-                   rounded-[4px] shadow-2xl"
+                    shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close ✕ */}
-        <button
+        {/* <button
           onClick={closePopup}
           className="absolute top-4 right-5 text-white/60 hover:text-white transition-colors text-2xl leading-none"
           aria-label="Close"
         >
           ✕
-        </button>
+        </button> */}
 
         {/* Title block */}
         <QuoteTitle
@@ -109,7 +109,7 @@ const SelectedQuotePopup = () => {
 
         {/* Confirmation */}
         <div className="w-full flex flex-col gap-5">
-          <p className="text-white text-[14px] xl:text-[16px] 2xl:text-[20px] 3xl:text-[26px] font-semibold">
+          <p className="text-white text-[16px] 2xl:text-[20px] 3xl:text-[26px] font-semibold">
             Continue with{" "}
             <span className="font-bold">{QUOTE_LABELS[selectedQuote]}</span>{" "}
             plan?
@@ -118,12 +118,12 @@ const SelectedQuotePopup = () => {
           <div className="flex items-center gap-5">
             <Button
               title="YES"
-              className="text-primary bg-secondary w-[76px] xl:w-[100px] 2xl:w-[120px] 3xl:w-[155px]"
+              className="text-primary bg-secondary w-1/2 lg:w-[76px] xl:w-[100px] 2xl:w-[120px] 3xl:w-[155px]"
               onClick={() => router.push("/bind")} // wire up navigation here when ready
             />
             <Button
               title="NO"
-              className="border border-secondary text-secondary bg-transparent  w-[76px] xl:w-[100px] 2xl:w-[120px] 3xl:w-[155px]"
+              className="border border-secondary text-secondary bg-transparent w-1/2 lg:w-[76px] xl:w-[100px] 2xl:w-[120px] 3xl:w-[155px]"
               onClick={closePopup}
             />
           </div>
