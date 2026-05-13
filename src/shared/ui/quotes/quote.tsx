@@ -15,7 +15,6 @@
 //   "mynd managed": "Mynd Managed",
 // };
 
-// // ── Annual Premium removed from ROWS ──
 // const ROWS: Row[] = [
 //   {
 //     label: "Rental Rebuild Coverage",
@@ -143,23 +142,91 @@
 //     },
 //     includedFor: ["mynd managed"],
 //   },
-//   // ✅ "Annual Premium" intentionally removed from here
 // ];
 
 // const ANNUAL_PREMIUM: Record<QuoteType, string> = {
-//   basic: "<Amount>",
+//   basic: "$10,000",
 //   enchanced: "<Amount>",
-//   "mynd managed": "<Amount>",
+//   "mynd managed": "$100,000",
 // };
 
 // interface IProps {
 //   type: QuoteType;
+//   /** When true, renders the mobile full-screen carousel variant */
+//   isMobile?: boolean;
+//   onPrev?: () => void;
+//   onNext?: () => void;
 // }
 
-// const Quote: FC<IProps> = ({ type }) => {
+// const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
 //   const { selectedQuote, setSelectedQuote } = useQuoteStore();
 //   const isSelected = selectedQuote === type;
 
+//   // ── Mobile variant ──────────────────────────────────────────────
+//   if (isMobile) {
+//     return (
+//       <div className="flex flex-col h-full w-full rounded-[12px] overflow-hidden shadow-md">
+//         {/* Header with arrows */}
+//         <div className="flex items-center justify-between bg-primary px-4 py-[14px]">
+//           <button
+//             onClick={onPrev}
+//             className="text-white p-1"
+//             aria-label="Previous"
+//           >
+//             {arrowLeft}
+//           </button>
+//           <span className="font-medium text-white text-[25px]">
+//             {TITLES[type]}
+//           </span>
+//           <button onClick={onNext} className="text-white p-1" aria-label="Next">
+//             {arrowRight}
+//           </button>
+//         </div>
+
+//         {/* Scrollable body */}
+//         <div className="flex-1 overflow-y-auto bg-white px-4 py-5 flex flex-col gap-[10px]">
+//           {ROWS.map((row) => {
+//             const isIncluded = row.includedFor.includes(type);
+//             return (
+//               <div
+//                 key={row.label}
+//                 className={[
+//                   "w-full flex items-start gap-[8px]",
+//                   isIncluded ? "text-[#141412]" : "text-[#141412]/30",
+//                 ].join(" ")}
+//               >
+//                 <span className="mt-0.5 shrink-0 w-[18px]">
+//                   {isIncluded ? checkIcon : null}
+//                 </span>
+//                 <div className="flex-1 flex items-start justify-between gap-2 text-left">
+//                   <span className="w-[52%] font-medium leading-snug text-[13px]">
+//                     {row.label}
+//                   </span>
+//                   <span className="w-[44%] font-normal leading-snug text-left text-[13px]">
+//                     {isIncluded ? row.values[type] : "Not Included"}
+//                   </span>
+//                 </div>
+//               </div>
+//             );
+//           })}
+//         </div>
+
+//         {/* Annual Premium footer */}
+//         <div className="border-t-[2px] border-primary/20 bg-primary/8">
+//           <div className="px-4 py-[14px] flex items-center justify-between">
+//             <span className="font-semibold text-primary text-[13px]">
+//               Annual Premium
+//             </span>
+//             <span className="font-bold text-primary text-[13px]">
+//               {ANNUAL_PREMIUM[type]}
+//             </span>
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   // ── Desktop variant (unchanged) ─────────────────────────────────
 //   return (
 //     <div
 //       onClick={() => setSelectedQuote(type)}
@@ -169,7 +236,7 @@
 //         isSelected ? "ring-[3px] ring-primary shadow-xl" : "shadow-md",
 //       ].join(" ")}
 //     >
-//       {/* ── Header ── */}
+//       {/* Header */}
 //       <div
 //         className={[
 //           "py-[14px] xl:py-[18px] 2xl:py-[22px] 3xl:py-[28px]",
@@ -182,7 +249,7 @@
 //         {TITLES[type]}
 //       </div>
 
-//       {/* ── Body ── */}
+//       {/* Body */}
 //       <div
 //         className={[
 //           "py-[20px] xl:py-[25px] 2xl:py-[30px] 3xl:py-[38px]",
@@ -227,7 +294,7 @@
 //         })}
 //       </div>
 
-//       {/* ── Annual Premium Footer ── */}
+//       {/* Annual Premium Footer */}
 //       <div
 //         className={[
 //           "mt-auto border-t-[2px] border-primary/20",
@@ -266,6 +333,8 @@
 
 // export default Quote;
 
+// // ── Icons ──────────────────────────────────────────────────────────
+
 // const checkIcon = (
 //   <svg
 //     width="16"
@@ -278,6 +347,56 @@
 //       d="M1 7.3L5.9 12.2L17.1 1"
 //       stroke="#00785E"
 //       strokeWidth="2.2"
+//       strokeLinecap="round"
+//       strokeLinejoin="round"
+//     />
+//   </svg>
+// );
+
+// const arrowLeft = (
+//   <svg
+//     width="25"
+//     height="22"
+//     viewBox="0 0 25 22"
+//     fill="none"
+//     xmlns="http://www.w3.org/2000/svg"
+//   >
+//     <path
+//       d="M24 12H2"
+//       stroke="white"
+//       strokeWidth="2"
+//       strokeLinecap="round"
+//       strokeLinejoin="round"
+//     />
+//     <path
+//       d="M10 3L1 12L10 21"
+//       stroke="white"
+//       strokeWidth="2"
+//       strokeLinecap="round"
+//       strokeLinejoin="round"
+//     />
+//   </svg>
+// );
+
+// const arrowRight = (
+//   <svg
+//     width="25"
+//     height="22"
+//     viewBox="0 0 25 22"
+//     fill="none"
+//     xmlns="http://www.w3.org/2000/svg"
+//   >
+//     <path
+//       d="M1 12H23"
+//       stroke="white"
+//       strokeWidth="2"
+//       strokeLinecap="round"
+//       strokeLinejoin="round"
+//     />
+//     <path
+//       d="M15 3L24 12L15 21"
+//       stroke="white"
+//       strokeWidth="2"
 //       strokeLinecap="round"
 //       strokeLinejoin="round"
 //     />
@@ -438,7 +557,6 @@ const ANNUAL_PREMIUM: Record<QuoteType, string> = {
 
 interface IProps {
   type: QuoteType;
-  /** When true, renders the mobile full-screen carousel variant */
   isMobile?: boolean;
   onPrev?: () => void;
   onNext?: () => void;
@@ -452,7 +570,6 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
   if (isMobile) {
     return (
       <div className="flex flex-col h-full w-full rounded-[12px] overflow-hidden shadow-md">
-        {/* Header with arrows */}
         <div className="flex items-center justify-between bg-primary px-4 py-[14px]">
           <button
             onClick={onPrev}
@@ -469,7 +586,6 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
           </button>
         </div>
 
-        {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto bg-white px-4 py-5 flex flex-col gap-[10px]">
           {ROWS.map((row) => {
             const isIncluded = row.includedFor.includes(type);
@@ -497,7 +613,6 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
           })}
         </div>
 
-        {/* Annual Premium footer */}
         <div className="border-t-[2px] border-primary/20 bg-primary/8">
           <div className="px-4 py-[14px] flex items-center justify-between">
             <span className="font-semibold text-primary text-[13px]">
@@ -512,12 +627,12 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
     );
   }
 
-  // ── Desktop variant (unchanged) ─────────────────────────────────
+  // ── Desktop variant — w-full, parent wrapper controls the width ─
   return (
     <div
       onClick={() => setSelectedQuote(type)}
       className={[
-        "w-[35%] text-center rounded-[12px] cursor-pointer overflow-hidden",
+        "w-full text-center rounded-[12px] cursor-pointer overflow-hidden",
         "transition-all duration-300 ease-in-out flex flex-col",
         isSelected ? "ring-[3px] ring-primary shadow-xl" : "shadow-md",
       ].join(" ")}
@@ -619,7 +734,7 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
 
 export default Quote;
 
-// ── Icons ──────────────────────────────────────────────────────────
+// ── Icons ────────────────────────────────────────────────────────
 
 const checkIcon = (
   <svg
