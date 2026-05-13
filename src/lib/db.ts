@@ -3,6 +3,7 @@ import { Pool, type QueryResult, type QueryResultRow } from "pg";
 let _pool: Pool | undefined;
 
 function getPool(): Pool {
+  
   if (!_pool) {
     const connectionString = process.env.POSTGRES_URL;
     if (!connectionString) throw new Error("POSTGRES_URL is not set");
