@@ -8,7 +8,7 @@ services:
     command: >
       sh -c 'for f in /migrations/*.sql; do
         echo "Running $$f...";
-        psql "$$DATABASE_URL" -f "$$f" || exit 1;
+        psql "$$POSTGRES_URL" -f "$$f" || exit 1;
       done'
     depends_on:
       db:
@@ -38,6 +38,8 @@ services:
       - "5432:5432"
     env_file:
       - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DATABASE:-postgres}
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:

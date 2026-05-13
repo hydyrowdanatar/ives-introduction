@@ -3,9 +3,9 @@ const fs = require('fs');
 const path = require('path');
 
 async function migrate() {
-  const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL;
+  const connectionString = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
   if (!connectionString) {
-    console.error('Migration skipped: neither DIRECT_URL nor DATABASE_URL is set.');
+    console.error('Migration skipped: neither POSTGRES_URL_NON_POOLING nor POSTGRES_URL is set.');
     return;
   }
   const isLocal = /@(db|localhost|127\.0\.0\.1)[:/]/.test(connectionString);
