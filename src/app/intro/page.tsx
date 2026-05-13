@@ -1,5 +1,12 @@
 import heroBackImage from "@/shared/assets/mainPhoto.png";
 import IntroHero from "@/widgets/intor-page/IntroHero";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Intro | Ives Insurance",
+  description:
+    "Easily compare coverage options and pricing designed for your rental property.",
+};
 
 export default function IntroPage() {
   return (
