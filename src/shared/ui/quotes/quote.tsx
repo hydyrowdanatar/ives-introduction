@@ -697,7 +697,7 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
       {/* Annual Premium Footer */}
       <div
         className={[
-          "mt-auto border-t-[2px] border-primary/20",
+          "mt-auto border-t-2 border-primary/20",
           "transition-colors duration-300",
           "bg-white",
         ].join(" ")}

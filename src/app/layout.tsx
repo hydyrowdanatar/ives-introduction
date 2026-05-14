@@ -19,6 +19,9 @@ const taviraj = Taviraj({
 export const metadata: Metadata = {
   title: "Ives Insurance",
   description: "Ives Insurance",
+  icons: {
+    icon: "/favicone.ico",
+  },
 };
 
 export default function RootLayout({
