@@ -119,7 +119,7 @@ const SelectedQuotePopup = () => {
             <Button
               title="YES"
               className="text-primary bg-secondary w-1/2 lg:w-[76px] xl:w-[100px] 2xl:w-[120px] 3xl:w-[155px]"
-              onClick={() => router.push("/bind")} // wire up navigation here when ready
+              onClick={() => { closePopup(); router.push("/bind"); }}
             />
             <Button
               title="NO"

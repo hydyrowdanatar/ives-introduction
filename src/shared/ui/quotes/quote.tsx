@@ -563,8 +563,7 @@ interface IProps {
 }
 
 const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
-  const { selectedQuote, setSelectedQuote } = useQuoteStore();
-  const isSelected = selectedQuote === type;
+  const { setSelectedQuote } = useQuoteStore();
 
   // ── Mobile variant ──────────────────────────────────────────────
   if (isMobile) {
@@ -634,7 +633,7 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
       className={[
         "w-full text-center rounded-[12px] cursor-pointer overflow-hidden",
         "transition-all duration-300 ease-in-out flex flex-col",
-        isSelected ? "ring-[3px] ring-primary shadow-xl" : "shadow-md",
+        "shadow-md",
       ].join(" ")}
     >
       {/* Header */}
@@ -644,7 +643,7 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
           "font-semibold text-white",
           "text-[20px] xl:text-[25px] 2xl:text-[30px] 3xl:text-[38px]",
           "transition-colors duration-300",
-          isSelected ? "bg-primary" : "bg-[#5BA89A]",
+          "bg-primary",
         ].join(" ")}
       >
         {TITLES[type]}
@@ -700,7 +699,7 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
         className={[
           "mt-auto border-t-[2px] border-primary/20",
           "transition-colors duration-300",
-          isSelected ? "bg-primary/8" : "bg-white",
+          "bg-white",
         ].join(" ")}
       >
         <div

@@ -46,7 +46,7 @@ in conflict."
         btnTitle="GET MY QUOTE"
         bottomSubTitle={true}
         isBrHave
-        href="/quote"
+        href="/client-property"
       />
       <Hero
         bgImage={insuranceBackImage}
@@ -119,6 +119,7 @@ in conflict."
         check4={true}
         btnTitle="Get My Landlord Insurance Quote"
         inLine={true}
+        href="/client-property"
       />
 
       <Hero

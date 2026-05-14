@@ -105,14 +105,6 @@ function InsuredInfoSection() {
           value={insuredInfo.phoneNumber}
           onChange={(e) => setInsuredInfo({ phoneNumber: e.target.value })}
         />
-        <input
-          className={inputCls}
-          placeholder="Policy Effective Date mm/dd/yyyy"
-          value={insuredInfo.policyEffectiveDate}
-          onChange={(e) =>
-            setInsuredInfo({ policyEffectiveDate: e.target.value })
-          }
-        />
       </div>
     </div>
   );
@@ -150,47 +142,8 @@ function AdditionalInsuredBlock({
           </button>
         )}
       </div>
-
-      {/* First + Last */}
-      <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
-        <input
-          className={inputCls}
-          placeholder="First Name"
-          value={insured.firstName}
-          onChange={(e) => set({ firstName: e.target.value })}
-        />
-        <input
-          className={inputCls}
-          placeholder="Last Name"
-          value={insured.lastName}
-          onChange={(e) => set({ lastName: e.target.value })}
-        />
-      </div>
-
-      {/* Interest Type + Correspondence Required */}
-      <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
-        <input
-          className={inputCls}
-          placeholder="Interest Type"
-          value={insured.interestType}
-          onChange={(e) => set({ interestType: e.target.value })}
-        />
-        <input
-          className={inputCls}
-          placeholder="Correspondence Required"
-          value={insured.correspondenceRequired}
-          onChange={(e) => set({ correspondenceRequired: e.target.value })}
-        />
-      </div>
-
       {/* Correspondence Type + Loan Number */}
       <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
-        <input
-          className={inputCls}
-          placeholder="Correspondence Type"
-          value={insured.correspondenceType}
-          onChange={(e) => set({ correspondenceType: e.target.value })}
-        />
         <input
           className={inputCls}
           placeholder="Loan Number"
@@ -198,6 +151,22 @@ function AdditionalInsuredBlock({
           onChange={(e) => set({ loanNumber: e.target.value })}
         />
       </div>
+
+      {/* Mortgagee Clause 1 */}
+      <input
+        className={inputCls}
+        placeholder="Mortgagee Clause 1"
+        value={insured.mortgageeClause1}
+        onChange={(e) => set({ mortgageeClause1: e.target.value })}
+      />
+
+      {/* Mortgagee Clause 2 */}
+      <input
+        className={inputCls}
+        placeholder="Mortgagee Clause 2"
+        value={insured.mortgageeClause2}
+        onChange={(e) => set({ mortgageeClause2: e.target.value })}
+      />
 
       {/* Mailing Address 1 */}
       <input
@@ -257,12 +226,6 @@ function AdditionalInsuredBlock({
           value={insured.phoneNumber}
           onChange={(e) => set({ phoneNumber: e.target.value })}
         />
-        <input
-          className={inputCls}
-          placeholder="Policy Effective Date mm/dd/yyyy"
-          value={insured.policyEffectiveDate}
-          onChange={(e) => set({ policyEffectiveDate: e.target.value })}
-        />
       </div>
     </div>
   );
@@ -270,7 +233,7 @@ function AdditionalInsuredBlock({
 
 // ─── Additional Insured Section ───────────────────────────────────────────────
 function AdditionalInsuredSection() {
-  const { additionalInsureds, addAdditionalInsured } = useBindStore();
+  const { additionalInsureds } = useBindStore();
 
   return (
     <div className="flex flex-col gap-1 lg:gap-5 xl:gap-6">
@@ -284,17 +247,23 @@ function AdditionalInsuredSection() {
           showRemove={additionalInsureds.length > 1}
         />
       ))}
+    </div>
+  );
+}
 
-      {/* Add another */}
-      <button
-        onClick={addAdditionalInsured}
-        className="flex items-center gap-2 text-primary font-semibold mt-5 lg:mt-0
-                   text-[13px] xl:text-[14px] 2xl:text-[16px] 3xl:text-[20px]
-                   hover:opacity-70 transition-opacity w-fit"
-      >
-        <span className="text-[18px] leading-none">+</span>
-        Add Another Insured
-      </button>
+// ─── Effective Day Section ───────────────────────────────────────────────────
+function EffectiveDaySection() {
+  const { insuredInfo, setInsuredInfo } = useBindStore();
+
+  return (
+    <div className="flex flex-col gap-2 lg:gap-3 xl:gap-4">
+      <p className={sectionTitleCls}>Effective Day</p>
+      <input
+        className={inputCls}
+        placeholder="Policy Effective Date mm/dd/yyyy"
+        value={insuredInfo.policyEffectiveDate}
+        onChange={(e) => setInsuredInfo({ policyEffectiveDate: e.target.value })}
+      />
     </div>
   );
 }
@@ -358,7 +327,10 @@ const BindForm = () => {
 
       {/* <div className="w-full h-10 bg-[#141412]/10" /> */}
 
+      <EffectiveDaySection />
+      
       <AdditionalInsuredSection />
+
 
       {/* <div className="w-full h-px bg-[#141412]/10" /> */}
 

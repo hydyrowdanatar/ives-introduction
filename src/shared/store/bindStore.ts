@@ -16,11 +16,8 @@ export interface InsuredInfo {
 
 export interface AdditionalInsured {
   id: string;
-  firstName: string;
-  lastName: string;
-  interestType: string;
-  correspondenceRequired: string;
-  correspondenceType: string;
+  mortgageeClause1: string;
+  mortgageeClause2: string;
   loanNumber: string;
   mailingAddress1: string;
   mailingAddress2: string;
@@ -34,11 +31,8 @@ export interface AdditionalInsured {
 
 const emptyAdditional = (): AdditionalInsured => ({
   id: crypto.randomUUID(),
-  firstName: "",
-  lastName: "",
-  interestType: "",
-  correspondenceRequired: "",
-  correspondenceType: "",
+  mortgageeClause1: "",
+  mortgageeClause2: "",
   loanNumber: "",
   mailingAddress1: "",
   mailingAddress2: "",
