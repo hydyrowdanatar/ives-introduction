@@ -1,4 +1,3 @@
-// src/widgets/bind-page/BindForm.tsx
 "use client";
 
 import Button from "@/shared/ui/btn";
@@ -16,7 +15,7 @@ const labelCls =
   "text-[13px] xl:text-[15px] 2xl:text-[18px] 3xl:text-[23px] font-semibold text-[#141412]";
 
 const sectionTitleCls =
-  "text-[16px] xl:text-[19px] 2xl:text-[22px] 3xl:text-[28px] font-semibold text-[#141412]";
+  "text-[16px] xl:text-[19px] 2xl:text-[22px] 3xl:text-[28px] font-normal text-[#141412]";
 
 // ─── Insured Information Section ──────────────────────────────────────────────
 function InsuredInfoSection() {
@@ -24,7 +23,7 @@ function InsuredInfoSection() {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col gap-3 xl:gap-4">
+    <div className="flex flex-col gap-2 lg:gap-3 xl:gap-4">
       <p className={sectionTitleCls}>Insured Information</p>
 
       {/* Quote number */}
@@ -33,7 +32,7 @@ function InsuredInfoSection() {
       </p>
 
       {/* First + Last name */}
-      <div className="flex gap-3 xl:gap-4">
+      <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
         <input
           className={inputCls}
           placeholder="Client First Name"
@@ -73,7 +72,7 @@ function InsuredInfoSection() {
       />
 
       {/* State + Zip */}
-      <div className="flex gap-3 xl:gap-4">
+      <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
         <input
           className={inputCls}
           placeholder="State"
@@ -98,7 +97,7 @@ function InsuredInfoSection() {
       />
 
       {/* Phone + Policy Effective Date */}
-      <div className="flex gap-3 xl:gap-4">
+      <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
         <input
           className={inputCls}
           placeholder="Phone Number"
@@ -134,7 +133,7 @@ function AdditionalInsuredBlock({
     setAdditionalInsured(insured.id, data);
 
   return (
-    <div className="flex flex-col gap-3 xl:gap-4">
+    <div className="flex flex-col gap-2 lg:gap-3 xl:gap-4 mt-9 lg:mt-0">
       {/* Block header */}
       <div className="flex items-center justify-between">
         {index > 0 && (
@@ -153,7 +152,7 @@ function AdditionalInsuredBlock({
       </div>
 
       {/* First + Last */}
-      <div className="flex gap-3 xl:gap-4">
+      <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
         <input
           className={inputCls}
           placeholder="First Name"
@@ -169,7 +168,7 @@ function AdditionalInsuredBlock({
       </div>
 
       {/* Interest Type + Correspondence Required */}
-      <div className="flex gap-3 xl:gap-4">
+      <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
         <input
           className={inputCls}
           placeholder="Interest Type"
@@ -185,7 +184,7 @@ function AdditionalInsuredBlock({
       </div>
 
       {/* Correspondence Type + Loan Number */}
-      <div className="flex gap-3 xl:gap-4">
+      <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
         <input
           className={inputCls}
           placeholder="Correspondence Type"
@@ -225,7 +224,7 @@ function AdditionalInsuredBlock({
       />
 
       {/* State + Zip */}
-      <div className="flex gap-3 xl:gap-4">
+      <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
         <input
           className={inputCls}
           placeholder="State"
@@ -250,7 +249,7 @@ function AdditionalInsuredBlock({
       />
 
       {/* Phone + Policy Effective Date */}
-      <div className="flex gap-3 xl:gap-4">
+      <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
         <input
           className={inputCls}
           placeholder="Phone Number"
@@ -274,7 +273,7 @@ function AdditionalInsuredSection() {
   const { additionalInsureds, addAdditionalInsured } = useBindStore();
 
   return (
-    <div className="flex flex-col gap-5 xl:gap-6">
+    <div className="flex flex-col gap-1 lg:gap-5 xl:gap-6">
       <p className={sectionTitleCls}>Additional Insured</p>
 
       {additionalInsureds.map((insured, index) => (
@@ -289,8 +288,8 @@ function AdditionalInsuredSection() {
       {/* Add another */}
       <button
         onClick={addAdditionalInsured}
-        className="flex items-center gap-2 text-primary font-semibold
-                   text-[12px] xl:text-[14px] 2xl:text-[16px] 3xl:text-[20px]
+        className="flex items-center gap-2 text-primary font-semibold mt-5 lg:mt-0
+                   text-[13px] xl:text-[14px] 2xl:text-[16px] 3xl:text-[20px]
                    hover:opacity-70 transition-opacity w-fit"
       >
         <span className="text-[18px] leading-none">+</span>
@@ -354,28 +353,28 @@ const BindForm = () => {
   const { certified } = useBindStore();
 
   return (
-    <div className="flex flex-col gap-8 xl:gap-10">
+    <div className="flex flex-col gap-9 xl:gap-10">
       <InsuredInfoSection />
 
-      <div className="w-full h-px bg-[#141412]/10" />
+      {/* <div className="w-full h-10 bg-[#141412]/10" /> */}
 
       <AdditionalInsuredSection />
 
-      <div className="w-full h-px bg-[#141412]/10" />
+      {/* <div className="w-full h-px bg-[#141412]/10" /> */}
 
       <CertificationSection />
 
       {/* Actions */}
-      <div className="flex items-center justify-between pt-2">
+      <div className="flex items-center justify-between gap-5">
         <Button
           title="BACK"
-          className="border border-primary text-primary bg-transparent"
+          className="w-1/2 lg:w-fit border border-primary text-primary bg-transparent"
           onClick={() => router.back()}
         />
         <Button
           title="BIND MY POLICY"
           className={[
-            "text-white transition-all duration-200",
+            "text-white transition-all duration-200 w-1/2 lg:w-fit ",
             certified
               ? "bg-primary cursor-pointer"
               : "bg-primary/40 cursor-not-allowed",
