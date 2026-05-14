@@ -13,6 +13,8 @@ interface IProps {
   italicWidth: string;
   subTitle: string;
   subTitle_2?: string;
+  subTitle_3?: string;
+  subTitle_4?: string;
   isBrHave?: boolean;
   firstHero?: boolean;
 }
@@ -28,6 +30,8 @@ const Hero: FC<IProps> = ({
   regularColor,
   subTitle,
   subTitle_2,
+  subTitle_3,
+  subTitle_4,
   isBrHave,
   firstHero = false,
 }) => {
@@ -55,6 +59,8 @@ const Hero: FC<IProps> = ({
           regularColor={regularColor}
           subTitle={subTitle}
           subTitle_2={subTitle_2}
+          subTitle_3={subTitle_3}
+          subTitle_4={subTitle_4}
           isBrHave={isBrHave}
         />
       </div>

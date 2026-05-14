@@ -613,7 +613,7 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
           })}
         </div>
 
-        <div className="border-t-[2px] border-primary/20 bg-primary/8">
+        <div className="border-t-2 border-primary/20 bg-primary/8">
           <div className="px-4 py-[14px] flex items-center justify-between">
             <span className="font-semibold text-primary text-[13px]">
               Annual Premium

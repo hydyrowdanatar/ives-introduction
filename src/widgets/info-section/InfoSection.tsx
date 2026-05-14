@@ -52,7 +52,7 @@ const InfoSection: FC<IProps> = ({
         <div className="lg:text-center">
           <div>
             <span
-              className={`inline-block ${regularColor} mr-2 text-[20px] xl:text-[25px] 2xl:text-[30px] 3xl:text-[38px] leading-[28px] xl:leading-[32px] 2xl:leading-[38px] 3xl:leading-[50px]  font-normal`}
+              className={`inline-block ${regularColor} mr-2 text-[20px] xl:text-[25px] 2xl:text-[30px] 3xl:text-[38px] leading-[28px] xl:leading-[32px] 2xl:leading-[38px] 3xl:leading-[50px] font-normal`}
             >
               {regularText}
             </span>
