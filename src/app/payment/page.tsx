@@ -25,6 +25,7 @@ export default function () {
           <Button
             title="COMPLETE"
             className="text-white bg-primary w-1/2 lg:w-fit"
+            onClick={() => router.push("/conclusion")}
           />
         </div>
 
