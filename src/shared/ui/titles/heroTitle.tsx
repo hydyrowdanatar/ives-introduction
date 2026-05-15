@@ -100,6 +100,8 @@ interface IProps {
   italicWidth: string;
   subTitle: string;
   subTitle_2?: string;
+  subTitle_3?: string;
+  subTitle_4?: string;
   isBrHave?: boolean;
   extraClassName?: boolean;
   extraSubTitleClassName?: boolean;
@@ -116,6 +118,8 @@ const HeroTitle: FC<IProps> = ({
   italicColor,
   subTitle,
   subTitle_2,
+  subTitle_3,
+  subTitle_4,
   isBrHave = true,
   extraClassName = false,
   extraSubTitleClassName = false,
@@ -169,7 +173,7 @@ const HeroTitle: FC<IProps> = ({
       <div className="mt-[20px] xl:mt-[30px]">
         {coverageSubTitleWidth ? (
           <span
-            className={`block ${regularColor}  w-full lg:w-[480px] xl:w-[600px] 2xl:w-[700px] xl:mx-auto text-[13px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal bg-red-500`}
+            className={`block ${regularColor}  w-full lg:w-[480px] xl:w-[600px] 2xl:w-[700px] xl:mx-auto text-[13px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal`}
           >
             {subTitle}
           </span>
@@ -189,6 +193,18 @@ const HeroTitle: FC<IProps> = ({
           className={`block ${regularColor} w-[340px] xl:${regularWidth} text-[13px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal mt-7`}
         >
           {subTitle_2}
+        </span>
+
+        <span
+          className={`block ${regularColor} w-[340px] xl:${regularWidth} text-[13px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal mt-7`}
+        >
+          {subTitle_3}
+        </span>
+
+        <span
+          className={`block ${regularColor} w-[340px] xl:${regularWidth} text-[13px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px] font-normal mt-7`}
+        >
+          {subTitle_4}
         </span>
       </div>
     </div>
