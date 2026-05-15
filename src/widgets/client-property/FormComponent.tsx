@@ -2,10 +2,10 @@
 
 // src/widgets/client-property/FormComponent.tsx
 import { useFormStore } from "@/shared/store/formStore";
-import PortfolioAsking from "@/widgets/client-property/PortfolioAsking";
 import Button from "@/shared/ui/btn";
 import { ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 // ─── Shared input styles ────────────────────────────────────────────────────
 const inputCls =
@@ -16,6 +16,8 @@ const inputCls =
 
 const selectWrapCls = "relative";
 const selectCls = inputCls + " appearance-none pr-10 cursor-pointer w-full";
+
+const errCls = " ring-1 ring-red-400 focus:ring-red-400";
 
 // ─── Progress bar ────────────────────────────────────────────────────────────
 function ProgressBar({ step }: { step: 0 | 1 | 2 }) {
@@ -31,33 +33,35 @@ function ProgressBar({ step }: { step: 0 | 1 | 2 }) {
 }
 
 // ─── Tab 1 – About You ───────────────────────────────────────────────────────
-function AboutYouTab() {
+function AboutYouTab({ attempted }: { attempted: boolean }) {
   const { aboutYou, setAboutYou } = useFormStore();
+  const e = (v: string) => (attempted && !v.trim() ? errCls : "");
+
   return (
     <div className="flex flex-col gap-3 xl:gap-4">
       <div className="flex flex-col lg:flex-row gap-2 xl:gap-4">
         <input
-          className={inputCls}
+          className={inputCls + e(aboutYou.firstName)}
           placeholder="First Name"
           value={aboutYou.firstName}
           onChange={(e) => setAboutYou({ firstName: e.target.value })}
         />
         <input
-          className={inputCls}
+          className={inputCls + e(aboutYou.lastName)}
           placeholder="Last Name"
           value={aboutYou.lastName}
           onChange={(e) => setAboutYou({ lastName: e.target.value })}
         />
       </div>
       <input
-        className={inputCls}
+        className={inputCls + e(aboutYou.email)}
         placeholder="Email"
         type="email"
         value={aboutYou.email}
         onChange={(e) => setAboutYou({ email: e.target.value })}
       />
       <input
-        className={inputCls}
+        className={inputCls + e(aboutYou.phoneNumber)}
         placeholder="Phone Number"
         type="tel"
         value={aboutYou.phoneNumber}
@@ -68,31 +72,33 @@ function AboutYouTab() {
 }
 
 // ─── Tab 2 – Property Details ────────────────────────────────────────────────
-function PropertyDetailsTab() {
+function PropertyDetailsTab({ attempted }: { attempted: boolean }) {
   const { propertyDetails, setPropertyDetails } = useFormStore();
+  const e = (v: string) => (attempted && !v.trim() ? errCls : "");
+
   return (
     <div className="flex flex-col gap-3 xl:gap-4">
       <input
-        className={inputCls}
+        className={inputCls + e(propertyDetails.streetAddress)}
         placeholder="Street Address"
         value={propertyDetails.streetAddress}
         onChange={(e) => setPropertyDetails({ streetAddress: e.target.value })}
       />
       <input
-        className={inputCls}
+        className={inputCls + e(propertyDetails.city)}
         placeholder="City"
         value={propertyDetails.city}
         onChange={(e) => setPropertyDetails({ city: e.target.value })}
       />
       <div className="flex flex-col lg:flex-row gap-2 xl:gap-4">
         <input
-          className={inputCls}
+          className={inputCls + e(propertyDetails.state)}
           placeholder="State"
           value={propertyDetails.state}
           onChange={(e) => setPropertyDetails({ state: e.target.value })}
         />
         <input
-          className={inputCls}
+          className={inputCls + e(propertyDetails.zipcode)}
           placeholder="Zipcode"
           value={propertyDetails.zipcode}
           onChange={(e) => setPropertyDetails({ zipcode: e.target.value })}
@@ -100,7 +106,7 @@ function PropertyDetailsTab() {
       </div>
       <div className="flex flex-col lg:flex-row gap-2 xl:gap-4">
         <input
-          className={inputCls}
+          className={inputCls + e(propertyDetails.squareFootage)}
           placeholder="Square Footage"
           value={propertyDetails.squareFootage}
           onChange={(e) =>
@@ -108,7 +114,7 @@ function PropertyDetailsTab() {
           }
         />
         <input
-          className={inputCls}
+          className={inputCls + e(propertyDetails.yearBuilt)}
           placeholder="Year Built"
           value={propertyDetails.yearBuilt}
           onChange={(e) => setPropertyDetails({ yearBuilt: e.target.value })}
@@ -117,7 +123,7 @@ function PropertyDetailsTab() {
       <div className="flex flex-col lg:flex-row gap-2 xl:gap-4">
         <div className={selectWrapCls + " flex-1"}>
           <select
-            className={selectCls}
+            className={selectCls + e(propertyDetails.propertyType)}
             value={propertyDetails.propertyType}
             onChange={(e) =>
               setPropertyDetails({ propertyType: e.target.value })
@@ -137,7 +143,7 @@ function PropertyDetailsTab() {
           />
         </div>
         <input
-          className={inputCls + " flex-1"}
+          className={inputCls + " flex-1" + e(propertyDetails.numberOfUnits)}
           placeholder="Number of Units"
           value={propertyDetails.numberOfUnits}
           onChange={(e) =>
@@ -150,14 +156,16 @@ function PropertyDetailsTab() {
 }
 
 // ─── Tab 3 – Coverage ─────────────────────────────────────────────────────────
-function CoverageTab() {
+function CoverageTab({ attempted }: { attempted: boolean }) {
   const { coverage, setCoverage } = useFormStore();
+  const e = (v: string) => (attempted && !v.trim() ? errCls : "");
+
   return (
     <div className="flex flex-col gap-3 xl:gap-4">
       <div className="flex flex-col lg:flex-row gap-2 xl:gap-4">
         <div className={selectWrapCls + " flex-1"}>
           <select
-            className={selectCls}
+            className={selectCls + e(coverage.occupancy)}
             value={coverage.occupancy}
             onChange={(e) => setCoverage({ occupancy: e.target.value })}
           >
@@ -175,7 +183,7 @@ function CoverageTab() {
         </div>
         <div className={selectWrapCls + " flex-1"}>
           <select
-            className={selectCls}
+            className={selectCls + e(coverage.knownLossesLast3Years)}
             value={coverage.knownLossesLast3Years}
             onChange={(e) =>
               setCoverage({ knownLossesLast3Years: e.target.value })
@@ -197,7 +205,14 @@ function CoverageTab() {
       </div>
 
       {/* Property Rebuild Cost */}
-      <div className="flex items-center bg-[#F2F5F2]">
+      <div
+        className={
+          "flex items-center bg-[#F2F5F2]" +
+          (attempted && !coverage.propertyRebuildCost.trim()
+            ? " ring-1 ring-red-400"
+            : "")
+        }
+      >
         <span className="pl-4 text-[#141412]/50 text-[13px] xl:text-[15px] select-none">
           $
         </span>
@@ -213,7 +228,14 @@ function CoverageTab() {
       </div>
 
       {/* Loss of Use */}
-      <div className="flex items-center bg-[#F2F5F2]">
+      <div
+        className={
+          "flex items-center bg-[#F2F5F2]" +
+          (attempted && !coverage.lossOfUseMonthlyRents.trim()
+            ? " ring-1 ring-red-400"
+            : "")
+        }
+      >
         <span className="pl-4 text-[#141412]/50 text-[13px] xl:text-[15px] select-none">
           $
         </span>
@@ -232,7 +254,14 @@ function CoverageTab() {
         <p className="text-[11px] xl:text-[13px] 2xl:text-[14px] text-[#141412] font-semibold mb-2">
           Policy Disclaimer &amp; Acknowledgement
         </p>
-        <label className="flex gap-3 items-start cursor-pointer">
+        <label
+          className={
+            "flex gap-3 items-start cursor-pointer rounded" +
+            (attempted && !coverage.acknowledged
+              ? " outline outline-1 outline-red-400 p-1"
+              : "")
+          }
+        >
           <input
             type="checkbox"
             className="mt-0.5 accent-primary shrink-0"
@@ -259,10 +288,63 @@ function CoverageTab() {
 const TAB_LABELS = ["About You", "Property Details", "Coverage"];
 
 const FormComponent = () => {
-  const { currentTab, nextTab, prevTab } = useFormStore();
+  const { currentTab, nextTab, prevTab, aboutYou, propertyDetails, coverage } =
+    useFormStore();
   const router = useRouter();
+  const [attempted, setAttempted] = useState(false);
 
   const isLastTab = currentTab === 2;
+
+  const isTabValid = () => {
+    if (currentTab === 0) {
+      return !!(
+        aboutYou.firstName.trim() &&
+        aboutYou.lastName.trim() &&
+        aboutYou.email.trim() &&
+        aboutYou.phoneNumber.trim()
+      );
+    }
+    if (currentTab === 1) {
+      return !!(
+        propertyDetails.streetAddress.trim() &&
+        propertyDetails.city.trim() &&
+        propertyDetails.state.trim() &&
+        propertyDetails.zipcode.trim() &&
+        propertyDetails.squareFootage.trim() &&
+        propertyDetails.yearBuilt.trim() &&
+        propertyDetails.propertyType.trim() &&
+        propertyDetails.numberOfUnits.trim()
+      );
+    }
+    if (currentTab === 2) {
+      return !!(
+        coverage.occupancy.trim() &&
+        coverage.knownLossesLast3Years.trim() &&
+        coverage.propertyRebuildCost.trim() &&
+        coverage.lossOfUseMonthlyRents.trim() &&
+        coverage.acknowledged
+      );
+    }
+    return true;
+  };
+
+  const handleNext = () => {
+    if (!isTabValid()) {
+      setAttempted(true);
+      return;
+    }
+    setAttempted(false);
+    if (isLastTab) {
+      router.push("/quote");
+    } else {
+      nextTab();
+    }
+  };
+
+  const handlePrev = () => {
+    setAttempted(false);
+    prevTab();
+  };
 
   return (
     <div className="w-full lg:w-[407px] xl:w-[513px] 2xl:w-[605px] 3xl:w-[790px] pb-5">
@@ -276,9 +358,9 @@ const FormComponent = () => {
 
       {/* Tab content */}
       <div className="">
-        {currentTab === 0 && <AboutYouTab />}
-        {currentTab === 1 && <PropertyDetailsTab />}
-        {currentTab === 2 && <CoverageTab />}
+        {currentTab === 0 && <AboutYouTab attempted={attempted} />}
+        {currentTab === 1 && <PropertyDetailsTab attempted={attempted} />}
+        {currentTab === 2 && <CoverageTab attempted={attempted} />}
       </div>
 
       {/* Navigation */}
@@ -286,27 +368,22 @@ const FormComponent = () => {
         <Button
           title="BACK"
           className="border border-primary text-primary hover:bg-secondary hover:border-secondary"
-          onClick={prevTab}
+          onClick={handlePrev}
           disabled={currentTab === 0}
         />
         {isLastTab ? (
           <Button
             title={"GET MY QUOTES"}
             className="bg-primary text-white hover:bg-secondary hover:text-primary"
-            onClick={() => router.push("/quote")}
+            onClick={handleNext}
           />
         ) : (
           <Button
             title={"NEXT"}
             className="bg-primary text-white hover:bg-secondary hover:text-primary"
-            onClick={nextTab}
+            onClick={handleNext}
           />
         )}
-        {/* <Button
-          title={isLastTab ? "GET MY QUOTES" : "NEXT"}
-          className="bg-primary text-white"
-          onClick={nextTab}
-        /> */}
       </div>
     </div>
   );

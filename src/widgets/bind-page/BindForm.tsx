@@ -3,6 +3,7 @@
 import Button from "@/shared/ui/btn";
 import { useBindStore, AdditionalInsured } from "@/shared/store/bindStore";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
 const inputCls =
@@ -11,16 +12,15 @@ const inputCls =
   "px-4 py-3 xl:py-3.5 2xl:py-4 outline-none " +
   "focus:ring-1 focus:ring-primary/40 transition-all duration-150 rounded-[4px]";
 
-const labelCls =
-  "text-[13px] xl:text-[15px] 2xl:text-[18px] 3xl:text-[23px] font-semibold text-[#141412]";
-
 const sectionTitleCls =
   "text-[16px] xl:text-[19px] 2xl:text-[22px] 3xl:text-[28px] font-normal text-[#141412]";
 
+const errCls = " ring-1 ring-red-400 focus:ring-red-400";
+
 // ─── Insured Information Section ──────────────────────────────────────────────
-function InsuredInfoSection() {
+function InsuredInfoSection({ attempted }: { attempted: boolean }) {
   const { insuredInfo, setInsuredInfo } = useBindStore();
-  const router = useRouter();
+  const e = (v: string) => (attempted && !v.trim() ? errCls : "");
 
   return (
     <div className="flex flex-col gap-2 lg:gap-3 xl:gap-4">
@@ -34,13 +34,13 @@ function InsuredInfoSection() {
       {/* First + Last name */}
       <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
         <input
-          className={inputCls}
+          className={inputCls + e(insuredInfo.clientFirstName)}
           placeholder="Client First Name"
           value={insuredInfo.clientFirstName}
           onChange={(e) => setInsuredInfo({ clientFirstName: e.target.value })}
         />
         <input
-          className={inputCls}
+          className={inputCls + e(insuredInfo.clientLastName)}
           placeholder="Client Last Name"
           value={insuredInfo.clientLastName}
           onChange={(e) => setInsuredInfo({ clientLastName: e.target.value })}
@@ -49,7 +49,7 @@ function InsuredInfoSection() {
 
       {/* Mailing Address 1 */}
       <input
-        className={inputCls}
+        className={inputCls + e(insuredInfo.mailingAddress1)}
         placeholder="Mailing Address 1"
         value={insuredInfo.mailingAddress1}
         onChange={(e) => setInsuredInfo({ mailingAddress1: e.target.value })}
@@ -65,7 +65,7 @@ function InsuredInfoSection() {
 
       {/* City */}
       <input
-        className={inputCls}
+        className={inputCls + e(insuredInfo.city)}
         placeholder="City"
         value={insuredInfo.city}
         onChange={(e) => setInsuredInfo({ city: e.target.value })}
@@ -74,13 +74,13 @@ function InsuredInfoSection() {
       {/* State + Zip */}
       <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
         <input
-          className={inputCls}
+          className={inputCls + e(insuredInfo.state)}
           placeholder="State"
           value={insuredInfo.state}
           onChange={(e) => setInsuredInfo({ state: e.target.value })}
         />
         <input
-          className={inputCls}
+          className={inputCls + e(insuredInfo.zipcode)}
           placeholder="Zipcode"
           value={insuredInfo.zipcode}
           onChange={(e) => setInsuredInfo({ zipcode: e.target.value })}
@@ -89,17 +89,17 @@ function InsuredInfoSection() {
 
       {/* Email */}
       <input
-        className={inputCls}
+        className={inputCls + e(insuredInfo.email)}
         placeholder="Email"
         type="email"
         value={insuredInfo.email}
         onChange={(e) => setInsuredInfo({ email: e.target.value })}
       />
 
-      {/* Phone + Policy Effective Date */}
+      {/* Phone */}
       <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
         <input
-          className={inputCls}
+          className={inputCls + e(insuredInfo.phoneNumber)}
           placeholder="Phone Number"
           type="tel"
           value={insuredInfo.phoneNumber}
@@ -115,14 +115,17 @@ function AdditionalInsuredBlock({
   insured,
   index,
   showRemove,
+  attempted,
 }: {
   insured: AdditionalInsured;
   index: number;
   showRemove: boolean;
+  attempted: boolean;
 }) {
   const { setAdditionalInsured, removeAdditionalInsured } = useBindStore();
   const set = (data: Partial<AdditionalInsured>) =>
     setAdditionalInsured(insured.id, data);
+  const e = (v: string) => (attempted && !v.trim() ? errCls : "");
 
   return (
     <div className="flex flex-col gap-2 lg:gap-3 xl:gap-4 mt-9 lg:mt-0">
@@ -142,10 +145,11 @@ function AdditionalInsuredBlock({
           </button>
         )}
       </div>
-      {/* Correspondence Type + Loan Number */}
+
+      {/* Loan Number */}
       <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
         <input
-          className={inputCls}
+          className={inputCls + e(insured.loanNumber)}
           placeholder="Loan Number"
           value={insured.loanNumber}
           onChange={(e) => set({ loanNumber: e.target.value })}
@@ -154,7 +158,7 @@ function AdditionalInsuredBlock({
 
       {/* Mortgagee Clause 1 */}
       <input
-        className={inputCls}
+        className={inputCls + e(insured.mortgageeClause1)}
         placeholder="Mortgagee Clause 1"
         value={insured.mortgageeClause1}
         onChange={(e) => set({ mortgageeClause1: e.target.value })}
@@ -170,7 +174,7 @@ function AdditionalInsuredBlock({
 
       {/* Mailing Address 1 */}
       <input
-        className={inputCls}
+        className={inputCls + e(insured.mailingAddress1)}
         placeholder="Mailing Address 1"
         value={insured.mailingAddress1}
         onChange={(e) => set({ mailingAddress1: e.target.value })}
@@ -186,7 +190,7 @@ function AdditionalInsuredBlock({
 
       {/* City */}
       <input
-        className={inputCls}
+        className={inputCls + e(insured.city)}
         placeholder="City"
         value={insured.city}
         onChange={(e) => set({ city: e.target.value })}
@@ -195,13 +199,13 @@ function AdditionalInsuredBlock({
       {/* State + Zip */}
       <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
         <input
-          className={inputCls}
+          className={inputCls + e(insured.state)}
           placeholder="State"
           value={insured.state}
           onChange={(e) => set({ state: e.target.value })}
         />
         <input
-          className={inputCls}
+          className={inputCls + e(insured.zipcode)}
           placeholder="Zipcode"
           value={insured.zipcode}
           onChange={(e) => set({ zipcode: e.target.value })}
@@ -210,17 +214,17 @@ function AdditionalInsuredBlock({
 
       {/* Email */}
       <input
-        className={inputCls}
+        className={inputCls + e(insured.email)}
         placeholder="Email"
         type="email"
         value={insured.email}
         onChange={(e) => set({ email: e.target.value })}
       />
 
-      {/* Phone + Policy Effective Date */}
+      {/* Phone */}
       <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 xl:gap-4">
         <input
-          className={inputCls}
+          className={inputCls + e(insured.phoneNumber)}
           placeholder="Phone Number"
           type="tel"
           value={insured.phoneNumber}
@@ -232,7 +236,7 @@ function AdditionalInsuredBlock({
 }
 
 // ─── Additional Insured Section ───────────────────────────────────────────────
-function AdditionalInsuredSection() {
+function AdditionalInsuredSection({ attempted }: { attempted: boolean }) {
   const { additionalInsureds } = useBindStore();
 
   return (
@@ -245,6 +249,7 @@ function AdditionalInsuredSection() {
           insured={insured}
           index={index}
           showRemove={additionalInsureds.length > 1}
+          attempted={attempted}
         />
       ))}
     </div>
@@ -252,14 +257,15 @@ function AdditionalInsuredSection() {
 }
 
 // ─── Effective Day Section ───────────────────────────────────────────────────
-function EffectiveDaySection() {
+function EffectiveDaySection({ attempted }: { attempted: boolean }) {
   const { insuredInfo, setInsuredInfo } = useBindStore();
+  const e = (v: string) => (attempted && !v.trim() ? errCls : "");
 
   return (
     <div className="flex flex-col gap-2 lg:gap-3 xl:gap-4">
       <p className={sectionTitleCls}>Effective Day</p>
       <input
-        className={inputCls}
+        className={inputCls + e(insuredInfo.policyEffectiveDate)}
         placeholder="Policy Effective Date mm/dd/yyyy"
         value={insuredInfo.policyEffectiveDate}
         onChange={(e) => setInsuredInfo({ policyEffectiveDate: e.target.value })}
@@ -269,7 +275,7 @@ function EffectiveDaySection() {
 }
 
 // ─── Certification Section ────────────────────────────────────────────────────
-function CertificationSection() {
+function CertificationSection({ attempted }: { attempted: boolean }) {
   const { certified, setCertified } = useBindStore();
 
   return (
@@ -278,7 +284,14 @@ function CertificationSection() {
         Certification, Coverage Selection &amp; Authorization
       </p>
 
-      <label className="flex gap-3 items-start cursor-pointer">
+      <label
+        className={
+          "flex gap-3 items-start cursor-pointer rounded" +
+          (attempted && !certified
+            ? " outline outline-1 outline-red-400 p-1"
+            : "")
+        }
+      >
         <input
           type="checkbox"
           className="mt-1 accent-primary shrink-0 w-4 h-4"
@@ -319,22 +332,57 @@ function CertificationSection() {
 // ─── Main BindForm ────────────────────────────────────────────────────────────
 const BindForm = () => {
   const router = useRouter();
-  const { certified } = useBindStore();
+  const { certified, insuredInfo, additionalInsureds } = useBindStore();
+  const [attempted, setAttempted] = useState(false);
+
+  const isFormValid = () => {
+    const i = insuredInfo;
+    if (
+      !i.clientFirstName.trim() ||
+      !i.clientLastName.trim() ||
+      !i.mailingAddress1.trim() ||
+      !i.city.trim() ||
+      !i.state.trim() ||
+      !i.zipcode.trim() ||
+      !i.email.trim() ||
+      !i.phoneNumber.trim() ||
+      !i.policyEffectiveDate.trim()
+    ) {
+      return false;
+    }
+    for (const ai of additionalInsureds) {
+      if (
+        !ai.loanNumber.trim() ||
+        !ai.mortgageeClause1.trim() ||
+        !ai.mailingAddress1.trim() ||
+        !ai.city.trim() ||
+        !ai.state.trim() ||
+        !ai.zipcode.trim() ||
+        !ai.email.trim() ||
+        !ai.phoneNumber.trim()
+      ) {
+        return false;
+      }
+    }
+    return certified;
+  };
+
+  const handleBind = () => {
+    setAttempted(true);
+    if (isFormValid()) {
+      router.push("/payment");
+    }
+  };
 
   return (
     <div className="flex flex-col gap-9 xl:gap-10">
-      <InsuredInfoSection />
+      <InsuredInfoSection attempted={attempted} />
 
-      {/* <div className="w-full h-10 bg-[#141412]/10" /> */}
+      <EffectiveDaySection attempted={attempted} />
 
-      <EffectiveDaySection />
-      
-      <AdditionalInsuredSection />
+      <AdditionalInsuredSection attempted={attempted} />
 
-
-      {/* <div className="w-full h-px bg-[#141412]/10" /> */}
-
-      <CertificationSection />
+      <CertificationSection attempted={attempted} />
 
       {/* Actions */}
       <div className="flex items-center justify-between gap-5">
@@ -351,8 +399,7 @@ const BindForm = () => {
               ? "bg-primary cursor-pointer"
               : "bg-primary/40 cursor-not-allowed",
           ].join(" ")}
-          disabled={!certified}
-          onClick={() => router.push("/payment")}
+          onClick={handleBind}
         />
       </div>
     </div>
