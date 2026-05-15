@@ -1,5 +1,10 @@
 import Hero from "@/shared/ui/hero";
 import teamBackImage from "@/shared/assets/landing/teamBG.png";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Contact Us | Ives",
+};
 
 export default function ContactUsPage() {
   return (

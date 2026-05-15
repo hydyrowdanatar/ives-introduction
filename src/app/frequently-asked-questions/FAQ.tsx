@@ -53,6 +53,11 @@ const questions = [
       "Different deductible amounts on dwelling vs wind/hail – we have 5 deductibles for our investors to choose from $2500/$5000/$10,000/25,000/$50,000. They can be chosen on a per home basis. Depending on the location of the property there are different wind/hail deductible options that can range from the standard fixed deductible to 1-5% deductible options.",
   },
   {
+    question: "What is my liability deductible?",
+    answer:
+      "If you are sued for a covered claim, you do not have to pay a deductible for your insurance coverage to trigger defense coverage.",
+  },
+  {
     question: "Can Ives Insurance Manage all of my insurance needs?",
     answer:
       "Yes, we are a full service insurance brokerage. However, ONLY properties managed by MYND can be added to the master policy currently being offered. If property is transferred to another property management company another policy will need to be obtained within 30 days. Also, if you have any other properties, now is the time to sign up for management service with MYND, the best property management company around! However, Ives can also provide competitive quotes for your rental properties, personal home, businesses, auto, and more. Due to being a client of MYND there are additional discounts available on these policies! Please contact us directly to inquire: mynd@ivesins.com or call Ives Insurance at 619-794-2710",

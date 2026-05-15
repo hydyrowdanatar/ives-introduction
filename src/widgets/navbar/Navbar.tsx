@@ -1,11 +1,16 @@
+"use client";
+
 import navbarBG from "@/shared/assets/navbarBG.png";
 import logo from "@/shared/assets/logoIcon.svg";
 import miniLogo from "@/shared/assets/mobileLogoIcon.svg";
 import Image from "next/image";
 import useGetIcons from "@/shared/icons/getIcons";
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
   const { closeIcon, miniCloseIcon } = useGetIcons();
+  const router = useRouter();
+
   return (
     <div
       className="w-full bg-cover bg-center bg-no-repeat flex items-center  fixed z-20"
@@ -15,8 +20,18 @@ const Navbar = () => {
       }}
     >
       <div className="flex items-center justify-between w-[92%] mx-auto">
-        <Image src={logo} alt="logo" className="hidden lg:flex" />
-        <Image src={miniLogo} alt="logo" className="flex lg:hidden" />
+        <Image
+          src={logo}
+          alt="logo"
+          className="hidden lg:flex cursor-pointer"
+          onClick={() => router.push("/landing")}
+        />
+        <Image
+          src={miniLogo}
+          alt="logo"
+          className="flex lg:hidden"
+          onClick={() => router.push("/landing")}
+        />
         <div className="hidden lg:flex">{closeIcon}</div>
         <div className="flex lg:hidden">{miniCloseIcon}</div>
       </div>

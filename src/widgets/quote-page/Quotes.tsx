@@ -160,9 +160,9 @@ const Quotes = () => {
       {/* ── Desktop Layout (md and above) ── */}
       <div className="hidden md:flex w-full flex-col gap-[40px]">
         {/* Cards row — each with its own SELECT QUOTE button below */}
-        <div className="flex justify-evenly items-start gap-8">
+        <div className="flex justify-between lg:justify-evenly items-start gap-8">
           {QUOTE_TYPES.map((type) => (
-            <div key={type} className="w-[35%] flex flex-col gap-4">
+            <div key={type} className="w-[45%] lg:w-[35%] flex flex-col gap-4">
               <Quote type={type} />
               <Button
                 title="SELECT QUOTE"
