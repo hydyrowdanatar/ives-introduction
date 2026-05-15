@@ -1,6 +1,10 @@
+"use client";
+
 import curve from "@/shared/assets/footerCurveBG.png";
+import { useRouter } from "next/navigation";
 
 const Footer = () => {
+  const router = useRouter();
   return (
     <div className="w-full bg-[#002B47] relative">
       <div
@@ -17,10 +21,11 @@ const Footer = () => {
       >
         <div className="flex flex-col-reverse lg:flex-row lg:items-end gap-3">
           <p
-            className="font-semibold"
+            className="font-semibold cursor-pointer"
             style={{
               fontSize: "var(--eighteen-size)",
             }}
+            onClick={() => router.push("/frequently-asked-questions")}
           >
             Frequently Asked Questions
           </p>
@@ -32,7 +37,10 @@ const Footer = () => {
           >
             |
           </p>
-          <p>
+          <p
+            className="cursor-pointer"
+            onClick={() => router.push("contact-us")}
+          >
             <span
               className="font-semibold"
               style={{

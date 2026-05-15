@@ -107,6 +107,7 @@ interface IProps {
   extraSubTitleClassName?: boolean;
   coverageSubTitleWidth?: boolean;
   inLine?: boolean;
+  contact?: boolean;
 }
 
 const HeroTitle: FC<IProps> = ({
@@ -124,6 +125,7 @@ const HeroTitle: FC<IProps> = ({
   extraClassName = false,
   extraSubTitleClassName = false,
   coverageSubTitleWidth = false,
+  contact = false,
   inLine = false,
 }) => {
   return (
@@ -206,6 +208,30 @@ const HeroTitle: FC<IProps> = ({
         >
           {subTitle_4}
         </span>
+
+        {contact && (
+          <div
+            className={`${regularWidth} flex flex-col lg:flex-row items-center gap-3 lg:gap-5 justify-between`}
+          >
+            <a
+              href="tel:6197942710"
+              className="w-full lg:w-fit text-center py-[8px] xl:py-[10px] 2xl:py-[12px] 3xl:py-[16px] px-[16px] xl:px-[20px] 2xl:px-[24px] 3xl:px-[30px] text-[14px] xl:text-[14px] 2xl:text-[18px] 3xl:text-[24px] border border-primary  font-semibold text-primary cursor-pointer transition-all duration-200 hover:brightness-110 hover:scale-[1.03] hover:bg-primary hover:text-white"
+            >
+              CALL 619-794-2710
+            </a>
+
+            <span className="text-[15px] xl:text-[15px] 2xl:text-[18px] 3xl:text-[24px] font-semibold">
+              OR
+            </span>
+
+            <a
+              href="mailto:mynd@ivesins.com"
+              className="w-full lg:w-fit text-center  py-[8px] xl:py-[10px] 2xl:py-[12px] 3xl:py-[16px] px-[16px] xl:px-[20px] 2xl:px-[24px] 3xl:px-[30px] text-[14px] xl:text-[14px] 2xl:text-[18px] 3xl:text-[24px] border border-primary font-semibold text-white bg-primary cursor-pointer transition-all duration-200 hover:brightness-110 hover:scale-[1.03] hover:bg-white hover:text-primary"
+            >
+              EMAIL mynd@ivesins.com
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );

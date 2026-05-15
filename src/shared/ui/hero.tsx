@@ -17,6 +17,7 @@ interface IProps {
   subTitle_4?: string;
   isBrHave?: boolean;
   firstHero?: boolean;
+  contact?: boolean;
 }
 
 const Hero: FC<IProps> = ({
@@ -34,6 +35,7 @@ const Hero: FC<IProps> = ({
   subTitle_4,
   isBrHave,
   firstHero = false,
+  contact,
 }) => {
   return (
     <div
@@ -62,6 +64,7 @@ const Hero: FC<IProps> = ({
           subTitle_3={subTitle_3}
           subTitle_4={subTitle_4}
           isBrHave={isBrHave}
+          contact={contact}
         />
       </div>
     </div>
