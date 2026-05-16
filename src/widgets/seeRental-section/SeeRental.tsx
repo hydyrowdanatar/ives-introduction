@@ -1,7 +1,10 @@
-import curve from "@/shared/assets/greenCurve.png";
+"use client";
+
 import Button from "@/shared/ui/btn";
+import { useRouter } from "next/navigation";
 
 const SeeRentalSection = () => {
+  const router = useRouter();
   return (
     <div className="w-full bg-primary-dark lg:h-[302px] xl:h-[380px] 2xl:h-[448px] 3xl:h-[585px] flex  items-center py-11 px-6 lg:py-0 lg:px-0">
       <div className="w-full lg:w-[86%] mx-auto flex flex-col lg:flex-row items-center justify-around ">
@@ -29,6 +32,7 @@ const SeeRentalSection = () => {
           <Button
             title="SEE MY COVERAGE"
             className="text-primary bg-white hover:bg-primary hover:text-white border border-white cursor-pointer w-fit"
+            onClick={() => router.push("/client-property")}
           />
 
           <span className="text-[13px] xl:text-[13px] 2xl:text-[15px] 3xl-text-[18px] text-white italic">

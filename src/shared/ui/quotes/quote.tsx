@@ -407,6 +407,7 @@
 
 import { FC } from "react";
 import { useQuoteStore, QuoteType } from "@/shared/store/quotesStore";
+import { useFormStore } from "@/shared/store/formStore";
 
 interface Row {
   label: string;
@@ -419,135 +420,6 @@ const TITLES: Record<QuoteType, string> = {
   enchanced: "Enhanced",
   "mynd managed": "Mynd Managed",
 };
-
-const ROWS: Row[] = [
-  {
-    label: "Rental Rebuild Coverage",
-    values: {
-      basic: "<Dwelling Amount>",
-      enchanced: "<Dwelling Amount>",
-      "mynd managed": "<Dwelling Amount>",
-    },
-    includedFor: ["basic", "enchanced", "mynd managed"],
-  },
-  {
-    label: "Loss of Rents",
-    values: {
-      basic: "<Annual Rents>",
-      enchanced: "<Annual Rents>",
-      "mynd managed": "<Annual Rents>",
-    },
-    includedFor: ["basic", "enchanced", "mynd managed"],
-  },
-  {
-    label: "Contents",
-    values: {
-      basic: "Not Included",
-      enchanced: "$5,000",
-      "mynd managed": "$5,000",
-    },
-    includedFor: ["enchanced", "mynd managed"],
-  },
-  {
-    label: "Ordinance and Law",
-    values: {
-      basic: "Not Included",
-      enchanced: "100% of A/10% B/10% C",
-      "mynd managed": "Full Coverage",
-    },
-    includedFor: ["enchanced", "mynd managed"],
-  },
-  {
-    label: "Water Claims",
-    values: {
-      basic: "Up to rebuild cost",
-      enchanced: "Up to rebuild cost",
-      "mynd managed": "Up to rebuild cost",
-    },
-    includedFor: ["basic", "enchanced", "mynd managed"],
-  },
-  {
-    label: "Sewers/Drains Backup",
-    values: {
-      basic: "$5,000",
-      enchanced: "$25,000 Per Occurrence",
-      "mynd managed": "$50,000",
-    },
-    includedFor: ["basic", "enchanced", "mynd managed"],
-  },
-  {
-    label: "Equipment Breakdown",
-    values: {
-      basic: "Not Included",
-      enchanced: "$25,000 Per Occurrence",
-      "mynd managed": "$50,000",
-    },
-    includedFor: ["enchanced", "mynd managed"],
-  },
-  {
-    label: "Vacancy Allowance",
-    values: {
-      basic: "30 Days",
-      enchanced: "60 Days",
-      "mynd managed": "Unlimited",
-    },
-    includedFor: ["basic", "enchanced", "mynd managed"],
-  },
-  {
-    label: "Burglary/Theft/ Vandalism",
-    values: {
-      basic: "Sublimit",
-      enchanced: "Included",
-      "mynd managed": "Included",
-    },
-    includedFor: ["basic", "enchanced", "mynd managed"],
-  },
-  {
-    label: "Landlord Liability",
-    values: {
-      basic: "$500,000/$1,000,000",
-      enchanced: "$1,000,000/$2,000,000",
-      "mynd managed": "$1,000,000/$3,000,000",
-    },
-    includedFor: ["basic", "enchanced", "mynd managed"],
-  },
-  {
-    label: "Habitability Lawsuit Coverage",
-    values: {
-      basic: "Not Included",
-      enchanced: "Not Included",
-      "mynd managed": "Included",
-    },
-    includedFor: ["mynd managed"],
-  },
-  {
-    label: "Animal Lawsuit Coverage",
-    values: {
-      basic: "$10,000",
-      enchanced: "$50,000",
-      "mynd managed": "$100,000",
-    },
-    includedFor: ["basic", "enchanced", "mynd managed"],
-  },
-  {
-    label: "Fire Arms Lawsuit Coverage",
-    values: {
-      basic: "Not Included",
-      enchanced: "Included",
-      "mynd managed": "Included",
-    },
-    includedFor: ["enchanced", "mynd managed"],
-  },
-  {
-    label: "Assault and Battery Lawsuit Coverage",
-    values: {
-      basic: "Not Included",
-      enchanced: "Not Included",
-      "mynd managed": "Included",
-    },
-    includedFor: ["mynd managed"],
-  },
-];
 
 const ANNUAL_PREMIUM: Record<QuoteType, string> = {
   basic: "$10,000",
@@ -564,6 +436,137 @@ interface IProps {
 
 const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
   const { setSelectedQuote } = useQuoteStore();
+  const { coverage } = useFormStore();
+
+  const ROWS: Row[] = [
+    {
+      label: "Rental Rebuild Coverage",
+      values: {
+        // basic: String(coverage.propertyRebuildCost),
+        basic: `$${coverage.propertyRebuildCost}`,
+        enchanced: "<Dwelling Amount>",
+        "mynd managed": `$${coverage.propertyRebuildCost}`,
+      },
+      includedFor: ["basic", "enchanced", "mynd managed"],
+    },
+    {
+      label: "Loss of Rents",
+      values: {
+        basic: `$${coverage.lossOfUseMonthlyRents}`,
+        enchanced: "<Annual Rents>",
+        "mynd managed": `$${coverage.lossOfUseMonthlyRents}`,
+      },
+      includedFor: ["basic", "enchanced", "mynd managed"],
+    },
+    {
+      label: "Contents",
+      values: {
+        basic: "Not Included",
+        enchanced: "$5,000",
+        "mynd managed": "$5,000",
+      },
+      includedFor: ["enchanced", "mynd managed"],
+    },
+    {
+      label: "Ordinance and Law",
+      values: {
+        basic: "Not Included",
+        enchanced: "100% of A/10% B/10% C",
+        "mynd managed": "Full Coverage",
+      },
+      includedFor: ["enchanced", "mynd managed"],
+    },
+    {
+      label: "Water Claims",
+      values: {
+        basic: "Up to rebuild cost",
+        enchanced: "Up to rebuild cost",
+        "mynd managed": "Up to rebuild cost",
+      },
+      includedFor: ["basic", "enchanced", "mynd managed"],
+    },
+    {
+      label: "Sewers/Drains Backup",
+      values: {
+        basic: "$5,000",
+        enchanced: "$25,000 Per Occurrence",
+        "mynd managed": "$50,000",
+      },
+      includedFor: ["basic", "enchanced", "mynd managed"],
+    },
+    {
+      label: "Equipment Breakdown",
+      values: {
+        basic: "Not Included",
+        enchanced: "$25,000 Per Occurrence",
+        "mynd managed": "$50,000",
+      },
+      includedFor: ["enchanced", "mynd managed"],
+    },
+    {
+      label: "Vacancy Allowance",
+      values: {
+        basic: "30 Days",
+        enchanced: "60 Days",
+        "mynd managed": "Unlimited",
+      },
+      includedFor: ["basic", "enchanced", "mynd managed"],
+    },
+    {
+      label: "Burglary/Theft/ Vandalism",
+      values: {
+        basic: "Sublimit",
+        enchanced: "Included",
+        "mynd managed": "Included",
+      },
+      includedFor: ["basic", "enchanced", "mynd managed"],
+    },
+    {
+      label: "Landlord Liability",
+      values: {
+        basic: "$500,000/$1,000,000",
+        enchanced: "$1,000,000/$2,000,000",
+        "mynd managed": "$1,000,000/$3,000,000",
+      },
+      includedFor: ["basic", "enchanced", "mynd managed"],
+    },
+    {
+      label: "Habitability Lawsuit Coverage",
+      values: {
+        basic: "Not Included",
+        enchanced: "Not Included",
+        "mynd managed": "Included",
+      },
+      includedFor: ["mynd managed"],
+    },
+    {
+      label: "Animal Lawsuit Coverage",
+      values: {
+        basic: "$10,000",
+        enchanced: "$50,000",
+        "mynd managed": "$100,000",
+      },
+      includedFor: ["basic", "enchanced", "mynd managed"],
+    },
+    {
+      label: "Fire Arms Lawsuit Coverage",
+      values: {
+        basic: "Not Included",
+        enchanced: "Included",
+        "mynd managed": "Included",
+      },
+      includedFor: ["enchanced", "mynd managed"],
+    },
+    {
+      label: "Assault and Battery Lawsuit Coverage",
+      values: {
+        basic: "Not Included",
+        enchanced: "Not Included",
+        "mynd managed": "Included",
+      },
+      includedFor: ["mynd managed"],
+    },
+  ];
 
   // ── Mobile variant ──────────────────────────────────────────────
   if (isMobile) {
@@ -631,7 +634,7 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
     <div
       onClick={() => setSelectedQuote(type)}
       className={[
-        "w-full text-center rounded-[12px] cursor-pointer overflow-hidden",
+        "w-full text-center rounded-[12px] overflow-hidden",
         "transition-all duration-300 ease-in-out flex flex-col",
         "shadow-md",
       ].join(" ")}

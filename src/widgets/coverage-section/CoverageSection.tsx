@@ -1,7 +1,10 @@
+"use client";
+
 import Button from "@/shared/ui/btn";
-import HeroTitle from "@/shared/ui/titles/heroTitle";
+import { useRouter } from "next/navigation";
 
 const CoverageSection = () => {
+  const router = useRouter();
   return (
     <div className="w-full lg:h-[400px] xl:h-[500px] 2xl:h-[590px] 3xl:h-[770px] bg-bright flex items-center justify-center py-11 px-6 lg:py-0 lg:px-0">
       <div className="w-full lg:w-[86%] mx-auto flex flex-col lg:flex-row lg:gap-[30px] lg:justify-around lg:items-center">
@@ -64,6 +67,7 @@ const CoverageSection = () => {
           <Button
             title="Check My Property Coverage"
             className="text-white bg-primary w-fit mt-6 border border-primary hover:bg-secondary hover:text-primary cursor-pointer"
+            onClick={() => router.push("/client-property")}
           />
         </div>
       </div>

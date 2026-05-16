@@ -22,8 +22,7 @@ const Conclusion = () => {
       />
 
       <div className="w-full lg:h-[450px] xl:h-[500px] 2xl:h-[590px] 3xl:h-[770px] bg-bright flex flex-col items-center justify-center gap-7 lg:gap-[45px] py-11 px-6 lg:py-0 lg:px-0 text-center">
-        {/* <div className="w-full lg:w-[86%] mx-auto flex flex-col gap-5 lg:gap-[30px] lg:items-center"></div> */}
-        <h2 className="text-[20px] xl:text-[25px] 2xl:text-[30px] 3xl:text-[38px] leading-[28px] xl:leading-[32px] 2xl:leading-[38px] 3xl:leading-[50px] font-semibold">
+        {/* <h2 className="text-[20px] xl:text-[25px] 2xl:text-[30px] 3xl:text-[38px] leading-[28px] xl:leading-[32px] 2xl:leading-[38px] 3xl:leading-[50px] font-semibold">
           Set up your Insurance Account
         </h2>
 
@@ -31,10 +30,10 @@ const Conclusion = () => {
           Your policy is now active please create your <span>Tokio Marine</span>{" "}
           account to securely view your policy documents and manage your
           coverage online anytime
-        </p>
+        </p> */}
 
         <span className="font-semibold text-primary text-[13px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px]">
-          $10,000
+          LT000004963
         </span>
 
         <div className="flex items-center gap-[45px]">
@@ -42,10 +41,10 @@ const Conclusion = () => {
             title="DOWNLOAD EVIDENCE"
             className="text-white bg-primary hover:bg-secondary hover:text-primary"
           />
-          <Button
+          {/* <Button
             title="DOWNLOAD INVOICE"
             className="text-white bg-primary hover:bg-secondary hover:text-primary"
-          />
+          /> */}
         </div>
       </div>
     </div>

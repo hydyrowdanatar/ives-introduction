@@ -116,6 +116,7 @@ function PropertyDetailsTab({ attempted }: { attempted: boolean }) {
         <input
           className={inputCls + e(propertyDetails.yearBuilt)}
           placeholder="Year Built"
+          type="number"
           value={propertyDetails.yearBuilt}
           onChange={(e) => setPropertyDetails({ yearBuilt: e.target.value })}
         />
@@ -145,6 +146,7 @@ function PropertyDetailsTab({ attempted }: { attempted: boolean }) {
         <input
           className={inputCls + " flex-1" + e(propertyDetails.numberOfUnits)}
           placeholder="Number of Units"
+          type="number"
           value={propertyDetails.numberOfUnits}
           onChange={(e) =>
             setPropertyDetails({ numberOfUnits: e.target.value })
@@ -219,6 +221,7 @@ function CoverageTab({ attempted }: { attempted: boolean }) {
         <input
           className={inputCls + " flex-1"}
           placeholder="Property Rebuild Cost"
+          type="number"
           value={coverage.propertyRebuildCost}
           onChange={(e) => setCoverage({ propertyRebuildCost: e.target.value })}
         />
@@ -242,6 +245,7 @@ function CoverageTab({ attempted }: { attempted: boolean }) {
         <input
           className={inputCls + " flex-1"}
           placeholder="Loss of Use/Monthly Rents"
+          type="number"
           value={coverage.lossOfUseMonthlyRents}
           onChange={(e) =>
             setCoverage({ lossOfUseMonthlyRents: e.target.value })
@@ -368,8 +372,10 @@ const FormComponent = () => {
         <Button
           title="BACK"
           className="border border-primary text-primary hover:bg-secondary hover:border-secondary"
-          onClick={handlePrev}
-          disabled={currentTab === 0}
+          onClick={
+            currentTab === 0 ? () => router.push("/landing") : handlePrev
+          }
+          // disabled={currentTab === 0}
         />
         {isLastTab ? (
           <Button

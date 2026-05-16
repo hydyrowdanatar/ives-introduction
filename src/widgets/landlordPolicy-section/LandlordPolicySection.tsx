@@ -1,7 +1,11 @@
+"use client";
+
 import curve from "@/shared/assets/greenCurve.png";
 import Button from "@/shared/ui/btn";
+import { useRouter } from "next/navigation";
 
 const LandlordPolicySection = () => {
+  const router = useRouter();
   return (
     <div className="w-full relative">
       <div className="w-full bg-primary-dark lg:h-[284px] xl:h-[358px] 2xl:h-[422px] 3xl:h-[550px] flex items-center py-11 px-6 lg:py-0 lg:px-0">
@@ -32,6 +36,7 @@ const LandlordPolicySection = () => {
             <Button
               title="SEE MY COVERAGE"
               className="text-primary bg-white hover:bg-primary hover:text-white border border-white cursor-pointer"
+              onClick={() => router.push("/client-property")}
             />
           </div>
         </div>

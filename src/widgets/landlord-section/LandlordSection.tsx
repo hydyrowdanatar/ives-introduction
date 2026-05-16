@@ -1,5 +1,8 @@
+"use client";
+
 import Button from "@/shared/ui/btn";
 import curve from "@/shared/assets/greenCurve.png";
+import { useRouter } from "next/navigation";
 
 const whiteCheck = (
   <svg
@@ -20,6 +23,7 @@ const whiteCheck = (
 );
 
 const LandlordSection = () => {
+  const router = useRouter();
   return (
     <div className="w-full relative">
       <div className="w-full bg-primary-dark lg:h-[400px] xl:h-[500px] 2xl:h-[590px] 3xl:h-[770px] flex items-center py-11 px-6 lg:py-0 lg:px-0">
@@ -95,6 +99,7 @@ const LandlordSection = () => {
               <Button
                 title="VIEW MY OPTIONS"
                 className="text-primary border border-white bg-white w-fit hover:bg-primary hover:text-white cursor-pointer"
+                onClick={() => router.push("/client-property")}
               />
             </div>
           </div>
