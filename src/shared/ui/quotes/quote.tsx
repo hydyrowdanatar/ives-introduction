@@ -644,6 +644,11 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
               {displayPremium}
             </span>
           </div>
+          {premiumError && (
+            <p className="px-4 pb-3 text-red-500 text-[11px] leading-snug">
+              {premiumError}
+            </p>
+          )}
         </div>
       </div>
     );
@@ -750,6 +755,17 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
             {displayPremium}
           </span>
         </div>
+        {premiumError && (
+          <p
+            className={[
+              "px-[16px] xl:px-[20px] 2xl:px-[24px] 3xl:px-[30px]",
+              "pb-3 text-red-500 leading-snug",
+              "text-[10px] xl:text-[11px] 2xl:text-[12px] 3xl:text-[14px]",
+            ].join(" ")}
+          >
+            {premiumError}
+          </p>
+        )}
       </div>
     </div>
   );

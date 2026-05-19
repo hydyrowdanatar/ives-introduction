@@ -47,11 +47,6 @@ export async function POST(req: NextRequest) {
     if (isNaN(sqftVal) || sqftVal < 100 || sqftVal > 15000)
       return NextResponse.json({ error: "Square footage must be between 100 and 15,000" }, { status: 400 });
 
-    if (annualRent <= dwelling * 0.05)
-      return NextResponse.json({ error: "Annual rent must be greater than 5% of dwelling amount" }, { status: 400 });
-    if (annualRent >= dwelling * 0.55)
-      return NextResponse.json({ error: "Annual rent must be less than 55% of dwelling amount" }, { status: 400 });
-
     const result = await db.query<RateRow>(
       `SELECT
          dwellingamountintiv,
