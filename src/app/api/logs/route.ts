@@ -1,12 +1,12 @@
-import pool from "@/lib/db";
+import { getDb } from "@/lib/db";
+import { logs } from "@/lib/schema";
 
 export async function POST(request: Request) {
   const { text } = await request.json();
-
-  const result = await pool.query(
-    "INSERT INTO logs (text) VALUES ($1) RETURNING id, created_at, text",
-    [text]
+  const db = getDb();
+  const [row] = await db.insert(logs).values({ text }).returning();
+  return Response.json(
+    { id: row.id, created_at: row.createdAt, text: row.text },
+    { status: 201 }
   );
-
-  return Response.json(result.rows[0], { status: 201 });
 }

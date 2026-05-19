@@ -1,19 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import db from "@/lib/db";
+import { getDb } from "@/lib/db";
+import { productInsuranceRate } from "@/lib/schema";
+import { and, eq } from "drizzle-orm";
 
-interface RateRow {
-  dwellingamountintiv: boolean;
-  additionalbuildingamountintiv: boolean;
-  businesspersonalpropertyintiv: boolean;
-  annualrentintiv: boolean;
-  propertyrate1: number;
-  propertyrate2: number;
-  generalliabilityrate: number;
-  additionalliabilityratio: number;
-  triarate: number;
-  taxrate: number;
-  brokerfee: number;
-  pricepersqftmin: number;
+const PropertySqFtMin = 100;
+const PropertySqFtMax = 15000;
+const BASIC_TIER_RATIO = 0.85;
+
+function round2(n: number) {
+  return Math.round(n * 100) / 100;
 }
 
 export async function POST(req: NextRequest) {
@@ -44,43 +39,46 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid rent amount" }, { status: 400 });
     if (isNaN(units) || units < 1 || units > 8)
       return NextResponse.json({ error: "Unit count must be between 1 and 8" }, { status: 400 });
-    if (isNaN(sqftVal) || sqftVal < 100 || sqftVal > 15000)
-      return NextResponse.json({ error: "Square footage must be between 100 and 15,000" }, { status: 400 });
+    if (isNaN(sqftVal) || sqftVal < PropertySqFtMin || sqftVal > PropertySqFtMax)
+      return NextResponse.json({ error: `Square footage must be between ${PropertySqFtMin} and ${PropertySqFtMax.toLocaleString()}` }, { status: 400 });
 
-    const result = await db.query<RateRow>(
-      `SELECT
-         dwellingamountintiv,
-         additionalbuildingamountintiv,
-         businesspersonalpropertyintiv,
-         annualrentintiv,
-         propertyrate1,
-         propertyrate2,
-         generalliabilityrate,
-         additionalliabilityratio,
-         triarate,
-         taxrate,
-         brokerfee,
-         pricepersqftmin
-       FROM productinsurancerate
-       WHERE zipcode = $1
-         AND deductibleamount = $2
-         AND active = true
-       LIMIT 1`,
-      [String(zipcode), String(deductible)]
-    );
+    const db = getDb();
+    const [rate] = await db
+      .select({
+        dwellingAmountInTiv: productInsuranceRate.dwellingAmountInTiv,
+        additionalBuildingAmountInTiv: productInsuranceRate.additionalBuildingAmountInTiv,
+        businessPersonalPropertyInTiv: productInsuranceRate.businessPersonalPropertyInTiv,
+        annualRentInTiv: productInsuranceRate.annualRentInTiv,
+        propertyRate1: productInsuranceRate.propertyRate1,
+        propertyRate2: productInsuranceRate.propertyRate2,
+        generalLiabilityRate: productInsuranceRate.generalLiabilityRate,
+        additionalLiabilityRatio: productInsuranceRate.additionalLiabilityRatio,
+        triaRate: productInsuranceRate.triaRate,
+        taxRate: productInsuranceRate.taxRate,
+        brokerFee: productInsuranceRate.brokerFee,
+        pricePerSqftMin: productInsuranceRate.pricePerSqftMin,
+      })
+      .from(productInsuranceRate)
+      .where(
+        and(
+          eq(productInsuranceRate.zipcode, String(zipcode)),
+          eq(productInsuranceRate.deductibleAmount, String(deductible)),
+          eq(productInsuranceRate.active, true)
+        )
+      )
+      .limit(1);
 
-    if (result.rows.length === 0) {
+    if (!rate) {
       return NextResponse.json(
         { error: "No rate available for this zipcode and deductible" },
         { status: 404 }
       );
     }
 
-    const rate = result.rows[0];
-    // numeric(19,2) columns come back as strings from node-postgres — parse them
-    const generalLiabilityRate = parseFloat(String(rate.generalliabilityrate));
-    const brokerFee = parseFloat(String(rate.brokerfee));
-    const pricePerSqFtMin = parseFloat(String(rate.pricepersqftmin));
+    // numeric(19,2) columns come back as strings from node-postgres
+    const generalLiabilityRate = Number(rate.generalLiabilityRate);
+    const brokerFee = Number(rate.brokerFee);
+    const pricePerSqFtMin = Number(rate.pricePerSqftMin);
 
     const pricePerSqFt = dwelling / sqftVal;
     if (pricePerSqFt < pricePerSqFtMin) {
@@ -96,32 +94,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // TIV calculation
     const BPP = 5000;
     const additionalBuildings = 0;
 
     let calcTIV = 0;
-    if (rate.dwellingamountintiv) calcTIV += dwelling;
-    if (rate.additionalbuildingamountintiv) calcTIV += additionalBuildings;
-    if (rate.businesspersonalpropertyintiv) calcTIV += BPP;
-    if (rate.annualrentintiv) calcTIV += annualRent;
+    if (rate.dwellingAmountInTiv) calcTIV += dwelling;
+    if (rate.additionalBuildingAmountInTiv) calcTIV += additionalBuildings;
+    if (rate.businessPersonalPropertyInTiv) calcTIV += BPP;
+    if (rate.annualRentInTiv) calcTIV += annualRent;
 
-    const propertyRate = isWindHail ? rate.propertyrate1 : rate.propertyrate2;
-    const propertyPremium = Math.round((calcTIV / 100) * propertyRate);
+    const propertyRate = isWindHail ? rate.propertyRate1 : rate.propertyRate2;
+    const propertyPremium = Math.round((calcTIV / 100) * (propertyRate ?? 0));
 
     const liabilityPremium =
       generalLiabilityRate +
-      (units - 1) * generalLiabilityRate * rate.additionalliabilityratio;
+      (units - 1) * generalLiabilityRate * (rate.additionalLiabilityRatio ?? 0);
 
-    const triaPremium = Math.round((propertyPremium + liabilityPremium) * rate.triarate);
+    const triaPremium = Math.round(
+      (propertyPremium + liabilityPremium) * (rate.triaRate ?? 0)
+    );
 
     const totalPropertyPremium = propertyPremium + triaPremium;
     const totalPremium = totalPropertyPremium + liabilityPremium;
-    const taxesFees = totalPremium * rate.taxrate;
-    const totalAmount = Math.round(totalPremium + taxesFees + brokerFee);
+    const taxesFees = totalPremium * (rate.taxRate ?? 0);
+    const totalAmount = round2(totalPremium + taxesFees + brokerFee);
 
     const myndManagedAmount = totalAmount;
-    const basicAmount = Math.round(totalAmount * 0.85);
+    const basicAmount = round2(totalAmount * BASIC_TIER_RATIO);
 
     return NextResponse.json({
       myndManagedAmount,
@@ -130,8 +129,8 @@ export async function POST(req: NextRequest) {
         propertyPremium,
         liabilityPremium,
         triaPremium,
-        taxesFees: Math.round(taxesFees),
-        brokerFee: brokerFee,
+        taxesFees: round2(taxesFees),
+        brokerFee,
         totalPremium,
         myndManagedAmount,
         basicAmount,

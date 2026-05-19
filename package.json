@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "node scripts/migrate.js && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.5.1",
     "@types/pg": "^8.20.0",
+    "drizzle-orm": "^0.45.2",
     "lucide-react": "^1.14.0",
     "next": "16.2.6",
     "pg": "^8.20.0",
@@ -23,6 +24,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",

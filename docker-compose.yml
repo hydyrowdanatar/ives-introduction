@@ -1,15 +1,12 @@
 services:
   migrate:
-    image: postgres:15
+    image: ives-danatar3-app
     env_file:
       - .env
     volumes:
-      - ./migrations:/migrations:ro
-    command: >
-      sh -c 'for f in /migrations/*.sql; do
-        echo "Running $$f...";
-        psql "$$POSTGRES_URL" -f "$$f" || exit 1;
-      done'
+      - .:/app
+      - /app/node_modules
+    command: node scripts/migrate.js
     depends_on:
       db:
         condition: service_healthy
@@ -19,6 +16,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: ives-danatar3-app
     ports:
       - "3000:3000"
     volumes:

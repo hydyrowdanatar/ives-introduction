@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+const USD_FORMAT: Intl.NumberFormatOptions = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
+function formatUSD(n: number) {
+  return "$" + n.toLocaleString("en-US", USD_FORMAT);
+}
 import { ChevronDown } from "lucide-react";
 import QuoteTitle from "@/shared/ui/titles/quoteTitle";
 import Quotes from "@/widgets/quote-page/Quotes";
@@ -47,8 +52,8 @@ export default function QuoteSelectingPage() {
           setPremiumAmounts({ basic: null, "mynd managed": null });
         } else if (data.basicAmount > 0 && data.myndManagedAmount > 0) {
           setPremiumAmounts({
-            basic: "$" + Number(data.basicAmount).toLocaleString("en-US"),
-            "mynd managed": "$" + Number(data.myndManagedAmount).toLocaleString("en-US"),
+            basic: formatUSD(Number(data.basicAmount)),
+            "mynd managed": formatUSD(Number(data.myndManagedAmount)),
           });
           setPremiumError(null);
         }

@@ -1,4 +1,5 @@
-import pool from "@/lib/db";
+import { getDb } from "@/lib/db";
+import { leads } from "@/lib/schema";
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -14,11 +15,15 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await pool.query(
-      "INSERT INTO leads (text) VALUES ($1) RETURNING id, created_at, text",
-      [text.trim()]
+    const db = getDb();
+    const [row] = await db
+      .insert(leads)
+      .values({ text: text.trim() })
+      .returning();
+    return Response.json(
+      { id: row.id, created_at: row.createdAt, text: row.text },
+      { status: 201 }
     );
-    return Response.json(result.rows[0], { status: 201 });
   } catch (err) {
     console.error("leads POST error:", err);
     return Response.json({ error: "Internal server error" }, { status: 500 });
