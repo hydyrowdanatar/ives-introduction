@@ -373,9 +373,9 @@ const FormComponent = () => {
           title="BACK"
           className="border border-primary text-primary hover:bg-secondary hover:border-secondary"
           onClick={
-            currentTab === 0 ? () => router.push("/landing") : handlePrev
+            currentTab === 0 ? () => router.push("/intro") : handlePrev
           }
-          // disabled={currentTab === 0}
+        // disabled={currentTab === 0}
         />
         {isLastTab ? (
           <Button
