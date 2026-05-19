@@ -26,16 +26,16 @@ const Navbar = () => {
           src={logo}
           alt="logo"
           className="hidden lg:flex cursor-pointer"
-          onClick={() => router.push("/landing")}
+          onClick={() => router.push("/intro")}
         />
         <Image
           src={miniLogo}
           alt="logo"
           className="flex lg:hidden"
-          onClick={() => router.push("/landing")}
+          onClick={() => router.push("/intro")}
         />
-        {isIntroPage && <div className="hidden lg:flex">{closeIcon}</div>}
-        {isIntroPage && <div className="flex lg:hidden">{miniCloseIcon}</div>}
+        {/* {isIntroPage && <div className="hidden lg:flex">{closeIcon}</div>}
+        {isIntroPage && <div className="flex lg:hidden">{miniCloseIcon}</div>} */}
       </div>
     </div>
   );
