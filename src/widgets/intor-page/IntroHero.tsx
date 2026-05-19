@@ -214,7 +214,7 @@ const IntroHero: FC<IProps> = ({
             <div className="flex items-center gap-2">
               <span className="shrink-0">{greenCheckIcon}</span>
               <span className="font-semibold text-[12px] xl:text-[14px] 2xl:text-[17px] 3xl:text-[22px]">
-                Choose from 3 options to match your risk strategy.
+                Choose from 2 options to match your risk strategy.
               </span>
             </div>
             <div className="flex items-center gap-2">
