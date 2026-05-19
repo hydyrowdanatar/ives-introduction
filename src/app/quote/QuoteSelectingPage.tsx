@@ -10,14 +10,14 @@ import { useQuoteStore } from "@/shared/store/quotesStore";
 export default function QuoteSelectingPage() {
   const [deductible, setDeductible] = useState("10000");
   const { propertyDetails, coverage } = useFormStore();
-  const { setPremiumAmount, setPremiumLoading, setPremiumError } = useQuoteStore();
+  const { setPremiumAmounts, setPremiumLoading, setPremiumError } = useQuoteStore();
 
   useEffect(() => {
     const { zipcode, squareFootage, numberOfUnits } = propertyDetails;
     const { propertyRebuildCost, lossOfUseMonthlyRents } = coverage;
 
     if (!zipcode || !squareFootage || !numberOfUnits || !propertyRebuildCost || !lossOfUseMonthlyRents) {
-      setPremiumAmount(null);
+      setPremiumAmounts({ basic: null, "mynd managed": null });
       setPremiumError(null);
       return;
     }
@@ -44,11 +44,12 @@ export default function QuoteSelectingPage() {
         if (cancelled) return;
         if (data.error) {
           setPremiumError(data.error);
-          setPremiumAmount(null);
-        } else {
-          setPremiumAmount(
-            "$" + Number(data.totalAmount).toLocaleString("en-US")
-          );
+          setPremiumAmounts({ basic: null, "mynd managed": null });
+        } else if (data.basicAmount > 0 && data.myndManagedAmount > 0) {
+          setPremiumAmounts({
+            basic: "$" + Number(data.basicAmount).toLocaleString("en-US"),
+            "mynd managed": "$" + Number(data.myndManagedAmount).toLocaleString("en-US"),
+          });
           setPremiumError(null);
         }
       })

@@ -1,0 +1,1331 @@
+/*********
+ .jsw file
+ *********
+
+ Backend .jsw files contain functions that run on the server side but can be called from page code and frontend files.
+ Use backend functions to keep code private and hidden from a user's browser. More info:
+
+ https://support.wix.com/en/article/velo-web-modules-calling-backend-code-from-the-frontend
+
+**********/
+/*******************************************************************************************************************
+//   MYNDDatabaseFunction
+//   PolicyBindLog
+//   PolicyBindRequest
+//   PolicyEvidenceGet
+//   PolicyNumberGet
+//   PolicyPremiumCalculate
+//   PolicyProposalGet
+//   PolicyQuoteAddUpdate
+//   PolicyQuoteFind
+//   PolicyQuoteLog
+//   ReplacementCostCalculation
+********************************************************************************************************************/
+
+import wixData from 'wix-data';
+import {sendEmail} from 'backend/sendEmail.jsw';
+import {getPDFFile} from 'backend/pdf.jsw';
+import {floodQuoteGetUpdate} from 'backend/floodQuote.jsw';
+
+export async function CityStateGet(Zipcode) {
+    console.log ('CityStateGet Start - Zipcode:' + Zipcode);
+
+    var CityStateResult = {
+            "City": "",
+            "State": ""
+        }
+
+    console.log('CSG Zipcode-' + Zipcode)
+    /* await wixData.query("EstimatorInsuranceRates").eq("iSIndividual", "Yes").eq("zipcode", Zipcode).eq("deductibleAmount", 10000) */
+    await wixData.query("EstimatorInsuranceRates").eq("zipcode", Zipcode)
+    .find()
+    .then(results => {
+        console.log('CSG Query Result-' + results.items.length )
+        if (results.items.length > 0) {
+            CityStateResult = {
+                "City": results.items[0].city,
+                "State": results.items[0].state
+            }
+        }
+    })
+    .catch (error => console.log('Error-' + error))
+
+    console.log ('CityStateGet End');
+    
+    return CityStateResult;
+}
+
+export function formatDollarsOnly(CurrencyAmount) {
+	let Formatter = new Intl.NumberFormat('en-US', {
+  		style: 'currency',
+  		currency: 'USD',
+  		minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
+  		maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
+	});
+	//console.log("FDO CurrencyAmount-"+ CurrencyAmount)
+	return Formatter.format(CurrencyAmount)
+}
+
+export async function FloodBindRequest(BindObject, FloodQuote, CheckData) {
+    var BindStatus;
+    var BindStatusReason;
+    var InputParametersOK;
+
+    console.log ('FloodBindRequest Start  CheckData-' + CheckData);
+    
+    InputParametersOK = "Y";
+    BindStatus = "";
+    BindStatusReason = "";
+
+    if (CheckData == 'Y') {
+        if (BindObject.InsuranceRequest.Insured.FirstName == '') {
+            BindStatus = "Error";
+            BindStatusReason = "Client First Name MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('FloodBindRequest Client First Name Bad - First Name:' + BindObject.InsuredRequest.Insured.FirstName);
+        }
+        else if (BindObject.InsuranceRequest.Insured.LastName == '') {
+            BindStatus = "Error";
+            BindStatusReason = "Client Last Name MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('FloodBindRequest Client Last Name Bad');
+        }
+        else if ((BindObject.InsuranceRequest.Insured.MailingAddress == '') || (BindObject.InsuranceRequest.Insured.MailingCity == '') || (BindObject.InsuranceRequest.Insured.MailingState == '') || (BindObject.InsuranceRequest.Insured.MailingZipcode == '')) {
+            BindStatus = "Error";
+            BindStatusReason = "Client Mailing Address MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('FloodBindRequest Client Mailing Address Bad');
+        }
+        else if (BindObject.InsuranceRequest.Insured.EmailAddress == '') {
+            BindStatus = "Error";
+            BindStatusReason = "Client Email Address MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('FloodBindRequest Client EMail Address Bad');
+        }
+        else if (BindObject.InsuranceRequest.Insured.PhoneNumber == '') {
+            BindStatus = "Error";
+            BindStatusReason = "Client Phone Number MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('FloodBindRequest Client Phone Number Bad');
+        }
+        else if ((BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.Address == '') || (BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.City == '') || (BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.State == '') || (BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.Zipcode == '')) {
+            BindStatus = "Error";
+            BindStatusReason = "Client Property Address MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('FloodBindRequest Property Address Bad');
+        }
+        else if (BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.EffectiveDate == '') {
+            BindStatus = "Error";
+            BindStatusReason = "Quote Effective Date MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('FloodBindRequest Effective Date Bad');
+        }
+        else if (BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.ExpirationDate == '') {
+            BindStatus = "Error";
+            BindStatusReason = "Quote Effective Date MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('FloodBindRequest Expiration Date Bad');
+        }
+    }
+    console.log ('FloodBindRequest Input Parameter OK-' + InputParametersOK);
+    if (InputParametersOK == 'Y') {
+        FloodQuote.QuoteInfo.application.firstName = BindObject.InsuranceRequest.Insured.FirstName;
+        FloodQuote.QuoteInfo.application.lastName = BindObject.InsuranceRequest.Insured.LastName;
+        FloodQuote.QuoteInfo.application.mailingAddr1 = BindObject.InsuranceRequest.Insured.MailingAddress;
+        FloodQuote.QuoteInfo.application.mailingCity = BindObject.InsuranceRequest.Insured.MailingCity;
+        FloodQuote.QuoteInfo.application.mailingState = BindObject.InsuranceRequest.Insured.MailingState;
+        FloodQuote.QuoteInfo.application.mailingZip = BindObject.InsuranceRequest.Insured.MailingZipcode;
+        FloodQuote.QuoteInfo.application.mailingCountry = "US";
+        FloodQuote.QuoteInfo.application.email = BindObject.InsuranceRequest.Insured.EmailAddress;
+        FloodQuote.QuoteInfo.application.phone = BindObject.InsuranceRequest.Insured.PhoneNumber;
+
+        await floodQuoteGetUpdate(FloodQuote)
+	    .then(function(ParamReturn) {
+            FloodQuote = ParamReturn;
+        })
+        .catch(error => console.log('FloodBindRequest  Error-', error));
+    }
+
+    if (InputParametersOK == 'Y') {
+        let FloodCoverageTotal = FloodQuote.QuoteInfo.application.buildingCoverage + FloodQuote.QuoteInfo.application.contentCoverage;
+        let FloodTotalPremium = FloodQuote.QuoteInfo.policy.basePremium + FloodQuote.QuoteInfo.policy.optionalCoveragePremium;
+
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.SelectNumber = "1";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.InsuranceCompany = "Neptune Flood";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.InsuranceCompanyNaic = "524126";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.ProductName = "Personal Flood";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.IsWindHail = "No";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.PolicyNumber = FloodQuote.QuoteInfo.quoteNumber;
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.DwellingAmount = String(FloodQuote.QuoteInfo.application.buildingCoverage);
+		BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.AdditionalBuildings = "0";
+		BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.PersonalProperty = String(FloodQuote.QuoteInfo.application.contentCoverage);
+	    BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.AnnualRent = "0";
+		BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.TotalInsuredValue = String(FloodCoverageTotal);
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.PropertyRate = "0.0";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.ReplacementCost = "Yes";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.MoldFungi = "$15,000";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.AnnualRentCoverage = "12M-ALS";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.OrdLawA = "None";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.OrdLawB = "None";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.OrdLawC = "None";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.WaterBackupCoverage = "Not Included";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.VacancyClause = "None";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.BurglaryTheft = "None";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.WindHailCoverage = "None";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.FloodCoverage = "Included";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.EarthquakeCoverage = "None";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.UmbrellaCoverage = "None";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.NamedStormDeductible = "None";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.GeneralAggregate = "";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.EachOccurrence = "";
+        //BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.DeductibleAmount = String(FloodQuote.QuoteInfo.application.deductible);
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.PropertyDeductibleAmount = formatDollarsOnly(FloodQuote.QuoteInfo.application.deductible);
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.LiabilityDeductibleAmount = "$0";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.PropertyPremium = String(FloodQuote.QuoteInfo.policy.basePremium + FloodQuote.QuoteInfo.policy.optionalCoveragePremium);
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.LiabilityPremium = "0";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.TotalPremium = String(FloodTotalPremium);
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.TaxesAmount = String(FloodQuote.QuoteInfo.policy.surplusTax);
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.FeesAmount = String(FloodQuote.QuoteInfo.policy.policyFee);
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.BrokerFeeAmount = "0";
+        BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.TotalAmount = String(FloodQuote.QuoteInfo.policy.totalPremium);
+        BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.FloodZone = String(FloodQuote.QuoteInfo.application.floodZone);
+
+        const BindRequest = JSON.stringify(BindObject);
+    
+        console.log ('FloodBindRequest Send Email Start');
+        const emailResult = await sendEmail ('companymailbox@ivesins.com', 'MYND New Flood Bind Request', 'MYND - A new flood bind request is contained in the attached JSON file.', 'MYNDBIND', 'MYNDBindRequest.json', BindRequest);
+        
+        BindStatus = emailResult.statusCode
+        console.log ('PolicyBindRequest emailResult:' + emailResult.statusCode);
+        
+        const SaveData = {
+            "actionType": "FloodBind",
+            "actionDate": BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.BindRequestorDate,
+            "actionRequestor": BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.BindRequestorEmail,
+            "propertyName": BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.Address + ' ' + BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.City + ', ' + BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.State + ' ' + BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.Zipcode,
+            "propertyAmount": BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.TotalAmount
+        };
+	    PolicyQuoteLog(SaveData)
+			.then(function(ParamReturn) {
+            let QuoteID = ParamReturn;
+        })
+        .catch( (err) => {
+            let errorMsg = err;
+        });
+
+	    PolicyBindLog(BindObject)
+			.then(function(ParamReturn) {
+            let QuoteID = ParamReturn;
+        })
+        .catch( (err) => {
+            let errorMsg = err;
+        });
+
+    }
+
+    const BindResult = {
+        "BindStatus": BindStatus,
+        "BindStatusReason":BindStatusReason
+    }
+    console.log ('FloodBindRequest  End  BindStatus:' + BindResult.BindStatus + ' BindStatusReason:' + BindResult.BindStatusReason)
+    return BindResult
+
+}
+
+
+export async function FloodSquareFootGet(StreetAddress, City, State, Zipcode) {
+    var  FloodQuote = {                
+        "ResponseToken": "",
+        "QuoteInfo": {
+            "quoteNumber": "",
+            "link": "",
+            "ProducerName": "Michelle Afflalo",
+            "application": {
+                "firstName": "Ives",
+				"lastName": "Insurance",
+				"mailingAddr1": "",
+				"mailingCity": "",
+				"mailingState": "",
+				"mailingZip": "",
+				"mailingCountry": "",
+                "addr1": "",
+                "city": "",
+                "state": "",
+                "zip": "",
+                "email": "michelle@ivesins.com",
+			    "phone": "619-224-5337",
+                "floodZone": "",
+                "buildingCoverage": 0,
+                "contentCoverage": 0,
+                "deductible": 0
+            }
+        }   
+    };
+
+    console.log ('FloodSquareFootGet Start');
+    console.log ('StreetAddress-' + StreetAddress + ",City-" + City + ",State-" + State + ",Zipcode-" + Zipcode);
+
+    let BuildingCoverage = 250000;
+    let ContentCoverage = 15000;
+    let Deductible = 10000;
+
+    FloodQuote.QuoteInfo.application.addr1 = StreetAddress;
+    FloodQuote.QuoteInfo.application.city = City;
+    FloodQuote.QuoteInfo.application.state = State;
+    FloodQuote.QuoteInfo.application.zip = Zipcode;
+    FloodQuote.QuoteInfo.application.buildingCoverage = BuildingCoverage;
+    FloodQuote.QuoteInfo.application.contentCoverage = ContentCoverage;
+    FloodQuote.QuoteInfo.application.deductible = Deductible;
+
+    await floodQuoteGetUpdate(FloodQuote)
+	.then(function(ParamReturn) {
+        FloodQuote = ParamReturn;
+        console.log ('FloodSquareFootGet Mid1 FloodQuote-' + JSON.stringify(FloodQuote.QuoteInfo));
+    })
+    console.log ('FloodSquareFootGet End');
+    return FloodQuote;
+}
+
+export async function FloodPremiumGetUpdate(DwellingAmount, PersonalProperty, QuoteObject) {
+    var FloodQuote;
+    var BuildingCoverage;
+    var Deductible;
+
+    console.log ('FloodPremiumGetUpdate Start');
+    if ((DwellingAmount == 0) || (DwellingAmount > 250000)) {
+        BuildingCoverage = 250000
+    } else {
+        BuildingCoverage = DwellingAmount
+    }
+    PersonalProperty = 15000;
+    Deductible = 10000;
+
+    if (QuoteObject.QuoteInfo.application.firstName == "") {
+        QuoteObject.QuoteInfo.application.firstName = "Ives"
+    }
+    if (QuoteObject.QuoteInfo.application.lastName == "") {
+        QuoteObject.QuoteInfo.application.lastName = "Insurance"
+    }
+    if (QuoteObject.QuoteInfo.application.mailingAddr1 == "") {
+        QuoteObject.QuoteInfo.application.mailingAddr1 = "2150 Chatsworth Blvd"
+    }
+    if (QuoteObject.QuoteInfo.application.mailingCity == "") {
+        QuoteObject.QuoteInfo.application.mailingCity = "San Diego"
+    }
+    if (QuoteObject.QuoteInfo.application.mailingState == "") {
+        QuoteObject.QuoteInfo.application.mailingState = "CA"
+    }
+    if (QuoteObject.QuoteInfo.application.mailingZip == "") {
+        QuoteObject.QuoteInfo.application.mailingZip = "92107"
+    }
+    if (QuoteObject.QuoteInfo.application.email == "") {
+        QuoteObject.QuoteInfo.application.email = "michelle@ivesins.com"
+    }
+    if (QuoteObject.QuoteInfo.application.phone == "") {
+        QuoteObject.QuoteInfo.application.phone = "619-224-5337"
+    }    
+    console.log("FloodPremiumGetUpdate AddressInfo BuildingCoverage-" + BuildingCoverage + ", PersonalProperty-" + PersonalProperty + ", Deductible-" + Deductible);
+    QuoteObject.QuoteInfo.application.constructionType = "wood";
+    QuoteObject.QuoteInfo.application.propertyType = "rentalOwner";
+    QuoteObject.QuoteInfo.application.buildingCoverage = BuildingCoverage;
+    QuoteObject.QuoteInfo.application.contentCoverage = PersonalProperty;
+    QuoteObject.QuoteInfo.application.deductible = Deductible;
+
+    await floodQuoteGetUpdate(QuoteObject)
+	.then(function(ParamReturn) {
+        FloodQuote = ParamReturn;
+        //console.log("FloodPremiumGetUpdate TotalPremium-" + FloodQuote.QuoteInfo.policy.totalPremium)
+    })
+    .catch(error => console.log('FloodPremiumGetUpdate  Parm Error-'+error));
+
+    console.log ('FloodPremiumGetUpdate End');
+    return FloodQuote;
+}
+
+export async function MYNDDatabaseFunction() {
+
+    console.log ('MYNDDatabaseFunction Start');
+
+    // Event to update values in the database
+	wixData.query("EstimatorInsuranceRates")
+	.find()
+	.then( (QueryResults) => {
+		let TotalCount = QueryResults.totalCount;
+		let AllItems = QueryResults.items
+        
+        console.log ('MDBF Total Count-' + TotalCount);
+
+        var RecordCounter = 0;
+		AllItems.forEach((RateRecord) => {
+            RecordCounter = RecordCounter + 1;
+            let RecordRemainder = RecordCounter % 100;
+            if (RecordRemainder == 0) {
+                console.log ('MDBF Record Count-' + RecordCounter);
+            }
+			RateRecord.iSInstitutional = "No";
+			RateRecord.iSIndividual = "Yes";
+			wixData.update("EstimatorInsuranceRates", RateRecord);
+		})
+	})
+    console.log ('MYNDDatabaseFunction End');
+}
+
+export async function PolicyBindLog(SaveData) {
+    var item;
+    var results;
+    
+    item = '';
+    results = '';
+    console.log ('PolicyBindLog Start');
+    console.log ('PolicyBindLog Bind Record: Log: ' + SaveData.BrokerInformation.BrokerName + ' PropertyName: ' + SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.Address + ' TotalAmount: ' + SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.TotalAmount);
+    const BindData = {
+        "bIBrokerName": SaveData.BrokerInformation.BrokerName,
+    	"bIMailingAddress": SaveData.BrokerInformation.MailingAddress,
+    	"bIMailingCity": SaveData.BrokerInformation.MailingCity,
+    	"bIMailingState": SaveData.BrokerInformation.MailingState,
+    	"bIMailingZipcode": SaveData.BrokerInformation.MailingZipcode,
+    	"bIPhoneNumber": SaveData.BrokerInformation.PhoneNumber,
+    	"bIEmailAddress": SaveData.BrokerInformation.EmailAddress,
+    	"bIAgentNumber":  SaveData.BrokerInformation.AgentNumber,
+
+        "iIFirstName": SaveData.InsuranceRequest.Insured.FirstName,
+		"iILastName": SaveData.InsuranceRequest.Insured.LastName,
+		"iICompanyName": SaveData.InsuranceRequest.Insured.CompanyName,
+		"iIMailingAddress": SaveData.InsuranceRequest.Insured.MailingAddress,
+		"iIMailingCity": SaveData.InsuranceRequest.Insured.MailingCity,
+		"iIMailingState": SaveData.InsuranceRequest.Insured.MailingState,
+		"iIMailingZipcode": SaveData.InsuranceRequest.Insured.MailingZipcode,
+		"iIPhoneNumber": SaveData.InsuranceRequest.Insured.PhoneNumber,
+		"iIEmailAddress": SaveData.InsuranceRequest.Insured.EmailAddress,
+
+        "qDQuoteRequestorDate": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.QuoteRequestorDate,
+		"qDQuoteRequestorEmail": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.QuoteRequestorEmail,
+        "qDProposalRequestorDate": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.ProposalRequestorDate,
+		"qDProposalRequestorEmail": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.ProposalRequestorEmail,
+        "qDSelectNumber": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.SelectNumber,
+        "qDSelectRequestorDate": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.SelectRequestorDate,
+		"qDSelectRequestorEmail": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.SelectRequestorEmail,
+        "qDBindRequestorDate": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.BindRequestorDate,
+		"qDBindRequestorEmail": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.BindRequestorEmail,
+        "qDEvidenceRequestorDate": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.EvidenceRequestorDate,
+		"qDEvidenceRequestorEmail": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.EvidenceRequestorEmail,
+        "qDInsuranceCompany":  SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.InsuranceCompany,
+        "qDInsuranceCompanyNaic":  SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.InsuranceCompanyNaic,
+		"qDMailingAddress": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.MailingAddress,
+    	"qDMailingCity": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.MailingCity,
+    	"qDMailingState": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.MailingState,
+    	"qDMailingZipcode": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.MailingZipcode,
+    	"qDProductName": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.ProductName,
+        "qDRateStatus":  SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.RateStatus,
+        "qDRateStatusReason": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.RateStatusReason,
+        "iSInstitutional": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.IsInstitutional,
+        "iSIndividual": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.IsIndividual,
+		"qDEffectiveDate": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.EffectiveDate,
+    	"qDExpirationDate": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.ExpirationDate,
+	    "qDPolicyNumber": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.PolicyNumber,
+    	"qDDeductibleAmount": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.DeductibleAmount,
+		"qDUmbrellaCoverage": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.UmbrellaCoverage,
+		"qDBusinessPersonalProperty": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.BusinessPersonalProperty,
+		"qDAnnualRentCoverage": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.AnnualRentCoverage,
+		"qDWaterBackupCoverage": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.WaterBackupCoverage,
+		"qDFloodCoverage":  SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.FloodCoverage,
+		"qDEarthquakeCoverage":  SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.EarthquakeCoverage,
+        "qDWindHailCoverage":  SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.WindHailCoverage,
+        "qDNamedStormDeductible":  SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.NamedStormDeductible,
+        "qDPropertyRate": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.PropertyRate,
+        "qDCoverageA": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.CoverageA,
+        "qDCoverageB": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.CoverageB,
+        "qDPropertyPremiumAmount": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.PropertyPremium,
+        "qDOtherPremiumAmount": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.OtherPremium,
+        "qDLiabilityPremiumAmount": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.LiabilityPremium,
+		"qDTotalPremiumAmount": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.TotalPremium,
+        "qDTaxesAmount": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.TaxesAmount,
+        "qDFeesAmount": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.FeesAmount,
+        "qDBrokerFeeAmount": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.BrokerFeeAmount,
+		"qDTotalAmount": SaveData.InsuranceRequest.InsuranceQuote.QuoteDetail.TotalAmount,
+
+        "pDAddress": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.Address,
+        "pDCity": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.City,
+        "pDState": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.State,
+		"pDZipcode": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.Zipcode,
+		"pDCounty": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.County,
+        "pDDwellingAmount": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.DwellingAmount,
+		"pDAdditionalBuildings": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.AdditionalBuildings,
+		"pDPersonalProperty": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.PersonalProperty,
+		"pDMonthlyRent": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.MonthlyRent,
+        "pDAnnualRent": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.AnnualRent,
+		"pDTotalInsuredValue": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.TotalInsuredValue,
+		"pDOwnershipEntity": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.OwnershipEntity,
+		"pDYearBuilt": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.YearBuilt,
+		"pDNumberUnits": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.NumberUnits,
+		"pDNumberBedrooms": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.NumberBedrooms,
+		"pDNumberBaths": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.NumberBaths,
+		"pDNumberStories": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.NumberStories,
+		"pDSquareFootage": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.SquareFootage,
+		"pDPricePerSqFt": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.PricePerSqFt,
+		"pDConstructionType": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.ConstructionType,
+		"pDWiringType": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.WiringType,
+		"pDCircuitBreakers": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.CircuitBreakers,
+		"pDFuses": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.Fuses,
+		"pDRoofType": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.RoofType,
+		"pDYearRoofUpdated": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.YearRoofUpdated,
+		"pDYearPropertyUpdated": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.YearPropertyUpdated,
+		"pDGarageType": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.GarageType,
+		"pDPool": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.Pool,
+		"pDNumberPools": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.NumberPools,
+		"pDPoolFencedGated": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.PoolFencedGated,
+		"pDDivingBoard": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.DivingBoard,
+	    "pDFireplace": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.Fireplace,
+		"pDSprinklered": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.Sprinklered,
+		"pDGasSmokeDetectors": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.GasSmokeDetectors,
+		"pDBurglarAlarm": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.BurglarAlarm,
+		"pDSeasonalProperty": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.SeasonalProperty,
+		"pDCommercialExposure": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.CommercialExposure,
+		"pDPriorClaims": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.PriorClaims,
+		"pDClaimDescription": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.ClaimDescription,
+		"pDCurrentInsuranceCompany": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.CurrentInsuranceCompany,
+		"pDCurrentInsurancePremium": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.CurrentInsurancePremium,
+		"pDLoanNumber": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.LoanNumber,
+		"pDAI1Clause1": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.AI1Clause1,
+		"pDAI1Clause2": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.AI1Clause2,
+		"pDAI1StreetAddress": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.AI1StreetAddress,
+		"pDAI1City": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.AI1City,
+		"pDAI1State": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.AI1State,
+		"pDAI1Zipcode": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.AI1Zipcode,
+        "pDInitialPayment": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.InitialPayment,
+        "pDRenewalPayment": SaveData.InsuranceRequest.InsuranceQuote.PropertyDetail.RenewalPayment
+    }
+
+    wixData.insert("EstimatorBinds", BindData)
+        .then(function(ParamReturn) {
+            let item = ParamReturn
+        })
+        .catch( (err) => {
+            let errorMsg = err;
+        });
+
+    console.log ('PolicyBindLog End Return Item:' + item);
+    return item;
+}
+
+export async function PolicyBindRequest(BindObject, CheckData) {
+    var BindStatus;
+    var BindStatusReason;
+    var InputParametersOK;
+
+    InputParametersOK = "Y";
+    BindStatus = "";
+    BindStatusReason = "";
+
+    console.log ('PolicyBindRequest Start');
+    if (CheckData == 'Y') {
+        if (BindObject.InsuranceRequest.Insured.FirstName == '') {
+            BindStatus = "Error";
+            BindStatusReason = "Client First Name MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('PolicyBindRequest Client First Name Bad - First Name:' + BindObject.InsuredRequest.Insured.FirstName);
+        }
+        else if (BindObject.InsuranceRequest.Insured.LastName == '') {
+            BindStatus = "Error";
+            BindStatusReason = "Client Last Name MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('PolicyBindRequest Client Last Name Bad');
+        }
+        else if ((BindObject.InsuranceRequest.Insured.MailingAddress == '') || (BindObject.InsuranceRequest.Insured.MailingCity == '') || (BindObject.InsuranceRequest.Insured.MailingState == '') || (BindObject.InsuranceRequest.Insured.MailingZipcode == '')) {
+            BindStatus = "Error";
+            BindStatusReason = "Client Mailing Address MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('PolicyBindRequest Client Mailing Address Bad');
+        }
+        else if (BindObject.InsuranceRequest.Insured.EmailAddress == '') {
+            BindStatus = "Error";
+            BindStatusReason = "Client Email Address MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('PolicyBindRequest Client EMail Address Bad');
+        }
+        else if (BindObject.InsuranceRequest.Insured.PhoneNumber == '') {
+            BindStatus = "Error";
+            BindStatusReason = "Client Phone Number MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('PolicyBindRequest Client Phone Number Bad');
+        }
+        else if ((BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.Address == '') || (BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.City == '') || (BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.State == '') || (BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.Zipcode == '')) {
+            BindStatus = "Error";
+            BindStatusReason = "Client Property Address MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('PolicyBindRequest Property Address Bad');
+        }
+        else if (BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.EffectiveDate == '') {
+            BindStatus = "Error";
+            BindStatusReason = "Quote Effective Date MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('PolicyBindRequest Effective Date Bad');
+        }
+        else if (BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.ExpirationDate == '') {
+            BindStatus = "Error";
+            BindStatusReason = "Quote Effective Date MUST Be Complete to Bind the Policy.";
+            InputParametersOK = "N";
+            console.log ('PolicyBindRequest Expiration Date Bad');
+        }
+    }
+    console.log ('PolicyBindRequest Input Parameter OK' + InputParametersOK);
+    if (InputParametersOK == 'Y') {
+        const BindRequest = JSON.stringify(BindObject);
+    
+        console.log ('PolicyBindRequest Send Email Start');
+        const emailResult = await sendEmail ('companymailbox@ivesins.com', 'MYND New Property Bind Request', 'MYND - A new property bind request is contained in the attached JSON file.', 'MYNDBIND', 'MYNDBindRequest.json', BindRequest);
+        
+        BindStatus = emailResult.statusCode
+        console.log ('PolicyBindRequest emailResult:' + emailResult.statusCode)
+
+        const SaveData = {
+            "actionType": "PropertyBind",
+            "actionDate": BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.BindRequestorDate,
+            "actionRequestor": BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.BindRequestorEmail,
+            "propertyName": BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.Address + ' ' + BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.City + ', ' + BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.State + ' ' + BindObject.InsuranceRequest.InsuranceQuote.PropertyDetail.Zipcode,
+            "propertyAmount": BindObject.InsuranceRequest.InsuranceQuote.QuoteDetail.TotalAmount
+        };
+	    PolicyQuoteLog(SaveData)
+			.then(function(ParamReturn) {
+            let QuoteID = ParamReturn;
+        })
+        .catch( (err) => {
+            let errorMsg = err;
+        });
+
+	    PolicyBindLog(BindObject)
+			.then(function(ParamReturn) {
+            let QuoteID = ParamReturn;
+        })
+        .catch( (err) => {
+            let errorMsg = err;
+        });
+
+    }
+
+    const BindResult = {
+        "BindStatus": BindStatus,
+        "BindStatusReason":BindStatusReason
+    }
+    console.log ('PolicyBindRequest End BindStatus:' + BindResult.BindStatus + ' BindStatusReason:' + BindResult.BindStatusReason)
+    return BindResult
+}
+
+
+export async function PolicyEvidenceGet(EvidenceObject, IncludeFlood) {
+    var ProposalTemplateID;
+
+    console.log ('PolicyEvidenceGet Start');
+
+    const SaveData = {
+        "actionType": "Evidence",
+        "actionDate": EvidenceObject.InsuranceRequest.InsuranceQuote.QuoteDetail.EvidenceRequestorDate,
+        "actionRequestor": EvidenceObject.InsuranceRequest.InsuranceQuote.QuoteDetail.EvidenceRequestorEmail,
+        "propertyName": EvidenceObject.InsuranceRequest.InsuranceQuote.PropertyDetail.Address + ' ' + EvidenceObject.InsuranceRequest.InsuranceQuote.PropertyDetail.City + ', ' + EvidenceObject.InsuranceRequest.InsuranceQuote.PropertyDetail.State + ' ' + EvidenceObject.InsuranceRequest.InsuranceQuote.PropertyDetail.Zipcode,
+        "propertyAmount": EvidenceObject.InsuranceRequest.InsuranceQuote.QuoteDetail.TotalAmount
+    }
+
+	PolicyQuoteLog(SaveData)
+			.then(function(ParamReturn) {
+        let QuoteID = ParamReturn;
+    })
+    .catch( (err) => {
+        let errorMsg = err;
+    });
+    console.log ('PolicyEvidenceGet End');
+    if (IncludeFlood == "Y") {
+        ProposalTemplateID = "470719";
+    } else {
+        ProposalTemplateID = "470679";
+    }
+    return getPDFFile(ProposalTemplateID, EvidenceObject);
+}
+
+export async function PolicyNumberGet(RecordNumber) {
+    const PolicyNumberLength = 8;
+    var FillerZerosString = '';
+    var PolicyNumber = '';
+
+    //let RecordNumber = RecordNumber.replaceAll(',','');
+    console.log('PolicyNumberGet Start  Record Number-' + RecordNumber )
+    if (RecordNumber !== '') {
+        const RecordNumberLength = RecordNumber.length;
+        const FillerZerosLength = PolicyNumberLength - RecordNumberLength;
+        for (let i = 0; i < FillerZerosLength; i++) {
+            FillerZerosString = FillerZerosString + '0';
+        }
+        PolicyNumber = 'AN' + FillerZerosString + RecordNumber;
+     }
+    console.log('PNG Policy Number-' + PolicyNumber )
+    const PolicyNumberResult = {
+        "PolicyNumber": PolicyNumber,
+    }
+    console.log('PolicyNumberGet End')
+    return PolicyNumberResult;
+}
+
+export async function PolicyPremiumCalculate(ProductName, Zipcode, UnitCount, PropertySqFt, DwellingAmount, AdditionalBuildingAmount, BusinessPersonalProperty, AnnualRent, IsInstitutional, IsWindHail, RequestorEmail) {
+    const PropertySqFtMin = 100;
+    const PropertySqFtMax = 15000;
+
+    var RateStatus;
+    var RateStatusReason;
+    var PropertyPremiumAmount;
+    var TRIAPremiumAmount;
+    var TotalPropertyPremiumAmount;
+    var LiabilityPremiumAmount;
+    var TotalPremiumAmount;
+    var TaxesFeesAmount;
+    var BrokerFeeAmount;
+    var TotalAmount;
+    var PropertyRate;
+    var WindHailValue;
+    var ResultRecord;
+    var ResultDataSet;
+    var InputParametersOK;
+    var InstitutionalIndividualFieldName = "";
+
+    ResultDataSet = [];
+    console.log ('PolicyPremiumCalculate  Start');
+    console.log ('PolicyPremiumCalculate  Zipcode-' + Zipcode + ', UnitCount-' + UnitCount + ', Square Footage-' + PropertySqFt + ', DwellingAmount-' + DwellingAmount + ', AdditionalBuildingAmount-' + AdditionalBuildingAmount + ', BusinessPersonalProperty-' + BusinessPersonalProperty + ', AnnualRent-' + AnnualRent);
+    console.log ('PolicyPremiumCalculate  IsInstitutional-'+IsInstitutional + 'IsWindHail-' + IsWindHail);
+
+    const QuoteDate = new Date().toLocaleDateString();
+    
+    var InnovativeRateResult = {
+            "zipcode": Zipcode,
+            "city": '',
+            "county": '',
+            "state": '',
+            "iSInstitutional": '',
+            "iSIndividual": '',
+            "insuranceCompany": '',
+            "insuranceCompanyNaic": '',
+            "rateStatus": 'Error',
+            "rateStatusReason": '',
+            "deductibleAmount": '',
+            "deductibleNamedStorm": '',
+            "dwellingAmountInTiv": '',
+            "additionalBuildingAmountInTiv": '',
+            "businessPersonalPropertyInTiv": '',
+            "annualRentInTiv": '',
+            "generalLiabilityRate": '0.0000',
+            "additionalLiabilityRatio": '0',
+            "propertyRate1": '0.0000',
+            "propertyRate2": '0.0000',
+            "triaRate": "0",
+            "taxRate": "0",
+            "brokerFee": "0",
+            "umbrellaCoverage": '',
+            "businessPersonalPropertyCoverage":'',
+            "annualRentCoverage": '',
+            "waterBackupCoverage": '',
+            "floodCoverage": '',
+            "earthquakeCoverage": '',
+            "windHailCoverage1": '',
+            "windHailCoverage2": ''
+        }
+
+    var MinPriceResult = {
+        "Title": '',
+        "propertyZipcode": '',
+        "city": '',
+        "county": '',
+        "state": '',
+        "materialFactor": 0,
+        "laborFactor": 0,
+        "equipmentFactor": 0,
+        "weightedFactor": 0,
+        "minPriceSqFt": 0 
+    }
+
+
+    InputParametersOK = 'Y'
+    if ((Zipcode == '') || isNaN(Zipcode)) {
+        RateStatus = 'Error';
+        RateStatusReason = 'Zipcode is NOT Correct.';
+        InputParametersOK = 'N';
+    } else if ((UnitCount == '') || isNaN(UnitCount) || (UnitCount < 1) || (UnitCount > 8)) {
+        RateStatus = 'Error';
+        RateStatusReason = 'Unit Count is NOT Correct, Unit Count MUST Be Between 1 and 8.';
+        InputParametersOK = 'N';
+    } else if ((PropertySqFt == '') || isNaN(PropertySqFt) || (PropertySqFt < PropertySqFtMin) || (PropertySqFt > PropertySqFtMax)) {
+        RateStatus = 'Error';
+        RateStatusReason = 'Property Square Footage is NOT Correct, Square Footage MUST Be Between ' + PropertySqFtMin + ' and ' + PropertySqFtMax + '.';
+        InputParametersOK = 'N';
+    } else if ((DwellingAmount == '') || isNaN(DwellingAmount)) {
+        RateStatus = 'Error';
+        RateStatusReason = 'Dwelling Amount is Incorrect.';
+        InputParametersOK = 'N';
+    } else if ((AdditionalBuildingAmount == '') || isNaN(AdditionalBuildingAmount)) {
+        RateStatus = 'Error';
+        RateStatusReason = 'Additional Building Amount is Incorrect.';
+        InputParametersOK = 'N';
+    } else if ((BusinessPersonalProperty == '') || isNaN(BusinessPersonalProperty)) {
+        RateStatus = 'Error';
+        RateStatusReason = 'Building Personal Property Amount is Incorrect.';
+        InputParametersOK = 'N';
+    } else if ((AnnualRent == '') || isNaN(AnnualRent)) {
+        RateStatus = 'Error';
+        RateStatusReason = 'Monthly Rent Amount is Incorrect.';
+        InputParametersOK = 'N';
+    } else if (RequestorEmail == '') {
+        RateStatus = 'Error';
+        RateStatusReason = 'Requestor Email MUST Be Set.';
+        InputParametersOK = 'N';
+    } else if (AnnualRent <=  (Number(DwellingAmount) * .05) - .01) {
+        RateStatus = 'Error';
+        RateStatusReason = 'Annualized Rent MUST Be Greater Than 5% of Dwelling Amount.';
+        InputParametersOK = 'N';
+    } else if (AnnualRent >  (Number(DwellingAmount) * .55) + .01) {
+        RateStatus = 'Error';
+        RateStatusReason = 'Annualized Rent MUST Be Less Than 30% of Dwelling Amount.';
+        InputParametersOK = 'N';
+    }
+
+    var PricePerSqFtMin = 100
+    var PricePerSqFtMax = 700;
+    if (InputParametersOK == "Y") {
+        const MinPriceQueryResult = await wixData.query("EstimatorZipcodeCost").eq("propertyZipcode", Zipcode).find();
+        
+        console.log('GP Min Price Result-' + MinPriceQueryResult.items.length )
+        
+        if (MinPriceQueryResult.items.length > 0) {
+            MinPriceResult = MinPriceQueryResult.items[0];
+            PricePerSqFtMin = MinPriceResult.minPriceSqFt;           
+        }
+    }
+    console.log('GP Min Price Per Sqft Min-' + PricePerSqFtMin )
+    console.log('GP Min Price Per Sqft Max-' + PricePerSqFtMax )
+
+	if (InputParametersOK == "Y") {
+		let PricePerSqFt = Number(DwellingAmount) / Number(PropertySqFt);
+		console.log("PolicyPremiumCalculate PricePerSqFt-"+ PricePerSqFt)
+		if (PricePerSqFt < PricePerSqFtMin) {
+            RateStatus = 'Error';
+            RateStatusReason = 'Price Per Square Foot is Too Low - MUST Be Above ' + PricePerSqFtMin + '.';
+            InputParametersOK = 'N';
+		} else if (PricePerSqFt > PricePerSqFtMax) {
+            RateStatus = 'Error';
+            RateStatusReason = 'Price Per Square Foot is Too High - MUST Be Below ' + PricePerSqFtMax + '.';
+            InputParametersOK = 'N';
+		}
+	}
+
+    console.log('PolicyPremiumCalculate Zipcode-' + Zipcode + ', Input Parameter OK-'+ InputParametersOK)
+    
+    if (InputParametersOK == 'Y') {
+        if (IsInstitutional == true) {
+            InstitutionalIndividualFieldName = "iSInstitutional";
+        } else {
+            InstitutionalIndividualFieldName = "iSIndividual"
+        }
+
+        console.log('PolicyPremiumCalculate FieldName-' + InstitutionalIndividualFieldName + 'Wind Hail-' + IsWindHail);
+
+        const QueryResult = await wixData.query("EstimatorInsuranceRates").eq(InstitutionalIndividualFieldName, "Yes").eq("zipcode", Zipcode).descending('propertyRate1').find();
+
+        console.log('GP Query Result-' + QueryResult.items.length )
+        if (QueryResult.items.length > 0) {
+
+            for (var i=0; i < QueryResult.items.length; i++) {
+            
+                InnovativeRateResult = QueryResult.items[i];
+
+                const TRIARate = Number(InnovativeRateResult.triaRate);
+                const TaxRate = Number(InnovativeRateResult.taxRate);
+                const BrokerFee = Number(InnovativeRateResult.brokerFee);
+                if (IsWindHail == true) {
+                    PropertyRate = Number(InnovativeRateResult.propertyRate1)
+                    WindHailValue = InnovativeRateResult.windHailCoverage1;
+                } else {
+                    PropertyRate = Number(InnovativeRateResult.propertyRate2)
+                    WindHailValue = InnovativeRateResult.windHailCoverage2;
+                }
+
+                console.log('PolicyPremiumCalculate  Deductible Amount:'+ InnovativeRateResult.deductibleAmount)
+                console.log('PolicyPremiumCalculate  DwellingInTIV:' + InnovativeRateResult.dwellingAmountInTiv + ', AdditionalBuildingAmountInTIV:' + InnovativeRateResult.additionalBuildingAmountInTiv + ', BusinessPersonalPropertyInTIV:' + InnovativeRateResult.businessPersonalPropertyInTiv + ', AnnualRentInTIV:' + InnovativeRateResult.annualRentInTiv);
+                var TIV = 0;
+                var CalcTIV = 0;
+                TIV = TIV + Number(DwellingAmount);
+                if (InnovativeRateResult.dwellingAmountInTiv == 'Yes') {
+                    CalcTIV = CalcTIV + Number(DwellingAmount);
+                }
+
+                TIV = TIV + Number(AdditionalBuildingAmount);
+                if (InnovativeRateResult.additionalBuildingAmountInTiv == 'Yes') {
+                    CalcTIV = CalcTIV + Number(AdditionalBuildingAmount);
+                }
+
+                BusinessPersonalProperty = 5000;
+                TIV = TIV + Number(BusinessPersonalProperty);
+                if (InnovativeRateResult.businessPersonalPropertyInTiv == 'Yes') {
+                    CalcTIV = CalcTIV + Number(BusinessPersonalProperty);
+                }
+
+                TIV = TIV + Number(AnnualRent);
+                if (InnovativeRateResult.annualRentInTiv == 'Yes') {
+                    CalcTIV = CalcTIV + Number(AnnualRent);
+                }
+                
+                console.log('PolicyPremiumCalculate CalcTIV-' + CalcTIV + ',TIV-' + TIV+ ', TRIA Rate-' + TRIARate + ', TaxRate-' + TaxRate + ', BrokerFee-' + BrokerFee);
+
+                console.log('PolicyPremiumCalculate  Rate Status-' + InnovativeRateResult.rateStatus + ', Rate Status Reason-' + InnovativeRateResult.rateStatusReason + ', Deductible Amount-' + InnovativeRateResult.deductibleAmount + ', Property Rate-' + InnovativeRateResult.propertyRate )
+                
+                if (InnovativeRateResult.rateStatus == 'Quoted') {
+                    PropertyPremiumAmount = Number((CalcTIV / 100 * parseFloat(PropertyRate)).toFixed(0));
+                    LiabilityPremiumAmount = Number((parseFloat(InnovativeRateResult.generalLiabilityRate) + ((Number(UnitCount)-1) * parseFloat(InnovativeRateResult.generalLiabilityRate) * parseFloat(InnovativeRateResult.additionalLiabilityRatio))).toFixed(2));
+
+                    /* LiabilityPremium = Number((Number(UnitCount) * parseFloat(InnovativeRateResult.generalLiabilityRate)).toFixed(2)); */
+                    TRIAPremiumAmount = Number(((PropertyPremiumAmount + LiabilityPremiumAmount) * TRIARate).toFixed(0));
+                    TotalPropertyPremiumAmount = PropertyPremiumAmount + TRIAPremiumAmount;
+
+                    console.log ('PolicyPremiumCalculate PropertyPremium-' + PropertyPremiumAmount+ ', LiabilityPremium -' + LiabilityPremiumAmount + ', TRIAPremium -' + TRIAPremiumAmount);
+            
+                    TotalPremiumAmount = Number((TotalPropertyPremiumAmount + LiabilityPremiumAmount).toFixed(0));
+                    TaxesFeesAmount = (TotalPremiumAmount * TaxRate).toFixed(2);
+                    BrokerFeeAmount = BrokerFee.toFixed(2);
+                    TotalAmount = (Number(TotalPremiumAmount) + Number(TaxesFeesAmount) + Number(BrokerFeeAmount)).toFixed(2);
+
+                } else if (InnovativeRateResult.rateStatus == 'Declined') {
+                    PropertyPremiumAmount = 0;
+                    TRIAPremiumAmount = 0;
+                    TotalPropertyPremiumAmount = 0;
+                    LiabilityPremiumAmount = 0;
+                    TotalPremiumAmount = 0;
+                    TaxesFeesAmount = 0;
+                    BrokerFeeAmount = 0;
+                    TotalAmount = 0;
+                }
+
+                console.log ('PolicyPremiumCalculate DeductibleAmount-' + InnovativeRateResult.deductibleAmount + ', NamedStormDeductible-' + InnovativeRateResult.deductibleNamedStorm);
+                console.log ('PolicyPremiumCalculate BusinessPersonalPropertyCoverage-' + InnovativeRateResult.businessPersonalPropertyCoverage + ', AnnualRentCoverage-' + InnovativeRateResult.annualRentCoverage + ', WaterBackupCoverage-' + InnovativeRateResult.waterBackupCoverage + ', FloodCoverage-' + InnovativeRateResult.floodCoverage);
+                console.log ('PolicyPremiumCalculate EarthquakeCoverage-' + InnovativeRateResult.earthquakeCoverage + ', WindHailCoverage-' + InnovativeRateResult.windHailCoverage);
+                console.log ('PolicyPremiumCalculate TotalPremiumAmount-' + TotalPremiumAmount+ ', TaxesFeesAmount-' + TaxesFeesAmount + ', BrokerFeeAmount-' + BrokerFeeAmount + ', TotalAmount-' + TotalAmount);
+
+                if (ProductName == 'FULLX') {
+                    ResultRecord = {
+                        "QuoteRequestorEmail": RequestorEmail,
+                        "QuoteRequestorDate": QuoteDate,
+                        "Zipcode": Zipcode,
+                        "City": InnovativeRateResult.city,
+                        "County": InnovativeRateResult.county,
+                        "State": InnovativeRateResult.state,
+                        "InsuranceCompany": InnovativeRateResult.insuranceCompany,
+                        "InsuranceCompanyNaic": InnovativeRateResult.insuranceCompanyNaic,
+                        "RateStatus": InnovativeRateResult.rateStatus,
+                        "RateStatusReason": InnovativeRateResult.rateStatusReason,
+                        "DeductibleAmount": InnovativeRateResult.deductibleAmount,
+                        "UmbrellaCoverage": InnovativeRateResult.umbrellaCoverage,
+                        "BusinessPersonalPropertyCoverage": BusinessPersonalProperty,
+                        "AnnualRentCoverage": InnovativeRateResult.annualRentCoverage,
+                        "WaterBackupCoverage": InnovativeRateResult.waterBackupCoverage,
+                        "FloodCoverage": InnovativeRateResult.floodCoverage,
+                        "EarthquakeCoverage": InnovativeRateResult.earthquakeCoverage,
+                        "WindHailCoverage": WindHailValue,
+                        "NamedStormDeductible": InnovativeRateResult.deductibleNamedStorm,
+                        "TIV": TIV.toFixed(2),
+                        "PropertyRate": PropertyRate,
+                        "PropertyPremiumAmount": TotalPropertyPremiumAmount,
+                        "LiabilityPremiumAmount": LiabilityPremiumAmount,
+                        "TotalPremiumAmount": TotalPremiumAmount,
+                        "TaxesFeesAmount": TaxesFeesAmount,
+                        "BrokerFeeAmount": BrokerFeeAmount,
+                        "TotalAmount": TotalAmount
+                    }
+                }
+                else if (ProductName == 'MYNDM') {
+                    ResultRecord = {
+                        "QuoteRequestorEmail": RequestorEmail,
+                        "QuoteRequestorDate": QuoteDate,
+                        "Zipcode": Zipcode,
+                        "City": InnovativeRateResult.city,
+                        "County": InnovativeRateResult.county,
+                        "State": InnovativeRateResult.state,
+                        "InsuranceCompany": InnovativeRateResult.insuranceCompany,
+                        "InsuranceCompanyNaic": InnovativeRateResult.insuranceCompanyNaic,
+                        "RateStatus": InnovativeRateResult.rateStatus,
+                        "RateStatusReason": InnovativeRateResult.rateStatusReason,
+                        "DeductibleAmount": InnovativeRateResult.deductibleAmount,
+                        "UmbrellaCoverage": InnovativeRateResult.umbrellaCoverage,
+                        "BusinessPersonalPropertyCoverage": BusinessPersonalProperty,
+                        "AnnualRentCoverage": InnovativeRateResult.annualRentCoverage,
+                        "WaterBackupCoverage": InnovativeRateResult.waterBackupCoverage,
+                        "FloodCoverage": InnovativeRateResult.floodCoverage,
+                        "EarthquakeCoverage": InnovativeRateResult.earthquakeCoverage,
+                        "WindHailCoverage": InnovativeRateResult.windHailCoverage,
+                        "NamedStormDeductible": InnovativeRateResult.deductibleNamedStorm,
+                        "TIV": TIV.toFixed(2),
+                        "TotalAmount": TotalAmount
+                    }
+                }
+                ResultDataSet.push(ResultRecord)
+            }
+            
+            const SaveData = {
+                "actionType": "Quote",
+                "actionDate": QuoteDate,
+                "actionRequestor": RequestorEmail,
+                "propertyName": Zipcode,
+                "propertyAmount": ''
+            }
+			PolicyQuoteLog(SaveData)
+			        .then(function(ParamReturn) {
+                let QuoteID = ParamReturn;
+        	})
+        	.catch( (err) => {
+            	let errorMsg = err;
+        	});
+
+        } else {
+            ResultRecord = {
+                "QuoteRequestorEmail": RequestorEmail,
+                "QuoteRequestorDate": QuoteDate,
+                "Zipcode": Zipcode,
+                "City": '',
+                "County": '',
+                "State": '',
+                "InsuranceCompany": '',
+                "InsuranceCompanyNaic": '',
+                "RateStatus": 'Error',
+                "RateStatusReason": 'Zipcode NOT Found.',
+                "DeductibleAmount": '',
+                "UmbrellaCoverage": '',
+                "BusinessPersonalPropertyCoverage": '',
+                "AnnualRentCoverage": '',
+                "WaterBackupCoverage": '',
+                "FloodCoverage": '',
+                "EarthquakeCoverage": '',
+                "WindHailCoverage": '',
+                "NamedStormDeductible": '',
+                "TIV": 0,
+                "PropertyRate": 0,
+                "PropertyPremiumAmount": TotalPropertyPremiumAmount,
+                "LiabilityPremiumAmount": LiabilityPremiumAmount,
+                "TotalPremiumAmount": TotalPremiumAmount,
+                "TaxesFeesAmount": TaxesFeesAmount,
+                "BrokerFeeAmount": BrokerFeeAmount,
+                "TotalAmount": TotalAmount
+            }
+            ResultDataSet.push(ResultRecord)
+        }
+    } else {
+        ResultRecord = {
+            "QuoteRequestorEmail": RequestorEmail,
+            "QuoteRequestorDate": QuoteDate,
+            "Zipcode": Zipcode,
+            "City": '',
+            "County": '',
+            "State": '',
+            "InsuranceCompany": '',
+            "InsuranceCompanyNaic": '',
+            "RateStatus": RateStatus,
+            "RateStatusReason": RateStatusReason,
+            "DeductibleAmount": '',
+            "UmbrellaCoverage": '',
+            "BusinessPersonalPropertyCoverage": '',
+            "AnnualRentCoverage": '',
+            "WaterBackupCoverage": '',
+            "FloodCoverage": '',
+            "EarthquakeCoverage": '',
+            "WindHailCoverage": '',
+            "NamedStormDeductible": '',
+            "TIV": 0,
+            "PropertyRate": 0,
+            "PropertyPremiumAmount": TotalPropertyPremiumAmount,
+            "LiabilityPremiumAmount": LiabilityPremiumAmount,
+            "TotalPremiumAmount": TotalPremiumAmount,
+            "TaxesFeesAmount": TaxesFeesAmount,
+            "BrokerFeeAmount": BrokerFeeAmount,
+            "TotalAmount": TotalAmount
+        }
+        ResultDataSet.push(ResultRecord)
+    }
+    console.log ('PolicyPremiumCalculate  End');
+    return ResultDataSet;
+}
+
+export async function PolicyProposalGet(ProposalObject, IncludeFlood) {
+    var ProposalTemplateID;
+
+    console.log ('PolicyProposalGet Start');
+    
+    const ProposalDate = new Date().toLocaleDateString();
+    
+    const SaveData = {
+        "actionType": "Proposal",
+        "actionDate": ProposalDate,
+        "actionRequestor": ProposalObject.InsuranceRequest.InsuranceQuote.QuoteDetail.RequestorEmail,
+        "propertyName": ProposalObject.InsuranceRequest.InsuranceQuote.PropertyDetail.PropertyAddress,
+        "propertyAmount": ''
+    }
+	PolicyQuoteLog(SaveData)
+			.then(function(ParamReturn) {
+        let QuoteID = ParamReturn;
+    })
+    .catch( (err) => {
+        let errorMsg = err;
+    });
+
+    const PolicyCount = ProposalObject.InsuranceRequest.InsuranceQuote.PolicyDetail.PolicyCount;
+    const QuoteCount = ProposalObject.InsuranceRequest.InsuranceQuote.QuoteDetail.QuoteCount;
+    console.log ('PolicyProposalGet Policy Count-' + PolicyCount + ', QuoteCount-' + QuoteCount);
+    if (IncludeFlood == "Y") {
+        if (PolicyCount == 1) {
+            if (QuoteCount == 1) {
+                ProposalTemplateID = '416549';
+            }
+            else if (QuoteCount == 2) {
+                ProposalTemplateID = '416548';
+            }
+            else {
+                ProposalTemplateID = '927060';
+                //ProposalTemplateID = '470725';  --Old Format
+            }
+        }
+        else {
+            if (QuoteCount == 2) {
+                ProposalTemplateID = '416550';
+            }
+            else {
+                ProposalTemplateID = '416542';
+            }
+        }
+    } else {
+        if (PolicyCount == 1) {
+            if (QuoteCount == 1) {
+                ProposalTemplateID = '416549';
+            }
+            else if (QuoteCount == 2) {
+                ProposalTemplateID = '416548';
+            }
+            else {
+                ProposalTemplateID = '928373';
+                //ProposalTemplateID = '416500';  -- Old Format
+            }
+        }
+        else {
+            if (QuoteCount == 2) {
+                ProposalTemplateID = '416550';
+            }
+            else {
+                ProposalTemplateID = '416542';
+            }
+        }
+    }
+    console.log ('PolicyProposalGet End');
+	return getPDFFile(ProposalTemplateID, ProposalObject);
+}
+
+export async function PolicyQuoteAddUpdate(QuoteSaveID, FormSaveFields) {
+    var SaveItem = {};
+    var TotalRecordCount = '';
+    var NewQuoteSave = {
+        "NewRecordID": '',
+        "RecordNumber": '',
+        "PolicyNumber": ''
+    };
+
+    console.log ('PolicyQuoteAddUpdate Before Insert QuoteSaveID-' + QuoteSaveID)
+    if (QuoteSaveID == '') {
+        console.log ('PolicyQuoteAddUpdate Insert Record')
+        await wixData.insert("EstimatorSave", FormSaveFields)
+            .then(function(ParamReturn) {
+                SaveItem = ParamReturn;
+                NewQuoteSave.NewRecordID = SaveItem._id;
+                console.log ('PolicyQuoteAddUpdate After Insert RecordID-'+ SaveItem._id + ', RecordNumber-' + SaveItem.recordNumber + ', CreateDate-' + SaveItem._createdDate);
+        })
+        .catch( (err) => {
+            let errorMsg = err;
+            console.log('PolicyQuoteAddUpdate Insert Record ERROR-' + errorMsg)
+        });
+        const RecordCreateDate = SaveItem._createdDate;
+        
+        await wixData.query("EstimatorSave").le("_createdDate",RecordCreateDate).find()
+            .then(function(CountReturn) {
+                TotalRecordCount = CountReturn.totalCount.toString();
+                console.log ('PolicyQuoteAddUpdate Get Count RecordID-'+ SaveItem._id + ', RecordCount-' + TotalRecordCount + ', CreateDate-' + SaveItem._createdDate);
+                NewQuoteSave.RecordNumber = TotalRecordCount;
+                SaveItem.recordNumber = TotalRecordCount;
+        });
+		
+        await PolicyNumberGet(TotalRecordCount)
+			.then(function(PolicyNumberReturn) {
+                NewQuoteSave.PolicyNumber = PolicyNumberReturn.PolicyNumber;
+				SaveItem.qDPolicyNumber = PolicyNumberReturn.PolicyNumber;	
+        });
+        console.log("PolicyQuoteAddUpdate After Policy Number Get-" + SaveItem.qDPolicyNumber);
+        await wixData.update("EstimatorSave", SaveItem)
+            .then(function(CountSave) {
+        })
+        .catch ((err) => {
+            let errorMsg = err;
+            console.log('PolicyQuoteAddUpdate Update Record Number ERROR-' + errorMsg)
+
+        })
+
+        console.log("PolicyQuoteAddUpdate After Count Record Inserted ID-" + NewQuoteSave.NewRecordID + ", Record Number-" + NewQuoteSave.RecordNumber + ', Policy Number-'+NewQuoteSave.PolicyNumber);
+    }
+    else {
+        console.log ('PolicyQuoteAddUpdate Update Record')
+        FormSaveFields._id = QuoteSaveID;
+        await wixData.update("EstimatorSave", FormSaveFields)
+            .then(function(ParamReturn) {
+            NewQuoteSave.NewRecordID = ParamReturn._id;
+            NewQuoteSave.RecordNumber = ParamReturn.recordNumber;
+            NewQuoteSave.PolicyNumber = ParamReturn.qDPolicyNumber;
+            console.log("PolicyQuoteAddUpdate After Record Updated ID-" + NewQuoteSave.NewRecordID + ",Record Number-" + NewQuoteSave.RecordNumber + ", PolicyNumber-"+NewQuoteSave.PolicyNumber);
+        })
+        .catch( (err) => {
+            let errorMsg = err;
+            console.log('PolicyQuoteAddUpdate Update Record ERROR-' + errorMsg)
+        });
+    }
+    console.log("PolicyQuoteAddUpdate End-" + NewQuoteSave.NewRecordID + ",Record Number-" + NewQuoteSave.RecordNumber);
+
+    return NewQuoteSave;
+}
+
+export async function PolicyQuoteFind(PropertyAddress) {
+    const QueryResult = await wixData.query("EstimatorSave").contains("pDAddress", PropertyAddress).descending("_createDate").find();
+
+    return QueryResult;
+}
+
+export async function PolicyQuoteLog(SaveData) {
+    var results;
+    
+    results = '';
+
+    console.log ('PolicyQuoteLog Start Action Record: ActionType: ' + SaveData.actionType + ' ActionDate: ' + SaveData.actionDate + ' Requestor: ' + SaveData.actionRequestor + ' PropertyName: ' + SaveData.propertyName + ' PropertyAmount: ' + SaveData.propertyAmount);
+
+    wixData.insert("EstimatorActions", SaveData)
+        .then(function(ParamReturn) {
+            let results = ParamReturn
+        })
+        .catch( (err) => {
+            let errorMsg = err;
+        });
+
+    console.log ('PolicyQuoteLog End  Return Item:' + results);
+    return results;
+}
+
+export async function ReplacementCostCalculation(BuildingType, PropertySqFt, Zipcode) {
+    var InputParametersOK;
+    var ReplacementCostStatus;
+
+    const PropertySqFtMin = 700;
+    const PropertySqFtMax = 5000;
+
+    var GarageSqft;
+    var GarageCostFactor;
+    var HVACCostFactor;
+    var FireplaceAmount;
+    var LowReplacementCost;
+    var HighReplacementCost;
+
+    var ReplacementCostResult = {
+            "ReplacementCostStatus": '',
+            "LowReplacementCost": 0.0,
+            "HighReplacementCost": 0.0
+        }
+    console.log ('ReplacementCostCalculation Start');
+
+    InputParametersOK = 'Y'
+    if ((BuildingType == '') || isNaN(BuildingType) || (BuildingType !== 1)) {
+        ReplacementCostStatus = 'Building Type MUST Be - 1 Single Family Residence.';
+        InputParametersOK = 'N';
+    } else if ((PropertySqFt == '') || isNaN(PropertySqFt) || (PropertySqFt < PropertySqFtMin) || (PropertySqFt > PropertySqFtMax)) {
+        ReplacementCostStatus = 'Property Square Footage is NOT Correct, Square Footage MUST Be Between ' + PropertySqFtMin + ' and ' + PropertySqFtMax + '.';
+        InputParametersOK = 'N';
+    } else if ((Zipcode == '') || isNaN(Zipcode)) {
+        ReplacementCostStatus = 'Zipcode is NOT Correct.';
+        InputParametersOK = 'N';
+    }
+
+    console.log('ReplacementCostCalculation BuildingType-' + BuildingType + ', PropertySqft-' + PropertySqFt + ', Zipcode-' + Zipcode + ', Input Parameter OK-'+ InputParametersOK)
+    
+    if (InputParametersOK == 'Y') {
+
+        const ZipQueryResult = await wixData.query("EstimatorZipcodeCost").eq("propertyZipcode", Zipcode).find();
+
+        console.log('ReplacementCostCalculation Zipcode Query Result-' + ZipQueryResult.items.length )
+        if (ZipQueryResult.items.length > 0) {
+            
+            const ZipcodeRateResult = ZipQueryResult.items[0];
+            const NumPropertySqft = Number(PropertySqFt);
+            const SqftQueryResult = await wixData.query("EstimatorSqftCost")
+                .le("lowPropertySqft", NumPropertySqft)
+                .ge("highPropertySqft", NumPropertySqft)
+                .find();
+            
+            console.log('ReplacementCostCalculation Sqft Query Result-' + SqftQueryResult.items.length )
+            if (SqftQueryResult.items.length > 0) {
+                
+                const LowCostPerSqftRate = SqftQueryResult.items[0].lowCostPerSqft;
+                const HighCostPerSqftRate = SqftQueryResult.items[0].highCostPerSqft;
+
+                console.log('ReplacementCostCalculation Sqft Low Cost Per Sqft-' + LowCostPerSqftRate + ', High Cost Per Sqft-' + HighCostPerSqftRate)
+                
+                const DefaultsQueryResult = await wixData.query("EstimatorRCTDefaults").find();
+                console.log('ReplacementCostCalculation Defaults Query Result-' + DefaultsQueryResult.items.length )
+                if (DefaultsQueryResult.items.length > 0) {
+                    GarageSqft = DefaultsQueryResult.items[0].garageSqft;
+                    GarageCostFactor = DefaultsQueryResult.items[0].garageCostFactor;
+                    HVACCostFactor = DefaultsQueryResult.items[0].hvacCostFactor;
+                    FireplaceAmount = DefaultsQueryResult.items[0].fireplaceAmount;
+                }
+                else {
+                    GarageSqft = 0;
+                    GarageCostFactor = 0.0;
+                    HVACCostFactor = 0.0;
+                    FireplaceAmount = 0.0;
+                }
+                console.log('ReplacementCostCalculation Defaults Garage Sqft-' + GarageSqft + ', Garage Cost Factor-' + GarageCostFactor + ', HVACCostFactor-' + HVACCostFactor + ', FireplaceAmount-' + FireplaceAmount)
+
+                const ReplacementCostExtras = (GarageSqft * GarageCostFactor) + (PropertySqFt * HVACCostFactor) + FireplaceAmount;
+                console.log('ReplacementCostCalculation ReplacementCostExtras-' + ReplacementCostExtras)
+
+                LowReplacementCost = ((PropertySqFt * LowCostPerSqftRate) + ReplacementCostExtras) * (1 + (ZipcodeRateResult.weightedFactor / 100));
+                const CalcLowPriceSqft = LowReplacementCost / PropertySqFt;
+                if (CalcLowPriceSqft < ZipcodeRateResult.minPriceSqFt) {
+                    LowReplacementCost = PropertySqFt * ZipcodeRateResult.minPriceSqFt
+                }
+                
+                HighReplacementCost = ((PropertySqFt * HighCostPerSqftRate) + ReplacementCostExtras) * (1 + (ZipcodeRateResult.weightedFactor / 100));
+                const CalcHighPriceSqft = HighReplacementCost / PropertySqFt;
+                if (CalcHighPriceSqft < ZipcodeRateResult.minPriceSqFt) {
+                    HighReplacementCost = PropertySqFt * ZipcodeRateResult.minPriceSqFt
+                }
+                console.log('ReplacementCostCalculation Sqft LowReplacementCost-' + LowReplacementCost + ', HighReplacementCost-' + HighReplacementCost)
+
+                ReplacementCostResult = {
+                    "ReplacementCostStatus": '',
+                    "LowReplacementCost": LowReplacementCost,
+                    "HighReplacementCost": HighReplacementCost
+                }
+            } else {
+                ReplacementCostResult = {
+                    "ReplacementCostStatus": 'Square Footage Not Found in Replacement Cost Database.',
+                    "LowReplacementCost": 0.0,
+                    "HighReplacementCost": 0.0
+                }
+            }
+        } else {
+            ReplacementCostResult = {
+                "ReplacementCostStatus": 'Zipcode Not Found in Replacement Cost Database.',
+                "LowReplacementCost": 0.0,
+                "HighReplacementCost": 0.0
+            }
+        }
+    } else {
+        ReplacementCostResult = {
+            "ReplacementCostStatus": ReplacementCostStatus,
+            "LowReplacementCost": 0.0,
+            "HighReplacementCost": 0.0
+        }
+    }
+    console.log ('ReplacementCostCalculation end');
+    return ReplacementCostResult;
+}

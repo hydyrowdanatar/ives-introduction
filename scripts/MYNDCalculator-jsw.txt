@@ -1,0 +1,3352 @@
+/*********************************************************************************************************************
+//   BindMessageClear
+//   buttonBindClear_click
+//   buttonBindRequest_click
+//   buttonClearQuote_click
+//   buttonEvidence_click
+//   buttonProposal_click
+//   buttonQuote_click
+//   buttonSelect1_click
+//   buttonSelect2_click
+//   buttonSelect3_click
+//   cleanstring
+//   ClientPropertyClear
+//   ClientPropertyInfoExpandCollapse
+//   ErrorMessageDisplayClear
+//   formatDollarsOnly
+//   formatDollarsCents
+//   formatNumberComma
+//   formFieldsReset
+//   InfoClientEmailAddress_change
+//   InfoClientMailingAddress_change
+//   InfoClientMailingCity_change
+//   InfoClientMailingState_change
+//   InfoClientMailingZipcode_change
+//   InfoClientPhoneNumber_change
+//   InfoClientFirstName_change
+//   InfoClientLastName_change
+//   InfoPropertyAddress_change
+//   PolicyQuoteRestore
+//   PolicyQuoteSave
+//   PremiumResultScreenFieldsSet
+//   PropertyAddtionalBuildingInput_change
+//   PropertyDwellingAmountInput_change
+//   PropertyPricePerSqFtInput_change
+//   PropertyRentLimitInput_change
+//   PropertySqftInput_change
+//   PropertyUnitCountInput_change
+//   ProposalInsCo2ShowHide
+//   ProposalMessageClear
+//   ProposalExpandCollapse
+//   ProposalClientFirstNameInput_change
+//   ProposalClientLastNameInput_change
+//   ProposalStreetAddressInput_change
+//   InfoQuoteEffectiveDate_change
+//   InfoQuoteExpirationDate_change
+//   QuoteSelectScreenFieldsSet
+//   PropertyZipcodeInput_change
+//   buttonSave1_click
+//   buttonSave2_click
+//   buttonFind_click
+//   RequestorEmail_change
+//   buttonDwellingAmountHighSet_click
+//   buttonDwellingAmountLowSet_click
+//   buttonQuery_click
+********************************************************************************************************************/
+
+$w.onReady(function () {
+	//buttonClearQuote_click()
+	$w("#PropertyPersonalPropertyInput").value = '$5,000'
+});
+
+import wixWindow from 'wix-window';
+import {CityStateGet, FloodBindRequest, FloodSquareFootGet, FloodPremiumGetUpdate, MYNDDatabaseFunction, PolicyBindRequest, PolicyEvidenceGet, PolicyPremiumCalculate, PolicyProposalGet, PolicyQuoteAddUpdate, PolicyQuoteFind, PolicyQuoteLog, ReplacementCostCalculation} from 'backend/IvesModule.jsw';
+var PremiumResult = [];
+var	FloodQuote = {                
+	"ResponseToken": "",
+	"QuoteInfo": {
+        "quoteNumber": "",
+		"link": "",
+		"ProducerName": "",
+        "application": {
+            "firstName": "",
+			"lastName": "",
+			"mailingAddr1": "",
+			"mailingCity": "",
+			"mailingState": "",
+			"mailingZip": "",
+			"mailingCountry": "",
+			"addr1": "",
+            "city": "",
+			"state": "",
+            "zip": "",
+			"email": "",
+			"phone": "",
+			"floodZone": "",
+            "buildingCoverage": 0,
+            "contentCoverage": 0,
+            "deductible": 0
+		},
+		"policy": {
+			"basePremium": 0,
+			"optionalCoveragePremium": 0,
+			"policyFee": 0,
+			"surplusTax": 0,
+			"totalPremium": 0,
+			"coverageA": 0,
+			"coverageB": 0
+		},
+	"errorList": []
+    }
+};
+var QuoteSaveID = '';
+var QuoteRecordNumber = '';
+var QuotePolicyNumber = '';
+var BeforeFieldValue = '';
+var QuoteRequestorEmail = '';
+var QuoteRequestorDate = '';
+var ProposalRequestorEmail = '';
+var ProposalRequestorDate = '';
+var SelectNumber = '';
+var SelectRequestorEmail = '';
+var SelectRequestorDate = '';
+var PolicyIsBound = 'No';
+var IsInstitutional;
+var IsWindHail;
+var ActionType;
+var BindRequestorEmail = '';
+var BindRequestorDate = '';
+var EvidenceRequestorEmail = '';
+var EvidenceRequestorDate = '';
+var PolicyAInsuranceCompany = '';
+var PolicyBInsuranceCompany = '';
+var PolicyCount = 0;
+var QuoteCount = 0;
+
+export function BindMessageClear() {
+	$w("#BindMessageDisplay").text = "";
+	$w("#BindMessageDisplay").hide();
+}
+
+
+export function buttonBindClear_click(event) {
+	buttonClearQuote_click()
+}
+
+
+export function buttonBindRequest_click(event) {
+	var BindIsOk;
+	console.log("buttonBindRequest Button Request To Bind Start");
+
+	BindIsOk = "Y";
+	if ($w("#ProposalClientFirstNameInput").value == "") {
+		console.log("buttonBindRequest  Proposal Client Name Empty");
+		$w("#BindMessageDisplay").text = "Client First Name MUST Be Entered To Accept The Quote.";
+		$w("#BindMessageDisplay").show();
+	} else if ($w("#ProposalClientLastNameInput").value == "") {
+		console.log("buttonBindRequest  Proposal Client Name Empty");
+		$w("#BindMessageDisplay").text = "Client Last Name MUST Be Entered To Accept The Quote.";
+		$w("#BindMessageDisplay").show();
+	} else if ($w("#ProposalStreetAddressInput").value == "") {
+		console.log("buttonBindRequest  Proposal Street Address Empty");
+		$w("#BindMessageDisplay").text = "Property Street Address MUST Be To Accept The Quote.";
+		$w("#BindMessageDisplay").show();
+	}
+	else if ($w("#RequestorEmail").value == '') {
+		$w("#BindMessageDisplay").text = 'Requestor Email Address MUST Be Set To Accept The Quote.';
+		$w("#BindMessageDisplay").show();
+	} else {
+		BindRequestorEmail = $w("#RequestorEmail").value;
+		BindRequestorDate = new Date().toLocaleDateString();
+
+		IsInstitutional = "No";
+		if ($w("#IsInstitutionalInput").checked == true) {
+			IsInstitutional = "Yes";
+		}
+		IsWindHail = "No";
+		if ($w("#IsWindHailInput").checked == true) {
+			IsWindHail = "Yes";
+		}
+		ActionType = "Add Asset";
+		if ($w("#IsRenewalQuote").checked == true) {
+			ActionType = "Rnw Asset";
+		}
+		const BindObject = {
+			"BrokerInformation": {
+				"BrokerName": "Ives Insurance Services Inc",
+    			"MailingAddress": "2150 Chatsworth Blvd",
+    			"MailingCity": "San Diego",
+    			"MailingState": "CA",
+    			"MailingZipcode": "92107",
+    			"PhoneNumber": "619-224-5337",
+    			"EmailAddress": "companymailbox@ivesins.com",
+    			"AgentNumber":  "X12345678"
+			},
+			"InsuranceRequest": {
+				"Insured": {
+					"FirstName": $w("#InfoClientFirstName").value,
+					"LastName": $w("#InfoClientLastName").value,
+					"InsuredFullName": $w("#InfoClientFirstName").value + " " + $w("#InfoClientLastName").value,
+					"CompanyName": $w("#InfoClientCompanyName").value,
+					"MailingAddress": $w("#InfoClientMailingAddress").value,
+					"MailingCity": $w("#InfoClientMailingCity").value,
+					"MailingState": $w("#InfoClientMailingState").value,
+					"MailingZipcode": $w("#InfoClientMailingZipcode").value,
+					"PhoneNumber": $w("#InfoClientPhoneNumber").value,
+					"EmailAddress": $w("#InfoClientEmailAddress").value,
+					"ProgramName": ""
+				},
+				"InsuranceQuote": {
+					"QuoteDetail": {
+						"PropertyNumber": "1",
+						"QuoteRequestorEmail": QuoteRequestorEmail,
+						"QuoteRequestorDate": QuoteRequestorDate,
+						"ProposalRequestorEmail": ProposalRequestorEmail,
+						"ProposalRequestorDate": ProposalRequestorDate,
+						"SelectNumber": SelectNumber,
+						"SelectRequestorEmail": SelectRequestorEmail,
+						"SelectRequestorDate": SelectRequestorDate,
+						"BindRequestorEmail": BindRequestorEmail,
+						"BindRequestorDate": BindRequestorDate,
+						"EvidenceRequestorEmail": EvidenceRequestorEmail,
+						"EvidenceRequestorDate": EvidenceRequestorDate,
+        				"InsuranceCompany":  $w("#InfoQuoteInsuranceCompany").value,
+						"InsuranceCompanyNaic":  $w("#InfoQuoteInsuranceCompanyNaic").value,
+						"MailingAddress": "",
+    					"MailingCity": "",
+    					"MailingState": "",
+    					"MailingZipcode": "",
+    					"ProductName": "Dwelling Fire",
+        				"RateStatus":  $w("#InfoQuoteRateStatus").value,
+        				"RateStatusReason": $w("#InfoQuoteRateStatusReason").value,
+						"IsInstitutional": IsInstitutional,
+						"IsWindHail": IsWindHail,
+						"ActionType": ActionType,
+						"EffectiveDate": $w("#InfoQuoteEffectiveDate").value,
+    					"ExpirationDate": $w("#InfoQuoteExpirationDate").value,
+	    				"PolicyNumber": $w("#InfoQuotePolicyNumber").value,
+						"DwellingAmount": cleanstring($w("#PropertyDwellingAmountInput").value),
+						"AdditionalBuildings": cleanstring($w("#PropertyAdditionalBuildingInput").value),
+						"PersonalProperty": cleanstring($w("#PropertyPersonalPropertyInput").value),
+						"AnnualRent": cleanstring($w("#PropertyAnnualRent").value),
+						"TotalInsuredValue": $w("#InfoPropertyTIV").value,
+						"PropertyRate": $w("#InfoQuotePropertyRate").value,
+						"ReplacementCost": "Yes",
+						"MoldFungi": "$15,000",
+						"AnnualRentsCoverage": "12M-ALS - Reported",
+						"OrdLawA": "Up To Building Limit",
+						"OrdLawB": "10% of Cov A",
+						"OrdLawC": "10% of Cov A",
+						"WaterBackupCoverage": $w("#InfoQuoteWaterBackupCoverage").value,
+						"VacancyClause": "Unlimited w/Notify",
+						"BurglaryTheft": "Included",
+						"WindHailCoverage":  $w("#InfoQuoteWindHailCoverage").value, 
+						"FloodCoverage":  $w("#InfoQuoteFloodCoverage").value,
+						"EarthquakeCoverage":  $w("#InfoQuoteEarthquakeCoverage").value,
+						"UmbrellaCoverage": $w("#InfoQuoteUmbrellaCoverage").value,
+						"NamedStormDeductible":  $w("#InfoQuoteNamedStormDeductible").value,
+						"GeneralAggregate": "$2,000,000",
+						"EachOccurrence": "$1,000,000",
+						"PropertyDeductibleAmount": $w("#InfoQuoteDeductible").value,
+						"LiabilityDeductibleAmount": "$0",
+						"PropertyPremium": $w("#InfoQuotePropertyPremiumAmount").value,
+						"LiabilityPremium": $w("#InfoQuoteLiabilityPremiumAmount").value,
+						"TotalPremium": $w("#InfoQuoteTotalPremiumAmount").value,
+						"TaxesAmount": $w("#InfoQuoteTaxesFeesAmount").value,
+            			"FeesAmount": "0.00",
+            			"BrokerFeeAmount": $w("#InfoQuoteBrokerFeeAmount").value,
+						"TotalAmount": cleanstring($w("#InfoQuoteTotalAmount").value)
+					},
+					"PropertyDetail": {
+						"PropertyNumber": "1",
+						"PropertyDetailComplete": "Yes",
+						"PropertyTitle": $w("#InfoPropertyAddress").value + " " + $w("#InfoPropertyCity").text + " " + $w("#InfoPropertyState").text + " " + $w("#InfoPropertyZipcode").text,
+						"PropertyTypeCode": "MYND-HOME",
+						"PropertyCode": $w("#InfoPropertyCode").value,
+						"Address": $w("#InfoPropertyAddress").value,
+        				"City": $w("#InfoPropertyCity").text,
+        				"State": $w("#InfoPropertyState").text,
+						"Zipcode": $w("#InfoPropertyZipcode").text,
+						"County": $w("#InfoPropertyCounty").text,
+						"FloodZone" : $w("#FloodZoneInput").value,
+        				"DwellingAmount": cleanstring($w("#PropertyDwellingAmountInput").value),
+						"AdditionalBuildings": cleanstring($w("#PropertyAdditionalBuildingInput").value),
+						"PersonalProperty": cleanstring($w("#PropertyPersonalPropertyInput").value),
+						"MonthlyRent": cleanstring($w("#PropertyMonthlyRentInput").value),
+						"AnnualRent": cleanstring($w("#PropertyAnnualRent").value),
+						"TotalInsuredValue": $w("#InfoPropertyTIV").value,						
+						"OwnershipEntity": $w("#InfoPropertyOwnershipEntity").value,
+						"YearBuilt": $w("#InfoPropertyYearBuilt").value,
+						"NumberUnits": $w("#InfoPropertyNumberUnits").text,
+						"NumberBedrooms": $w("#InfoPropertyNumberBedrooms").value,
+						"NumberBaths": $w("#InfoPropertyNumberBaths").value,
+						"NumberStories": $w("#InfoPropertyNumberStories").value,
+						"SquareFootage": $w("#InfoPropertySquareFootage").text,
+						"PricePerSqFt": cleanstring($w("#InfoPropertyPricePerSqFt").text),
+						"ConstructionType": $w("#InfoPropertyConstructionType").value,
+						"WiringType": $w("#InfoPropertyWiringType").value,
+						"CircuitBreakers": $w("#InfoPropertyCircuitBreakers").value,
+						"Fuses": $w("#InfoPropertyFuses").value,
+						"RoofType": $w("#InfoPropertyRoofType").value,
+						"YearRoofUpdated": $w("#InfoPropertyYearRoofUpdated").value,
+						"YearPropertyUpdated": $w("#InfoPropertyYearPropertyUpdated").value,
+						"GarageType": $w("#InfoPropertyGarageType").value,
+						"Pool": $w("#InfoPropertyPool").value,
+						"NumberPools": $w("#InfoPropertyNumberPools").value,
+						"PoolFencedGated": $w("#InfoPropertyPoolFencedGated").value,
+						"DivingBoard": $w("#InfoPropertyDivingBoard").value,
+						"Fireplace": $w("#InfoPropertyFireplace").value,
+						"Sprinklered": $w("#InfoPropertySprinklered").value,
+						"GasSmokeDetectors": $w("#InfoPropertyGasSmokeDetectors").value,
+						"BurglarAlarm": $w("#InfoPropertyBurglarAlarm").value,
+						"SeasonalProperty": $w("#InfoPropertySeasonalProperty").value,
+						"CommercialExposure": $w("#InfoPropertyCommercialExposure").value,
+						"PriorClaims": $w("#InfoPropertyPriorClaims").value,
+						"ClaimDescription": $w("#InfoPropertyClaimDescription").value,
+						"CurrentInsuranceCompany": $w("#InfoPropertyCurrentInsuranceCompany").value,
+						"CurrentInsurancePremium": $w("#InfoPropertyCurrentInsurancePremium").value,
+						"LoanNumber": $w("#InfoPropertyLoanNumber").value,
+						"AI1Clause1": $w("#InfoPropertyMortgageeClause1").value,
+						"AI1Clause2": $w("#InfoPropertyMortgageeClause2").value,
+						"AI1StreetAddress": $w("#InfoPropertyMortgageeStreetAddress").value,
+						"AI1City": $w("#InfoPropertyMortgageeCity").value,
+						"AI1State": $w("#InfoPropertyMortgageeState").value,
+						"AI1Zipcode": $w("#InfoPropertyMortgageeZipcode").value,
+						"AI1CityStateZipcode": $w("#InfoPropertyMortgageeCity").value + " " + $w("#InfoPropertyMortgageeState").value + " " + $w("#InfoPropertyMortgageeZipcode").value,
+						"InitialPayment": $w("#InfoInitialPayment").value,
+						"RenewalPayment": $w("#InfoRenewalPayment").value
+					}
+				}
+			}
+		}
+
+		if ($w("#FloodAcceptFloodQuote").checked == true) {
+			FloodBindRequest(BindObject, FloodQuote,"Y").then(function(BindResult) {
+				if (BindResult.BindStatus == 'Error') {
+					$w("#BindMessageDisplay").text = BindResult.BindStatusReason;
+					$w("#BindMessageDisplay").show();
+					BindIsOk = "N";
+				}
+			});
+		}
+
+		if (BindIsOk == "Y") {
+			PolicyBindRequest(BindObject,'Y').then(function(BindResult) {
+
+				console.log ('buttonBindRequest Bind Status:' + BindResult.BindStatus + ' Bind Status Reason:' + BindResult.BindStatusReason)
+
+				if (BindResult.BindStatus == 'Error') {
+					$w("#BindMessageDisplay").text = BindResult.BindStatusReason;
+					$w("#BindMessageDisplay").show();
+				}
+				else {
+					PolicyIsBound = 'Yes';
+					BindRequestLockUnlock();
+					PolicyQuoteSave()
+					.then(function(ParamReturn) {
+
+						$w("#BindMessageDisplay").text = "Property Acceptance Requested.";
+						$w("#IsRenewalQuote").hide();
+						$w("#buttonBindRequest").hide();
+						$w("#buttonEvidence").show();
+						$w("#buttonBindClear").show();
+						$w("#BindUserEmail").text = BindRequestorEmail;
+						$w("#lblBindUserEmail").show();
+						$w("#BindUserEmail").show();
+
+						wixWindow.openLightbox("Mynd Thank You Submission");
+					})
+				}
+			});
+		}
+	}
+}
+
+export function BindRequestClear() {
+	console.log("BindRequestClear Start  In Policy Is Bound-" + PolicyIsBound)
+	if (PolicyIsBound == 'Yes') {
+		$w("#BindMessageDisplay").text = "Changing Accepted Quote - Requires Re-Acceptance.";
+		$w("#BindMessageDisplay").show();
+		PolicyIsBound = 'No';
+		$w("#buttonBindRequest").show();
+		$w("#buttonEvidence").hide();
+		$w("#BindUserEmail").text ="";
+		$w("#lblBindUserEmail").hide();
+		$w("#BindUserEmail").hide();
+	}
+	console.log("BindRequestClear  End Policy Is Bound-" + PolicyIsBound)
+}
+
+export function BindRequestLockUnlock() {
+	console.log("BindRequestLockUnlock Start Bind Request Date-" + BindRequestorDate)
+	if (BindRequestorDate == '' || BindRequestorDate == undefined) {
+		console.log("BindRequestLockUnlock Zipcode Unlock");
+		$w("#PropertyZipcodeInput").readOnly = false;
+		$w("#ProposalStreetAddressInput").readOnly = false;
+		$w("#InfoPropertyAddress").readOnly = false;
+	} else {
+		$w("#PropertyZipcodeInput").readOnly = true;
+		$w("#ProposalStreetAddressInput").readOnly = true;
+		$w("#InfoPropertyAddress").readOnly = true;
+		console.log("BindRequestLockUnlock Zipcode Lock");
+	}
+	console.log("BindRequestLockUnlock End");
+}
+
+export function buttonClearQuote_click(event) {
+	console.log("buttonClearQuote Start");
+	formFieldsReset('Y');
+	$w("#PropertyStreetAddressInput").value = '';
+	$w("#PropertyZipcodeInput").value = '';
+	$w("#PropertyUnitCountInput").value = '1';
+	$w("#PropertySqftInput").value = '0';
+	$w("#PropertyDwellingAmountInput").value = '$0';
+	$w("#PropertyPricePerSqFtInput").value = '$0';
+	$w("#PropertyAdditionalBuildingInput").value = '$0';
+	$w("#PropertyMonthlyRentInput").value = '$0';
+	$w("#PropertyAnnualRent").value = '$0';
+	$w("#PropertyPersonalPropertyInput").value = '$5,000'
+	$w("#IsInstitutionalInput").checked = false;
+	$w("#IsWindHailInput").checked = true;
+	$w('#LowReplacementCost').text = '$0.0';
+	$w('#HighReplacementCost').text = '$0.0';
+
+	$w('#findStreetAddressInput').value = '';
+
+	FloodQuote = {                
+		"ResponseToken": "",
+		"QuoteInfo": {
+        	"quoteNumber": "",
+			"link": "",
+			"ProducerName": "",
+        	"application": {
+				"firstName": "",
+				"lastName": "",
+				"mailingAddr1": "",
+				"mailingCity": "",
+				"mailingState": "",
+				"mailingZip": "",
+				"mailingCountry": "",
+	            "addr1": "",
+    	        "city": "",
+				"state": "",
+            	"zip": "",
+				"email": "",
+				"phone": "",
+				"floodZone": "",
+            	"buildingCoverage": 0,
+            	"contentCoverage": 0,
+            	"deductible": 0},
+			"policy": {
+				"basePremium": 0,
+				"optionalCoveragePremium": 0,
+				"policyFee": 0,
+				"surplusTax": 0,
+				"totalPremium": 0,
+				"coverageA": 0,
+				"coverageB": 0
+			},
+			"errorList": []
+    	}   
+	};
+
+	$w('#FloodAcceptFloodQuote').checked = false;
+	$w('#FloodZoneInput').value = '';
+	$w('#FloodTotalPremiumInput').value = "";
+	$w('#NeptuneInsurance').link = 'https://neptuneflood.com/consumer-app/?source=6xOkI3ozI%2F6dfzaqbtpCYSxWqbT7OfoS3u2ARj6WRewD7StZ0hmd8fsuXraBH4FTJcspBgmiUeYP7KsdJDjQdILfNM2BTwLZH5JrDjgg%2B10%3D';
+
+
+	QuoteSaveID = '';
+	QuoteRecordNumber = '';
+	QuoteRequestorEmail = '';
+	QuoteRequestorDate = '';
+	ProposalRequestorEmail = '';
+	ProposalRequestorDate = '';
+	SelectNumber = '';
+	SelectRequestorEmail = '';
+	SelectRequestorDate = '';
+	PolicyIsBound = 'No';
+	BindRequestorEmail = '';
+	BindRequestorDate = '';
+	EvidenceRequestorEmail = '';
+	EvidenceRequestorDate = '';
+
+	BindRequestLockUnlock();
+	//$w("#PropertyZipcodeInput").focus()
+
+	console.log("buttonClearQuote End");
+}
+
+export function buttonEvidence_click(event) {
+	var base64;
+	var InsuredName;
+	var LoanNumber;
+	var AI1Clause1;
+	var IncludeFlood;
+
+	console.log("buttonEvidence Start");
+	if ($w("#RequestorEmail").value == '') {
+		$w("#BindMessageDisplay").text = 'Requestor Email Address MUST Be Set.';
+		$w("#BindMessageDisplay").show();
+	} 
+	else {
+		if ($w("#InfoClientCompanyName").value == "") {
+			InsuredName = $w("#InfoClientFirstName").value + " " +  $w("#InfoClientLastName").value;
+		} else {
+			InsuredName = $w("#InfoClientCompanyName").value;
+		}
+
+		LoanNumber = $w("#InfoPropertyLoanNumber").value
+		if (LoanNumber == "") {
+			LoanNumber = "N/A"
+		}
+		AI1Clause1 = $w("#InfoPropertyMortgageeClause1").value
+		if (AI1Clause1 == "") {
+			AI1Clause1 = "Proof Of Insurance"
+		}
+		IncludeFlood = "N";
+		if ($w("#FloodAcceptFloodQuote").checked == true) {
+			IncludeFlood = "Y";
+		}
+		const TotalDue = Number($w("#InfoQuoteTotalAmount").value) + Number(FloodQuote.QuoteInfo.policy.totalPremium);
+		console.log("buttonEvidence TotalDue-" + TotalDue + ", Formatted-" + formatDollarsCents(TotalDue));
+
+		EvidenceRequestorEmail = $w("#RequestorEmail").value
+		EvidenceRequestorDate = new Date().toLocaleDateString()
+		PolicyQuoteSave()
+		.then(function(ParamReturn) {
+
+			const EvidenceObject = {
+				"BrokerInformation": {
+					"BrokerName": "Ives Insurance Services Inc",
+					"BrokerageLicenseNumber":  "0G13604",
+    				"MailingAddress": "2150 Chatsworth Blvd",
+    				"MailingCity": "San Diego",
+    				"MailingState": "CA",
+	    			"MailingZipcode": "92107",
+    				"PhoneNumber": "(619) 224-5337",
+					"FaxNumber": "(619) 223-4716",
+    				"EmailAddress": "evidence@ivesins.com"
+				},
+				"InsuranceRequest": {
+					"Insured": {
+						"InsuredName": InsuredName,
+						"MailingAddress": $w("#InfoClientMailingAddress").value,
+						"MailingCity": $w("#InfoClientMailingCity").value,
+						"MailingState": $w("#InfoClientMailingState").value,
+						"MailingZipcode": $w("#InfoClientMailingZipcode").value,
+						"PhoneNumber": $w("#InfoClientPhoneNumber").value,
+						"EmailAddress": $w("#InfoClientEmailAddress").value
+					},
+					"InsuranceQuote": {
+						"TotalTotalAmount": formatDollarsCents(TotalDue),
+						"QuoteDetail": {
+							"RequestorEmail": EvidenceRequestorEmail,
+        					"InsuranceCompany":  $w("#InfoQuoteInsuranceCompany").value,
+							"InsuranceCompanyNAIC": $w("#InfoQuoteInsuranceCompanyNaic").value,
+							"MailingAddress": "",
+    						"MailingCity": "",
+    						"MailingState": "",
+    						"MailingZipcode": "",
+    						"ProductName": "Dwelling Fire",
+							"EvidenceEmail": EvidenceRequestorEmail,
+							"EvidenceDate": EvidenceRequestorDate,
+							"EffectiveDate": $w("#InfoQuoteEffectiveDate").value,
+    						"ExpirationDate": $w("#InfoQuoteExpirationDate").value,
+    						"PolicyNumber": $w("#InfoQuotePolicyNumber").value,
+							"WindHailCoverage":  $w("#InfoQuoteWindHailCoverage").value,
+        					"DeductibleAmount": $w("#InfoQuoteDeductible").value,
+							"PropertyRate": $w("#InfoQuotePropertyRate").value,
+							"PremiumAmount": formatDollarsCents($w("#InfoQuoteTotalPremiumAmount").value),
+	            			"TaxesFeesAmount": formatDollarsCents($w("#InfoQuoteTaxesFeesAmount").value),
+    	        			"BrokerFeeAmount": formatDollarsCents($w("#InfoQuoteBrokerFeeAmount").value),
+							"TotalAmount": formatDollarsCents($w("#InfoQuoteTotalAmount").value)
+						},
+						"FloodDetail": {
+							"InsuranceCompany":  "Neptune Flood",
+							"InsuranceCompanyNAIC": "524126",
+							"EffectiveDate": $w("#InfoQuoteEffectiveDate").value,
+    						"ExpirationDate": $w("#InfoQuoteExpirationDate").value,
+							"PolicyNumber": FloodQuote.QuoteInfo.quoteNumber,
+							"FloodZone": FloodQuote.QuoteInfo.application.floodZone,
+							"BuildingCoverage": formatDollarsOnly(FloodQuote.QuoteInfo.application.buildingCoverage),
+							"ContentsCoverage": formatDollarsOnly(FloodQuote.QuoteInfo.application.contentCoverage),
+							"DeductibleAmount": formatDollarsOnly(FloodQuote.QuoteInfo.application.deductible),
+							"PremiumAmount": formatDollarsCents(FloodQuote.QuoteInfo.policy.basePremium + FloodQuote.QuoteInfo.policy.optionalCoveragePremium),
+	            			"TaxesAmount": formatDollarsCents(FloodQuote.QuoteInfo.policy.surplusTax),
+							"FeesAmount": formatDollarsCents(FloodQuote.QuoteInfo.policy.policyFee),
+    	        			"BrokerFeeAmount": "$0.00",
+							"TotalAmount": formatDollarsCents(FloodQuote.QuoteInfo.policy.totalPremium)
+						},
+						"PropertyDetail": {
+							"Address": $w("#InfoPropertyAddress").value,
+        					"City": $w("#InfoPropertyCity").text,
+        					"State": $w("#InfoPropertyState").text,
+							"Zipcode": $w("#InfoPropertyZipcode").text,
+							"County": $w("#InfoPropertyCounty").text,
+        					"DwellingAmount": $w("#PropertyDwellingAmountInput").value,
+							"AdditionalBuildings": $w("#PropertyAdditionalBuildingInput").value,
+							"PersonalProperty": $w("#InfoQuoteBusinessPersonalPropertyCoverage").value,
+							"AnnualRent": $w("#PropertyAnnualRent").value,
+							"TotalInsuredValue": $w("#InfoPropertyTIV").value,
+							"LoanNumber": LoanNumber,
+							"AI1Clause1": AI1Clause1,
+							"AI1Clause2": $w("#InfoPropertyMortgageeClause2").value,
+							"AI1StreetAddress": $w("#InfoPropertyMortgageeStreetAddress").value,
+							"AI1City": $w("#InfoPropertyMortgageeCity").value,
+							"AI1State": $w("#InfoPropertyMortgageeState").value,
+							"AI1Zipcode": $w("#InfoPropertyMortgageeZipcode").value
+						}
+					}
+				}
+			}
+		
+			console.log("EB Total Estimate:" + formatDollarsCents($w("#InfoQuoteTotalAmount").value));
+			$w("#BindMessageDisplay").hide();
+	
+			console.log("EB pdfGenerateFile Call")
+			PolicyEvidenceGet(EvidenceObject, IncludeFlood).then(function(ParmReturn) {
+				base64 = ParmReturn;
+				base64 = 'data:application/pdf;base64,' + base64;
+				let msg = {
+					"conv": true,
+					"dataUrl": base64
+				}
+				$w('#html1').postMessage(msg);
+			});
+		})
+	}
+	console.log("buttonEvidence End");
+}	
+
+export function buttonProposal_click(event) {
+	var base64;
+	var Quote1Policy;
+	var Quote2Policy;
+	var Quote3Policy;
+	var PolicyA;
+	var PolicyB;
+	var PolicyF;
+	var Quote1;
+	var Quote2;
+	var Quote3;
+	var QuoteF;
+	var QuoteM;
+	var IncludeFlood;
+	
+	console.log("Proposal Start");
+	$w("#ProposalMessage").hide();
+	if ($w("#ProposalClientFirstNameInput").value == "") {
+		console.log("Proposal Client Name Empty");
+		$w("#ProposalMessage").text = "Client First Name MUST Be Entered For The Proposal.";
+		$w("#ProposalMessage").show();
+	} else if ($w("#ProposalClientLastNameInput").value == "") {
+		console.log("Proposal Client Name Empty");
+		$w("#ProposalMessage").text = "Client Last Name MUST Be Entered For The Proposal.";
+		$w("#ProposalMessage").show();
+	} else if ($w("#ProposalStreetAddressInput").value == "") {
+		console.log("Proposal Street Address Empty");
+		$w("#ProposalMessage").text = "Property Street Address MUST Be Entered For The Proposal.";
+		$w("#ProposalMessage").show();
+	}
+	else if ($w("#RequestorEmail").value == '') {
+		$w("#ProposalMessage").text = 'Requestor Email Address MUST Be Set.';
+		$w("#ProposalMessage").show();
+	} else {
+		console.log("Proposal Build Object");
+
+		ProposalRequestorEmail = $w("#RequestorEmail").value
+		ProposalRequestorDate = new Date().toLocaleDateString()
+		PolicyQuoteSave()
+		.then(function(ParamReturn) {
+			if ((FloodQuote.QuoteInfo.quoteNumber == "") || (FloodQuote.QuoteInfo.policy.totalPremium == 0)) {
+				IncludeFlood = "N";
+			} else {
+				IncludeFlood = "Y";     /* Set to Alway INCLUDE Flood in proposal */
+				if ($w("#FloodAcceptFloodQuote").checked == true) {
+					IncludeFlood = "Y";
+				}
+			}
+			console.log("Proposal Include Flood:" + IncludeFlood);
+
+			PolicyA = {
+				"InsuranceCompany": 'Policy A',
+				"UmbrellaCoverage": PremiumResult[0].UmbrellaCoverage,
+				"BusinessPersonalPropertyCoverage": PremiumResult[0].BusinessPersonalPropertyCoverage,
+				"AnnualRentCoverage": PremiumResult[0].AnnualRentCoverage,
+				"WaterBackupCoverage": PremiumResult[0].WaterBackupCoverage,
+				"FloodCoverage": PremiumResult[0].FloodCoverage,
+				"EarthquakeCoverage": PremiumResult[0].EarthquakeCoverage,
+				"WindHailCoverage": PremiumResult[0].WindHailCoverage,
+				"NamedStormDeductible": PremiumResult[0].NamedStormDeductible
+			};
+
+			if (PolicyCount > 1) {
+				if(PremiumResult[1].InsuranceCompany == PolicyBInsuranceCompany) {
+					PolicyB = {
+						"InsuranceCompany": 'Policy B',
+						"UmbrellaCoverage": PremiumResult[1].UmbrellaCoverage,
+						"BusinessPersonalPropertyCoverage": PremiumResult[1].BusinessPersonalPropertyCoverage,
+						"AnnualRentCoverage": PremiumResult[1].AnnualRentCoverage,
+						"WaterBackupCoverage": PremiumResult[1].WaterBackupCoverage,
+						"FloodCoverage": PremiumResult[1].FloodCoverage,
+						"EarthquakeCoverage": PremiumResult[1].EarthquakeCoverage,
+						"WindHailCoverage": PremiumResult[1].WindHailCoverage,
+						"NamedStormDeductible": PremiumResult[1].NamedStormDeductible
+					}
+				} 
+				else
+				{
+					PolicyB = {
+						"InsuranceCompany": 'Policy B',
+						"UmbrellaCoverage": PremiumResult[2].UmbrellaCoverage,
+						"BusinessPersonalPropertyCoverage": PremiumResult[2].BusinessPersonalPropertyCoverage,
+						"AnnualRentCoverage": PremiumResult[2].AnnualRentCoverage,
+						"WaterBackupCoverage": PremiumResult[2].WaterBackupCoverage,
+						"FloodCoverage": PremiumResult[2].FloodCoverage,
+						"EarthquakeCoverage": PremiumResult[2].EarthquakeCoverage,
+						"WindHailCoverage": PremiumResult[2].WindHailCoverage,
+						"NamedStormDeductible": PremiumResult[2].NamedStormDeductible
+					}
+				}
+			} 
+			else
+			{
+				PolicyB = {
+					"InsuranceCompany": '',
+					"UmbrellaCoverage": '',
+					"BusinessPersonalPropertyCoverage": '',
+					"AnnualRentCoverage": '',
+					"WaterBackupCoverage": '',
+					"FloodCoverage": '',
+					"EarthquakeCoverage": '',
+					"WindHailCoverage": '',
+					"NamedStormDeductible": ''
+				}
+			}
+
+			if (IncludeFlood == "Y") {
+				PolicyF = {
+          			"InsuranceCompany": "Policy F",
+          			"BuildingCoverage": formatDollarsOnly(FloodQuote.QuoteInfo.application.buildingCoverage),
+          			"ContentCoverage": formatDollarsOnly(FloodQuote.QuoteInfo.application.contentCoverage),
+				}
+			} else {
+				PolicyF = {
+          			"InsuranceCompany": "",
+          			"BuildingCoverage": "",
+          			"ContentCoverage": ""
+				}
+			}
+
+			if (PremiumResult[0].InsuranceCompany == PolicyAInsuranceCompany) {
+				Quote1Policy = 'Policy A';
+			}
+			else {
+				Quote1Policy = 'Policy B';
+			}
+			Quote1 = {
+				"DeductibleAmount":$w("#Deductible1").value,
+				"InsuranceCompany": Quote1Policy,
+				"PremiumAmount": formatDollarsCents(PremiumResult[0].TotalPremiumAmount),
+				"TaxesAmount": "$0.00",
+				"FeesAmount": "$0.00",
+            	"TaxesFeesAmount": formatDollarsCents(PremiumResult[0].TaxesFeesAmount),
+        		"BrokerFeeAmount": formatDollarsCents(PremiumResult[0].BrokerFeeAmount),
+				"TotalAmount": formatDollarsCents(PremiumResult[0].TotalAmount)
+			}
+			if (QuoteCount > 1) {
+					
+				if (PremiumResult[1].InsuranceCompany == PolicyAInsuranceCompany) {
+					Quote2Policy = 'Policy A';
+				}
+				else {
+					Quote2Policy = 'Policy B';
+				}	
+				Quote2 = {
+					"DeductibleAmount":$w("#Deductible2").value,
+					"InsuranceCompany": Quote2Policy,
+					"PremiumAmount": formatDollarsCents(PremiumResult[1].TotalPremiumAmount),
+					"TaxesAmount": "$0.00",
+					"FeesAmount": "$0.00",
+            		"TaxesFeesAmount": formatDollarsCents(PremiumResult[1].TaxesFeesAmount),
+            		"BrokerFeeAmount": formatDollarsCents(PremiumResult[1].BrokerFeeAmount),
+					"TotalAmount": formatDollarsCents(PremiumResult[1].TotalAmount)
+				}
+				if (QuoteCount > 2) {
+						
+					if (PremiumResult[2].InsuranceCompany == PolicyAInsuranceCompany) {
+						Quote3Policy = 'Policy A';
+					}
+					else {
+						Quote3Policy = 'Policy B';
+					}
+					Quote3 = {
+						"DeductibleAmount":$w("#Deductible3").value,
+						"InsuranceCompany": Quote3Policy,
+						"PremiumAmount": formatDollarsCents(PremiumResult[2].TotalPremiumAmount),
+						"TaxesAmount": "$0.00",
+						"FeesAmount": "$0.00",
+            			"TaxesFeesAmount": formatDollarsCents(PremiumResult[2].TaxesFeesAmount),
+            			"BrokerFeeAmount": formatDollarsCents(PremiumResult[2].BrokerFeeAmount),
+						"TotalAmount": formatDollarsCents(PremiumResult[2].TotalAmount)
+					}
+				}
+				else {
+					Quote3 = {
+						"DeductibleAmount": '',
+						"InsuranceCompany": '',
+						"PremiumAmount": '$0.00',
+						"TaxesAmount": "$0.00",
+						"FeesAmount": "$0.00",
+    	        		"TaxesFeesAmount": '$0.00',
+        	    		"BrokerFeeAmount": '$0.00',
+						"TotalAmount": '$0.00'
+					}
+				}
+			}
+			else {
+				Quote2 = {
+					"DeductibleAmount": '',
+					"InsuranceCompany": '',
+					"PremiumAmount": '$0.00',
+					"TaxesAmount": "$0.00",
+					"FeesAmount": "$0.00",
+            		"TaxesFeesAmount": '$0.00',
+            		"BrokerFeeAmount": '$0.00',
+					"TotalAmount": '$0.00'
+				}
+				Quote3 = {
+					"DeductibleAmount": '',
+					"InsuranceCompany": '',
+					"PremiumAmount": '$0.00',
+					"TaxesAmount": "$0.00",
+					"FeesAmount": "$0.00",
+            		"TaxesFeesAmount": '$0.00',
+            		"BrokerFeeAmount": '$0.00',
+					"TotalAmount": '$0.00'
+				}
+			}
+			
+			if (IncludeFlood == "Y") {
+				QuoteF = {
+					"DeductibleAmount": formatDollarsOnly(FloodQuote.QuoteInfo.application.deductible),
+					"InsuranceCompany": 'Policy F',
+					"PremiumAmount": formatDollarsCents(FloodQuote.QuoteInfo.policy.basePremium + FloodQuote.QuoteInfo.policy.optionalCoveragePremium),
+					"TaxesAmount": formatDollarsCents(FloodQuote.QuoteInfo.policy.surplusTax),
+					"FeesAmount": formatDollarsCents(FloodQuote.QuoteInfo.policy.policyFee),
+            		"TaxesFeesAmount": "$0.00",
+        			"BrokerFeeAmount": "$0.00",
+					"TotalAmount": formatDollarsCents(FloodQuote.QuoteInfo.policy.totalPremium)
+				}
+			} else {
+				QuoteF = {
+					"DeductibleAmount": "",
+					"InsuranceCompany": "",
+					"PremiumAmount": "$0.00",
+            		"TaxesAmount": "$0.00",
+					"FeesAmount": "$0.00",
+					"TaxesFeesAmount": '$0.00',
+        			"BrokerFeeAmount": "$0.00",
+					"TotalAmount": "$0.00"
+				}
+			}
+
+			QuoteM = {
+				"DwellingMonthlyAmount": formatDollarsCents(PremiumResult[0].TotalAmount/12),
+				"FloodMonthlyAmount": formatDollarsCents(FloodQuote.QuoteInfo.policy.totalPremium/12),
+				"WarrantyMonthlyAmount": "$64.33",
+				"DwellingWarrantyMonthlyAmount": formatDollarsCents((PremiumResult[0].TotalAmount/12) + 64.33),
+				"TotalMonthlyAmount": formatDollarsCents((PremiumResult[0].TotalAmount/12) + (FloodQuote.QuoteInfo.policy.totalPremium/12) + 64.33)
+			}
+
+			const ProposalObject = {
+				"BrokerInformation": {
+					"BrokerName": "Ives Insurance Services Inc",
+					"BrokerageLicenseNumber":  "0G13604",
+    				"MailingAddress": "2150 Chatsworth Blvd",
+    				"MailingCity": "San Diego",
+	    			"MailingState": "CA",
+    				"MailingZipcode": "92107",
+    				"PhoneNumber": "(619) 794-2710",
+					"FaxNumber": "(619) 223-4716",
+    				"EmailAddress": "michelle@ivesins.com"
+				},
+				"InsuranceRequest": {
+					"Insured": {
+						"InsuredName": $w("#ProposalClientFirstNameInput").value + ' ' + $w("#ProposalClientLastNameInput").value
+					},
+					"InsuranceQuote": {
+						"PolicyDetail": {
+							"PolicyCount": PolicyCount,
+							"PolicyA": PolicyA,
+							"PolicyB": PolicyB,
+							"PolicyF": PolicyF
+						},
+						"QuoteDetail": {
+							"RequestorDate": ProposalRequestorDate,
+							"RequestorEmail": ProposalRequestorEmail,
+							"QuoteCount": QuoteCount,
+							"Quote1": Quote1,
+							"Quote2": Quote2,
+							"Quote3": Quote3,
+							"QuoteF": QuoteF,
+							"QuoteM": QuoteM
+						},
+						"PropertyDetail": {
+							"PropertyAddress": $w("#ProposalStreetAddressInput").value + ' ' + $w("#ProposalCityStateZipAddress").text,
+							"FloodZone": $w("#FloodZoneInput").value,
+    	    				"DwellingAmount": $w("#PropertyDwellingAmountInput").value,
+							"AdditionalBuildings": $w("#PropertyAdditionalBuildingInput").value,
+							"PersonalProperty": $w("#PropertyPersonalPropertyInput").value,
+							"AnnualRent": $w("#PropertyAnnualRent").value,
+							"TotalInsuredValue": $w("#InfoPropertyTIV").value
+						}
+					}
+				}
+			}
+	
+			console.log("PPG pdfGenerateFile Call")
+			PolicyProposalGet(ProposalObject, IncludeFlood).then(function(ParmReturn) {
+				base64 = ParmReturn;
+				base64 = 'data:application/pdf;base64,' + base64;
+				let msg = {
+					"conv": true,
+					"dataUrl": base64
+				}
+				$w('#html1').postMessage(msg);
+			});
+		})
+	}
+	console.log("Proposal End");
+}
+
+export function buttonQuote_click(event) {
+	
+	console.log('buttonQuote Start');
+	/* console.log('buttonQuote  Start ResponseToken-'	+	FloodQuote.ResponseToken) */
+	PolicyIsBound = 'No';
+	formFieldsReset('N')
+
+	console.log("buttonQuote Street-" + $w("#PropertyStreetAddressInput").value + ", Zipcode-" + $w("#PropertyZipcodeInput").value);
+	if ($w("#PropertyStreetAddressInput").value == '')  {
+		$w("#ErrorMessageDisplay1").text = 'Error' + " - " + 'Street Address MUST Be Input';
+		$w("#ErrorMessageDisplay1").show()
+	} else if ($w("#PropertyZipcodeInput").value == '') {
+		$w("#ErrorMessageDisplay1").text = 'Error' + " - " + 'Zipcode MUST Be Input';
+		$w("#ErrorMessageDisplay1").show()
+    } else {
+		var Zipcode = $w("#PropertyZipcodeInput").value
+		var DwellingAmount = cleanstring($w("#PropertyDwellingAmountInput").value);
+		var PersonalProperty = cleanstring($w("#PropertyPersonalPropertyInput").value);
+
+		PolicyPremiumCalculate('FULLX', 
+				Zipcode, 
+				cleanstring($w("#PropertyUnitCountInput").value), 
+				cleanstring($w("#PropertySqftInput").value),
+				DwellingAmount,
+				cleanstring($w("#PropertyAdditionalBuildingInput").value),
+				PersonalProperty,
+				cleanstring($w("#PropertyAnnualRent").value),
+				$w("#IsInstitutionalInput").checked,
+				$w("#IsWindHailInput").checked,
+				$w("#RequestorEmail").value)
+		.then(function(ParmReturn) {
+			PremiumResult = ParmReturn;
+			PremiumResultScreenFieldsSet();
+
+			if (PremiumResult.length > 0) {	
+				// if ((PremiumResult[0].DeductibleAmount > '') && (FloodQuote.QuoteInfo.quoteNumber !== '')) {
+				if (PremiumResult[0].DeductibleAmount > '') {
+					/* console.log('buttonQuote  Flood Before Call ResponseToken-'	+	FloodQuote.ResponseToken) */
+					FloodQuote.QuoteInfo.application.firstName = $w("#ProposalClientFirstNameInput").value
+					FloodQuote.QuoteInfo.application.lastName = $w("#ProposalClientLastNameInput").value
+					FloodQuote.QuoteInfo.application.mailingAddr1 = $w("#InfoClientMailingAddress").value
+					FloodQuote.QuoteInfo.application.mailingCity = $w("#InfoClientMailingCity").value
+					FloodQuote.QuoteInfo.application.mailingState = $w("#InfoClientMailingState").value
+					FloodQuote.QuoteInfo.application.mailingZip = $w("#InfoClientMailingZipcode").value
+					FloodQuote.QuoteInfo.application.mailingCountry = "US"
+					FloodQuote.QuoteInfo.application.email = $w("#InfoClientEmailAddress").value
+					FloodQuote.QuoteInfo.application.phone = $w("#InfoClientPhoneNumber").value
+					FloodPremiumGetUpdate(DwellingAmount, PersonalProperty, FloodQuote) 
+					.then(Result => {
+						FloodQuote = Result;
+
+						if (FloodQuote.QuoteInfo.errorList.length === 0) {
+							console.log("buttonQuote  Flood Returned FloodZone-" + FloodQuote.QuoteInfo.application.floodZone + ", Flood Premium-" + FloodQuote.QuoteInfo.policy.totalPremium);
+						
+							$w("#FloodZoneInput").value = FloodQuote.QuoteInfo.application.floodZone;
+							$w("#FloodTotalPremiumInput").value = formatDollarsCents(FloodQuote.QuoteInfo.policy.totalPremium);
+							$w("#NeptuneInsurance").link = FloodQuote.QuoteInfo.link;
+							console.log("buttonQuote  Flood Quote Number-" + FloodQuote.QuoteInfo.quoteNumber)
+							console.log("buttonQuote  Premium-" + FloodQuote.QuoteInfo.policy.totalPremium + ", Optional Premium-" + FloodQuote.QuoteInfo.policy.optionalCoveragePremium)
+							FloodQuoteShow();
+						} else {
+							console.log("buttonQuote Error Returned");
+							console.log("buttonQuote Error-" + FloodQuote.QuoteInfo.errorList[0].Error);
+							$w("#ErrorMessageDisplay1").text = 'Flood Error' + " - " + FloodQuote.QuoteInfo.errorList[0].Error;
+							$w("#ErrorMessageDisplay1").show()
+						}
+					})
+					.catch(error => console.log('buttonQuote  Flood Error-'+error));
+				}
+			}
+		})
+		.catch(error => console.log('buttonQuote Calculate Error-'+error));
+	}
+	console.log('buttonQuote End');
+}
+
+export function buttonSelect1_click(event) {
+	console.log("buttonSelect1 Start");
+	SelectNumber = '1';
+	SelectRequestorEmail = $w("#RequestorEmail").value;
+	SelectRequestorDate = new Date().toLocaleDateString();
+	PolicyIsBound = 'No';
+
+	if ($w("#ProposalClientFirstNameInput").value == "") {
+		console.log("Proposal Client Name Empty");
+		$w("#ProposalMessage").text = "Client First Name MUST Be Entered For The Proposal.";
+		$w("#ProposalMessage").show();
+	} else if ($w("#ProposalClientLastNameInput").value == "") {
+		console.log("Proposal Client Name Empty");
+		$w("#ProposalMessage").text = "Client Last Name MUST Be Entered For The Proposal.";
+		$w("#ProposalMessage").show();
+	} else if ($w("#ProposalStreetAddressInput").value == "") {
+		console.log("Proposal Street Address Empty");
+		$w("#ProposalMessage").text = "Property Street Address MUST Be Entered For The Proposal.";
+		$w("#ProposalMessage").show();
+	}
+	else if ($w("#RequestorEmail").value == '') {
+		$w("#ProposalMessage").text = 'Requestor Email Address MUST Be Set.';
+		$w("#ProposalMessage").show();
+	} else {
+
+		PolicyQuoteSave()
+		.then(function(ParamReturn) {
+			QuoteSelectScreenFieldsSet(SelectNumber);
+		});
+
+		const SaveData = {
+        	"actionType": "Select1",
+        	"actionDate": SelectRequestorDate,
+        	"actionRequestor": SelectRequestorEmail,
+        	"propertyName": $w("#PropertyZipcodeInput").value,
+        	"propertyAmount": $w("#TotalEstimate1").value
+	 	}
+		PolicyQuoteLog(SaveData)
+				.then(function(ParamReturn) {
+        	let QuoteID = ParamReturn;
+    	})
+    	.catch( (err) => {
+        	let errorMsg = err;
+			$w("#ErrorMessageDisplay1").text = "ErrorA-" + errorMsg;
+			$w("#ErrorMessageDisplay1").show()
+    	});
+	}
+	console.log("buttonSelect1 End");
+}
+
+export function buttonSelect2_click(event) {
+	console.log("buttonSelect2 Start");
+
+	SelectNumber = '2';
+	SelectRequestorEmail = $w("#RequestorEmail").value;
+	SelectRequestorDate = new Date().toLocaleDateString();
+	PolicyIsBound = 'No';
+
+	if ($w("#ProposalClientFirstNameInput").value == "") {
+		console.log("Proposal Client Name Empty");
+		$w("#ProposalMessage").text = "Client First Name MUST Be Entered For The Proposal.";
+		$w("#ProposalMessage").show();
+	} else if ($w("#ProposalClientLastNameInput").value == "") {
+		console.log("Proposal Client Name Empty");
+		$w("#ProposalMessage").text = "Client Last Name MUST Be Entered For The Proposal.";
+		$w("#ProposalMessage").show();
+	} else if ($w("#ProposalStreetAddressInput").value == "") {
+		console.log("Proposal Street Address Empty");
+		$w("#ProposalMessage").text = "Property Street Address MUST Be Entered For The Proposal.";
+		$w("#ProposalMessage").show();
+	}
+	else if ($w("#RequestorEmail").value == '') {
+		$w("#ProposalMessage").text = 'Requestor Email Address MUST Be Set.';
+		$w("#ProposalMessage").show();
+	} else {
+		
+		PolicyQuoteSave()
+		.then(function(ParamReturn) {
+			QuoteSelectScreenFieldsSet(SelectNumber);
+		});
+
+    	const SaveData = {
+        	"actionType": "Select2",
+        	"actionDate": SelectRequestorDate,
+        	"actionRequestor": SelectRequestorEmail,
+        	"propertyName": $w("#PropertyZipcodeInput").value,
+        	"propertyAmount": $w("#TotalEstimate2").value
+	 	}
+		PolicyQuoteLog(SaveData)
+				.then(function(ParamReturn) {
+        	let QuoteID = ParamReturn;
+    	})
+    	.catch( (err) => {
+	        let errorMsg = err;
+			$w("#ErrorMessageDisplay1").text = "ErrorB-" + errorMsg;
+			$w("#ErrorMessageDisplay1").show()
+    	});
+	}
+	console.log("buttonSelect2 End");
+}
+
+export function buttonSelect3_click(event) {
+	console.log("buttonSelect3 Start");
+	SelectNumber = '3';
+	SelectRequestorEmail = $w("#RequestorEmail").value;
+	SelectRequestorDate = new Date().toLocaleDateString();
+	PolicyIsBound = 'No';
+
+	if ($w("#ProposalClientFirstNameInput").value == "") {
+		console.log("Proposal Client Name Empty");
+		$w("#ProposalMessage").text = "Client First Name MUST Be Entered For The Proposal.";
+		$w("#ProposalMessage").show();
+	} else if ($w("#ProposalClientLastNameInput").value == "") {
+		console.log("Proposal Client Name Empty");
+		$w("#ProposalMessage").text = "Client Last Name MUST Be Entered For The Proposal.";
+		$w("#ProposalMessage").show();
+	} else if ($w("#ProposalStreetAddressInput").value == "") {
+		console.log("Proposal Street Address Empty");
+		$w("#ProposalMessage").text = "Property Street Address MUST Be Entered For The Proposal.";
+		$w("#ProposalMessage").show();
+	}
+	else if ($w("#RequestorEmail").value == '') {
+		$w("#ProposalMessage").text = 'Requestor Email Address MUST Be Set.';
+		$w("#ProposalMessage").show();
+	} else {
+		
+		PolicyQuoteSave()
+		.then(function(ParamReturn) {
+			QuoteSelectScreenFieldsSet(SelectNumber);
+		});
+
+    	const SaveData = {
+        	"actionType": "Select3",
+        	"actionDate": SelectRequestorDate,
+        	"actionRequestor": SelectRequestorEmail,
+        	"propertyName": $w("#PropertyZipcodeInput").value,
+        	"propertyAmount": $w("#TotalEstimate3").value
+	 	}
+		PolicyQuoteLog(SaveData)
+				.then(function(ParamReturn) {
+        	let QuoteID = ParamReturn;
+    	})
+    	.catch( (err) => {
+	        let errorMsg = err;
+			$w("#ErrorMessageDisplay1").text = "ErrorC-" + errorMsg;
+			$w("#ErrorMessageDisplay1").show()
+	    });
+	}
+	console.log("buttonSelect3 End");
+}
+
+export function cleanstring(InputString) {
+	let NewString = InputString.replaceAll(',','');
+	NewString = NewString.replaceAll('$','');
+
+	//console.log('NewString-' + NewString)
+	return NewString;
+}
+
+export function ClientPropertyClear() {
+	console.log("ClientPropertyClear Start");
+	$w("#InfoClientFirstName").value = '';
+	$w("#InfoClientLastName").value = '';
+	$w("#ProposalClientFirstNameInput").value = '';
+	$w("#ProposalClientLastNameInput").value = '';
+	$w("#InfoClientCompanyName").value = '';
+	$w("#InfoQuoteDeductible").value = '';
+	$w("#InfoQuotePropertyRate").value = '';
+	$w("#InfoQuoteTotalAmount").value = '';
+	$w("#InfoQuotePolicyNumber").value = '';
+	$w("#InfoQuoteEffectiveDate").value = '';
+	$w("#InfoQuoteExpirationDate").value = '';
+	$w("#InfoClientMailingAddress").value = '';
+	$w("#InfoClientMailingCity").value = '';
+	$w("#InfoClientMailingState").value = '';
+	$w("#InfoClientMailingZipcode").value = '';
+	$w("#InfoClientPhoneNumber").value = '';
+	$w("#InfoClientEmailAddress").value = '';
+	$w("#InfoPropertyCode").value = '';
+	$w("#InfoPropertyAddress").value = '';
+	$w("#ProposalStreetAddressInput").value = '';
+	$w("#InfoPropertyCity").text = '';
+	$w("#InfoPropertyState").text = '';
+	$w("#InfoPropertyZipcode").text = '';
+	$w("#InfoPropertyOwnershipEntity").value = '';
+	$w("#InfoPropertyYearBuilt").value = '';
+	$w("#InfoPropertyNumberBedrooms").value = '1';
+	$w("#InfoPropertyNumberBaths").value = '1';
+	$w("#InfoPropertyNumberStories").value = '1';
+	$w("#InfoPropertySquareFootage").text = '';
+	$w("#InfoPropertyPricePerSqFt").text = '';
+	$w("#InfoPropertyConstructionType").value = 'Frame';
+	$w("#InfoPropertyWiringType").value = 'Copper';
+	$w("#InfoPropertyCircuitBreakers").value = 'Yes';
+	$w("#InfoPropertyFuses").value = 'No';
+	$w("#InfoPropertyRoofType").value = 'Asphalt Composite';
+	$w("#InfoPropertyYearRoofUpdated").value = '';
+	$w("#InfoPropertyYearPropertyUpdated").value = '';
+	$w("#InfoPropertyGarageType").value = 'Attached Garage';
+	$w("#InfoPropertyPool").value = 'No';
+	$w("#InfoPropertyNumberPools").value = '0';
+	$w("#InfoPropertyPoolFencedGated").value = 'Yes';
+	$w("#InfoPropertyDivingBoard").value = 'No';
+	$w("#InfoPropertyFireplace").value = 'No';
+	$w("#InfoPropertySprinklered").value = 'No';
+	$w("#InfoPropertyGasSmokeDetectors").value = 'Yes';
+	$w("#InfoPropertyBurglarAlarm").value = 'No';
+	$w("#InfoPropertySeasonalProperty").value = 'No';
+	$w("#InfoPropertyCommercialExposure").value = 'No';
+	$w("#InfoPropertyPriorClaims").value = 'No';
+	$w("#InfoPropertyClaimDescription").value = '';
+	$w("#InfoPropertyCurrentInsuranceCompany").value = '';
+	$w("#InfoPropertyCurrentInsurancePremium").value = '';
+
+	$w("#InfoPropertyLoanNumber").value = '';
+	$w("#InfoPropertyMortgageeClause1").value = '';
+	$w("#InfoPropertyMortgageeClause2").value = '';
+	$w("#InfoPropertyMortgageeStreetAddress").value = '';
+	$w("#InfoPropertyMortgageeCity").value = '';
+	$w("#InfoPropertyMortgageeState").value = '';
+	$w("#InfoPropertyMortgageeZipcode").value = '';
+	$w("#InfoInitialPayment").value = 'Escrow';
+	$w("#InfoRenewalPayment").value = 'MortCo';
+
+	console.log("ClientPropertyClear End");
+}
+
+export function ClientPropertyInfoExpandCollapse(Action) {
+	console.log("ClientPropertyInfoExpandCollapse Start");
+	if (Action == "Expand") {
+		console.log("ClientPropertyInfoExpandCollapse Client Info Show");
+		$w("#section3").expand();
+		
+		if (PolicyIsBound == 'Yes') {
+			$w("#IsRenewalQuote").hide();
+			$w("#buttonBindRequest").hide();
+			$w("#buttonEvidence").show();
+			$w("#lblBindUserEmail").show();
+			$w("#BindUserEmail").show();
+		}
+		else {
+			$w("#IsRenewalQuote").show();
+			$w("#buttonBindRequest").show();
+			$w("#buttonEvidence").hide();
+			$w("#lblBindUserEmail").hide();
+			$w("#BindUserEmail").hide();
+		}
+		$w("#buttonSendToICSS").show();
+		$w("#buttonBindClear").show();
+		$w("#BindMessageDisplay").show();
+
+		$w("#InfoClientCompanyName").focus();
+		FloodAcceptFloodQuoteMessageSet();
+	} else {
+		console.log("ClientPropertyInfoExpandCollapse Client Info Hide");
+		
+		ClientPropertyClear();
+		$w("#section3").collapse();			
+		$w("#BindMessageDisplay").hide();
+
+	}
+	console.log("ClientPropertyInfoExpandCollapse End");
+}
+
+export function ErrorMessageDisplayClear() {
+	$w("#ErrorMessageDisplay1").text = '';
+	$w("#ErrorMessageDisplay1").hide()
+}
+
+export function FloodAcceptFloodQuoteMessageSet() {
+	console.log("FloodAcceptFloodQuoteMessageSet Start");
+	if ($w("#FloodAcceptFloodQuote").checked == true) {
+		console.log("FloodAcceptFloodQuoteMessageSet Checked-True");
+		$w("#FloodMessageDisplay").text = 'Flood Zone ('+ $w("#FloodZoneInput").value + ') - Quote Accepted';
+	} else {
+		console.log("FloodAcceptFloodQuoteMessageSet Checked-False");
+		$w("#FloodMessageDisplay").text = 'Flood Zone ('+ $w("#FloodZoneInput").value + ') - Quote NOT Accepted';
+	}
+	$w("#FloodMessageDisplay").show();
+}
+
+export function FloodQuoteShow() {
+	console.log("PremiumResultScreenFieldsSet  Flood Quote Number-" + FloodQuote.QuoteInfo.quoteNumber)
+	if (FloodQuote.QuoteInfo.quoteNumber !== '') {
+		if ($w("#FloodTotalPremiumInput").value == '$0.00') {
+			$w("#FloodAcceptFloodQuote").hide();
+		} else {
+			$w("#FloodAcceptFloodQuote").show();
+		}
+		$w("#lblFloodZoneInput").show();
+		$w("#FloodZoneInput").show();
+		$w("#lblFloodPremiumInput").show();
+		$w("#FloodTotalPremiumInput").show();
+		$w("#NeptuneInsurance").show();
+	}
+}
+
+export function formatDollarsOnly(CurrencyAmount) {
+	let Formatter = new Intl.NumberFormat('en-US', {
+  		style: 'currency',
+  		currency: 'USD',
+  		minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
+  		maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
+	});
+	//console.log("FDO CurrencyAmount-"+ CurrencyAmount)
+	return Formatter.format(CurrencyAmount)
+}
+
+export function formatDollarsCents(CurrencyAmount) {
+	let Formatter = new Intl.NumberFormat('en-US', {
+  		style: 'currency',
+  		currency: 'USD',
+  		// minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
+  		// maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
+	});
+	//console.log("FDC CurrencyAmount-"+ CurrencyAmount)
+	return Formatter.format(CurrencyAmount)
+}
+
+export function formatNumberComma(NumberAmount) {
+	let Formatter = new Intl.NumberFormat
+	//console.log("FNC CurrencyAmount-"+ NumberAmount)
+	return Formatter.format(NumberAmount)
+}
+
+export function formFieldsReset(ResetClientProperty) {
+	console.log("formFieldsReset Start");
+	$w("#ErrorMessageDisplay1").hide()
+	$w("#ErrorMessageDisplay1").text = '';
+
+	$w("#lblCityState").hide();
+	$w("#lblCounty").hide();
+	$w("#CityState").hide();
+	$w("#County").hide();
+	$w("#lblDeductibleTitle").hide();
+	$w("#lblTotalEstimate").hide();
+	$w("#CompanyName2").hide();
+	$w("#CompanyName3").hide();
+	$w("#Deductible1").hide();
+	$w("#Deductible2").hide();
+	$w("#Deductible3").hide();
+	$w("#TotalEstimate1").hide();
+	$w("#TotalEstimate2").hide();
+	$w("#TotalEstimate3").hide();
+	$w("#buttonSelect1").hide();
+	$w("#buttonSelect2").hide();
+	$w("#buttonSelect3").hide();
+	$w("#buttonProposal").hide();
+	$w("#QuoteUserEmail").text = "";
+	$w("#lblQuoteUserEmail").hide();
+	$w("#QuoteUserEmail").hide();
+
+	$w("#PropertyLiabilityTitle2").hide();
+	$w("#DeductibleAmount2").hide();
+	$w("#TotalAmount2").hide();
+
+	$w("#PropertyLiabilityTitle3").hide();
+	$w("#DeductibleAmount3").hide();
+	$w("#TotalAmount3").hide();
+
+	$w("#FloodAcceptFloodQuote").hide();
+	$w("#lblFloodZoneInput").hide();
+	$w("#FloodZoneInput").hide();
+	$w("#lblFloodPremiumInput").hide();
+	$w("#FloodTotalPremiumInput").hide();
+	$w("#NeptuneInsurance").hide();
+
+	$w("#buttonQuote").enable();
+	$w("#buttonClearQuote").hide();
+
+	$w("#FloodMessageDisplay").hide();
+	$w("#IsRenewalQuote").hide();
+	$w("#buttonBindRequest").hide();
+	$w("#buttonSendToICSS").hide();
+	$w("#buttonEvidence").hide();
+	$w("#BindUserEmail").text = "";
+	$w("#lblBindUserEmail").hide();
+	$w("#BindUserEmail").hide();
+	$w("#BindMessageDisplay").text = "";
+	$w("#BindMessageDisplay").hide();
+
+	$w("#PolicyTitleInsCo2").text = 'InsCo1';
+	$w("#PolicyTitleInsCo2").text = 'InsCo2';
+	ProposalInsCo2ShowHide("Hide");
+	ProposalExpandCollapse('Collapse');
+	if (ResetClientProperty == 'Y') {
+		ClientPropertyClear();
+		ClientPropertyInfoExpandCollapse('Collapse');
+	}
+	console.log("formFieldsReset End");
+}
+
+export function InfoClientEmailAddress_change(event) {
+	console.log("InfoClientEmailAddress Start  BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientEmailAddress").value +"x")
+	if (BeforeFieldValue !== $w("#InfoClientEmailAddress").value) {
+		BindMessageClear();
+		console.log("ICEAC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+export function InfoClientMailingAddress_change(event) {
+	console.log("InfoClientMailingAddress  Start BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientMailingAddress").value +"x")
+	if (BeforeFieldValue !== $w("#InfoClientMailingAddress").value) {
+		BindMessageClear();
+		console.log("ICMAC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+export function InfoClientMailingCity_change(event) {
+	console.log("InfoClientMailingCity  Start BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientMailingCity").value +"x")
+	if (BeforeFieldValue !== $w("#InfoClientMailingCity").value) {
+		BindMessageClear();
+		console.log("ICMCC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+export function InfoClientMailingState_change(event) {
+	console.log("InfoClientMailingState  Start BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientMailingState").value +"x")
+	if (BeforeFieldValue !== $w("#InfoClientMailingState").value) {
+		BindMessageClear();
+		console.log("ICMSC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+export function InfoClientMailingZipcode_change(event) {
+	console.log("InfoClientMailingZipcode  Start BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientMailingZipcode").value +"x")
+	if (BeforeFieldValue !== $w("#InfoClientMailingZipcode").value) {
+		BindMessageClear();
+		console.log("ICMZC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+export function InfoClientPhoneNumber_change(event) {
+	console.log("InfoClientPhoneNumber  Start BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientPhoneNumber").value +"x")
+	if (BeforeFieldValue !== $w("#InfoClientPhoneNumber").value) {
+		BindMessageClear();
+		console.log("ICPNC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+export function InfoClientFirstName_change(event) {
+	console.log("InfoClientFirstName  Start BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientFirstName").value +"x")
+	if (BeforeFieldValue !== $w("#InfoClientFirstName").value) {
+		console.log("ICFNC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+		$w("#ProposalClientFirstNameInput").value = $w("#InfoClientFirstName").value;
+	}
+}
+
+export function InfoClientLastName_change(event) {
+	console.log("InfoClientLastName Start BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientLastName").value +"x")
+	if (BeforeFieldValue !== $w("#InfoClientLastName").value) {
+		console.log("ICLNC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+		$w("#ProposalClientLastNameInput").value = $w("#InfoClientLastName").value;
+	}
+}
+
+export function InfoPropertyAddress_change(event) {
+	console.log("InfoPropertyAddress PolicyIsBound:"+ PolicyIsBound)
+	ProposalMessageClear();
+	BindMessageClear();
+	$w("#ProposalMessage").hide();
+	$w("#ProposalStreetAddressInput").value = $w("#InfoPropertyAddress").value;
+}
+
+export function PolicyQuoteClear() {
+	$w("#lblCityState").hide();
+	$w("#lblCounty").hide();
+	$w("#CityState").hide();
+	$w("#County").hide();
+	$w("#lblDeductibleTitle").hide();
+	$w("#lblTotalEstimate").hide();
+	$w("#CompanyName2").hide();
+	$w("#CompanyName3").hide();
+	$w("#Deductible1").hide();
+	$w("#Deductible2").hide();
+	$w("#Deductible3").hide();
+	$w("#TotalEstimate1").hide();
+	$w("#TotalEstimate2").hide();
+	$w("#TotalEstimate3").hide();
+	$w("#buttonSelect1").hide();
+	$w("#buttonSelect2").hide();
+	$w("#buttonSelect3").hide();
+	$w("#buttonProposal").hide();
+	$w("#QuoteUserEmail").text = "";
+	$w("#lblQuoteUserEmail").hide();
+	$w("#QuoteUserEmail").hide();
+
+	$w("#IsRenewalQuote").hide();
+	$w("#buttonBindRequest").hide();
+	$w("#buttonEvidence").hide();
+	$w("#buttonSendToICSS").hide();
+
+	ProposalExpandCollapse('Collapse');
+
+	PolicyIsBound = 'No';
+	SelectNumber = '';
+}
+
+export function PolicyQuoteRestore(StreetAddress) {
+	var SavedRecord = '';
+	var FloodQuoteNumber = '';
+
+	console.log("PolicyQuoteRestore Start - Address-" + StreetAddress)
+
+	buttonClearQuote_click();
+
+	PremiumResult = [];
+
+
+	PolicyQuoteFind(StreetAddress)
+			.then(function(ParamReturn) {
+        
+		console.log("PolicyQuoteRestore Policy Find Returned-" + ParamReturn.items.length )
+		if (ParamReturn.items.length == 0) {
+			$w("#ErrorMessageDisplay1").text = "Property Not Found";
+			$w("#ErrorMessageDisplay1").show()
+			QuoteSaveID = '';
+			QuoteRecordNumber = '';
+			QuotePolicyNumber = '';
+		}
+		else {
+			
+			let FormRestoreFields = ParamReturn.items[0];
+			
+			QuoteSaveID = FormRestoreFields._id;
+			QuoteRecordNumber = FormRestoreFields.recordNumber;
+			QuotePolicyNumber = FormRestoreFields.qDPolicyNumber;
+			console.log("PolicyQuoteRestore Quote Save ID-" + QuoteSaveID + "QuoteRecordNumber-" + QuoteRecordNumber + ", Quote PolicyNumber-" + QuotePolicyNumber);
+
+			$w("#PropertyStreetAddressInput").value = FormRestoreFields.pDAddress;
+			$w("#PropertyZipcodeInput").value = FormRestoreFields.iFPropertyZipcodeInput;
+
+			$w("#PropertyUnitCountInput").value = FormRestoreFields.iFPropertyUnitCountInput;
+			$w("#PropertySqftInput").value = FormRestoreFields.iFPropertySqftInput;
+		 	$w("#PropertyDwellingAmountInput").value = FormRestoreFields.iFPropertyDwellingAmountInput;
+			$w("#PropertyPricePerSqFtInput").value = FormRestoreFields.iFPropertyPricePerSqftInput;
+			$w("#PropertyAdditionalBuildingInput").value = FormRestoreFields.iFPropertyAdditionalBuildingInput;
+			$w("#PropertyPersonalPropertyInput").value = FormRestoreFields.iFPropertyPersonalPropertyInput;
+			$w("#PropertyMonthlyRentInput").value = FormRestoreFields.iFPropertyMonthlyRent;
+			$w("#PropertyAnnualRent").value = FormRestoreFields.iFPropertyAnnualRent;
+			if (FormRestoreFields.iSInstitutional == "Yes") {
+				$w("#IsInstitutionalInput").checked = true;
+			} else {
+				$w("#IsInstitutionalInput").checked = false;
+			}
+			if (FormRestoreFields.iSWindHail == "Yes") {
+				$w("#IsWindHailInput").checked = true;
+			} else {
+				$w("#IsWindHailInput").checked = false;
+			}
+			$w("#LowReplacementCost").text = FormRestoreFields.iFLowReplacementCost; 
+			$w("#HighReplacementCost").text = FormRestoreFields.iFHighReplacementCost;
+			FloodQuoteNumber = FormRestoreFields.iFFloodQuoteNumber;
+			if (FloodQuoteNumber == null) {
+				FloodQuoteNumber = '';
+			}
+			FloodQuote = {                
+    			"ResponseToken": "",
+	    		"QuoteInfo": {
+        			"quoteNumber": FloodQuoteNumber,
+					"link": FormRestoreFields.iFFloodLink,
+					"ProducerName": "Michelle Afflalo",
+        			"application": {
+						"firstName": FormRestoreFields.iLFirstName,
+						"lastName": FormRestoreFields.iLLastName,
+						"mailingAddr1": FormRestoreFields.iLMailingAddress,
+						"mailingCity": FormRestoreFields.iLMailingCity,
+						"mailingState": FormRestoreFields.iLMailingState,
+						"mailingZip": FormRestoreFields.iLMailingZipcode,
+						"mailingCountry": "US",
+            			"addr1":FormRestoreFields.pDAddress,
+            			"city": FormRestoreFields.pR1City,
+						"state": FormRestoreFields.pR1State,
+            			"zip": FormRestoreFields.iFPropertyZipcodeInput,
+						"email": FormRestoreFields.iLEmailAddress,
+						"phone": FormRestoreFields.iLPhoneNumber,
+						"floodZone": FormRestoreFields.iFFloodZoneInput,
+            			"buildingCoverage": FormRestoreFields.iFFloodBuildingCoverage,
+            			"contentCoverage": FormRestoreFields.iFFloodPersonalProperty,
+            			"deductible": FormRestoreFields.iFFloodDeductible},
+					"policy": {
+						"basePremium": FormRestoreFields.iFFloodBasePremium,
+						"optionalCoveragePremium": FormRestoreFields.iFFloodOptionalPremium,
+						"policyFee": FormRestoreFields.iFFloodPolicyFee,
+						"surplusTax": FormRestoreFields.iFFloodSurplusTax,
+						"totalPremium": FormRestoreFields.iFFloodTotalPremiumInput,
+						"coverageA": FormRestoreFields.iFFloodCoverageA,
+						"coverageB": FormRestoreFields.iFFloodCoverageB
+					},
+					"errorList": []
+    			}
+			};
+			console.log("PolicyQuoteRestore Flood Total Premium-" + FloodQuote.QuoteInfo.policy.totalPremium + ", Optional Premium-" + FloodQuote.QuoteInfo.policy.optionalCoveragePremium);
+			$w("#FloodZoneInput").value = FormRestoreFields.iFFloodZoneInput;
+			$w("#FloodTotalPremiumInput").value = formatDollarsCents(FormRestoreFields.iFFloodTotalPremiumInput);
+			$w("#NeptuneInsurance").link = FormRestoreFields.iFFloodLink;
+			if (FormRestoreFields.iFFloodAcceptFloodQuote == "Yes") {
+				$w("#FloodAcceptFloodQuote").checked = true;
+			} else {
+				$w("#FloodAcceptFloodQuote").checked = false;
+			}
+			FloodAcceptFloodQuoteMessageSet();
+			
+			QuoteRequestorEmail = FormRestoreFields.iFQuoteRequestorEmail;
+			$w("#QuoteUserEmail").text = QuoteRequestorEmail;
+			QuoteRequestorDate = FormRestoreFields.iFQuoteRequestorDate;
+
+			if (FormRestoreFields.pR1QuoteRequestorEmail !== '') {
+				const SavedRecord = {
+                    "QuoteRequestorEmail": FormRestoreFields.pR1QuoteRequestorEmail,
+                    "QuoteRequestorDate": FormRestoreFields.pR1QuoteRequestorDate,
+                    "Zipcode": FormRestoreFields.pR1Zipcode,
+                    "City": FormRestoreFields.pR1City,
+                    "County": FormRestoreFields.pR1County,
+                    "State": FormRestoreFields.pR1State,
+                    "InsuranceCompany": FormRestoreFields.pR1InsuranceCompany,
+					"InsuranceCompanyNaic": FormRestoreFields.pR1InsuranceCompanyNaic,
+                    "RateStatus": FormRestoreFields.pR1RateStatus,
+                    "RateStatusReason": FormRestoreFields.pR1RateStatusReason,
+                    "DeductibleAmount": FormRestoreFields.pR1DeductibleAmount,
+					"PropertyRate": FormRestoreFields.pR1PropertyRate,
+                    "UmbrellaCoverage": FormRestoreFields.pR1UmbrellaCoverage,
+                    "BusinessPersonalPropertyCoverage": FormRestoreFields.pR1BusinessPersonalPropertyCoverage,
+                    "AnnualRentCoverage": FormRestoreFields.pR1AnnualRentCoverage,
+                    "WaterBackupCoverage": FormRestoreFields.pR1WaterBackupCoverage,
+					"FloodCoverage": FormRestoreFields.pR1FloodCoverage,
+                    "EarthquakeCoverage": FormRestoreFields.pR1EarthquakeCoverage,
+                    "WindHailCoverage": FormRestoreFields.pR1WindHailCoverage,
+                    "NamedStormDeductible": FormRestoreFields.pR1NamedStormDeductible,
+                    "TIV": FormRestoreFields.pR1Tiv,
+					"PropertyPremiumAmount": FormRestoreFields.pR1PropertyPremiumAmount,
+					"LiabilityPremiumAmount": FormRestoreFields.pR1LiabilityPremiumAmount,
+					"TotalPremiumAmount": FormRestoreFields.pR1TotalPremiumAmount,
+					"TaxesFeesAmount": FormRestoreFields.pR1TaxesFeesAmount,
+					"BrokerFeeAmount": FormRestoreFields.pR1BrokerFeeAmount,
+                    "TotalAmount": FormRestoreFields.pR1TotalAmount
+                }
+                PremiumResult.push(SavedRecord)
+			}
+
+			if (FormRestoreFields.pR2QuoteRequestorEmail !== '') {
+				const SavedRecord = {
+                    "QuoteRequestorEmail": FormRestoreFields.pR2QuoteRequestorEmail,
+                    "QuoteRequestorDate": FormRestoreFields.pR2QuoteRequestorDate,
+                    "Zipcode": FormRestoreFields.pR2Zipcode,
+                    "City": FormRestoreFields.pR2City,
+                    "County": FormRestoreFields.pR2County,
+                    "State": FormRestoreFields.pR2State,
+                    "InsuranceCompany": FormRestoreFields.pR2InsuranceCompany,
+					"InsuranceCompanyNaic": FormRestoreFields.pR2InsuranceCompanyNaic,
+                    "RateStatus": FormRestoreFields.pR2RateStatus,
+                    "RateStatusReason": FormRestoreFields.pR2RateStatusReason,
+                    "DeductibleAmount": FormRestoreFields.pR2DeductibleAmount,
+					"PropertyRate": FormRestoreFields.pR2PropertyRate,
+                    "UmbrellaCoverage": FormRestoreFields.pR2UmbrellaCoverage,
+                    "BusinessPersonalPropertyCoverage": FormRestoreFields.pR2BusinessPersonalPropertyCoverage,
+                    "AnnualRentCoverage": FormRestoreFields.pR2AnnualRentCoverage,
+                    "WaterBackupCoverage": FormRestoreFields.pR2WaterBackupCoverage,
+					"FloodCoverage": FormRestoreFields.pR2FloodCoverage,
+                    "EarthquakeCoverage": FormRestoreFields.pR2EarthquakeCoverage,
+                    "WindHailCoverage": FormRestoreFields.pR2WindHailCoverage,
+                    "NamedStormDeductible": FormRestoreFields.pR2NamedStormDeductible,
+                    "TIV": FormRestoreFields.pR2Tiv,
+					"PropertyPremiumAmount": FormRestoreFields.pR2PropertyPremiumAmount,
+					"LiabilityPremiumAmount": FormRestoreFields.pR2LiabilityPremiumAmount,
+					"TotalPremiumAmount": FormRestoreFields.pR2TotalPremiumAmount,
+					"TaxesFeesAmount": FormRestoreFields.pR2TaxesFeesAmount,
+					"BrokerFeeAmount": FormRestoreFields.pR2BrokerFeeAmount,
+                    "TotalAmount": FormRestoreFields.pR2TotalAmount
+                }
+                PremiumResult.push(SavedRecord)
+			}
+
+			if (FormRestoreFields.pR3QuoteRequestorEmail !== '') {
+				const SavedRecord = {
+                    "QuoteRequestorEmail": FormRestoreFields.pR3QuoteRequestorEmail,
+                    "QuoteRequestorDate": FormRestoreFields.pR3QuoteRequestorDate,
+                    "Zipcode": FormRestoreFields.pR3Zipcode,
+                    "City": FormRestoreFields.pR3City,
+                    "County": FormRestoreFields.pR3County,
+                    "State": FormRestoreFields.pR3State,
+                    "InsuranceCompany": FormRestoreFields.pR3InsuranceCompany,
+					"InsuranceCompanyNaic": FormRestoreFields.pR3InsuranceCompanyNaic,
+                    "RateStatus": FormRestoreFields.pR3RateStatus,
+                    "RateStatusReason": FormRestoreFields.pR3RateStatusReason,
+                    "DeductibleAmount": FormRestoreFields.pR3DeductibleAmount,
+					"PropertyRate": FormRestoreFields.pR3PropertyRate,
+                    "UmbrellaCoverage": FormRestoreFields.pR3UmbrellaCoverage,
+                    "BusinessPersonalPropertyCoverage": FormRestoreFields.pR3BusinessPersonalPropertyCoverage,
+                    "AnnualRentCoverage": FormRestoreFields.pR3AnnualRentCoverage,
+                    "WaterBackupCoverage": FormRestoreFields.pR3WaterBackupCoverage,
+					"FloodCoverage": FormRestoreFields.pR3FloodCoverage,
+                    "EarthquakeCoverage": FormRestoreFields.pR3EarthquakeCoverage,
+                    "WindHailCoverage": FormRestoreFields.pR3WindHailCoverage,
+                    "NamedStormDeductible": FormRestoreFields.pR3NamedStormDeductible,
+                    "TIV": FormRestoreFields.pR3Tiv,
+					"PropertyPremiumAmount": FormRestoreFields.pR3PropertyPremiumAmount,
+					"LiabilityPremiumAmount": FormRestoreFields.pR3LiabilityPremiumAmount,
+					"TotalPremiumAmount": FormRestoreFields.pR3TotalPremiumAmount,
+					"TaxesFeesAmount": FormRestoreFields.pR3TaxesFeesAmount,
+					"BrokerFeeAmount": FormRestoreFields.pR3BrokerFeeAmount,
+                    "TotalAmount": FormRestoreFields.pR3TotalAmount
+                }
+                PremiumResult.push(SavedRecord)
+			}
+			console.log("PolicyQuoteRestore Restore Premium  Result Taxes Fees-" + formatDollarsCents(PremiumResult[2].TaxesFeesAmount) + ", Database Taxes Fees-" + FormRestoreFields.pR3TaxesFeesAmount);
+			PremiumResultScreenFieldsSet();
+
+			$w("#InfoClientLastName").value = FormRestoreFields.iLLastName;
+			$w("#ProposalClientLastNameInput").value = FormRestoreFields.iLLastName;
+			$w("#InfoClientFirstName").value = FormRestoreFields.iLFirstName;
+			$w("#ProposalClientFirstNameInput").value = FormRestoreFields.iLFirstName;
+			$w("#InfoClientCompanyName").value = FormRestoreFields.iLCompanyName;
+			$w("#InfoClientMailingAddress").value = FormRestoreFields.iLMailingAddress;
+			$w("#InfoClientMailingCity").value = FormRestoreFields.iLMailingCity;
+			$w("#InfoClientMailingState").value = FormRestoreFields.iLMailingState;
+			$w("#InfoClientMailingZipcode").value = FormRestoreFields.iLMailingZipcode;
+			$w("#InfoClientPhoneNumber").value = FormRestoreFields.iLPhoneNumber;
+			$w("#InfoClientEmailAddress").value = FormRestoreFields.iLEmailAddress;
+
+			ProposalRequestorEmail = FormRestoreFields.qDProposalRequestorEmail;
+			ProposalRequestorDate = FormRestoreFields.qDProposalRequestorDate;
+			SelectNumber = FormRestoreFields.qDSelectNumber;
+			SelectRequestorEmail = FormRestoreFields.qDSelectRequestorEmail;
+			SelectRequestorDate = FormRestoreFields.qDSelectRequestorDate;
+			PolicyIsBound = FormRestoreFields.qDPolicyIsBound;
+			BindRequestorEmail = FormRestoreFields.qDBindRequestorEmail;
+			BindRequestorDate = FormRestoreFields.qDBindRequestorDate;
+			EvidenceRequestorEmail = FormRestoreFields.qDEvidenceRequestorEmail;
+			$w("#BindUserEmail").text = BindRequestorEmail;
+			EvidenceRequestorDate = FormRestoreFields.qDEvidenceRequestorDate;
+			$w("#InfoQuoteEffectiveDate").value = FormRestoreFields.qDEffectiveDate;
+			$w("#InfoQuoteExpirationDate").value = FormRestoreFields.qDExpirationDate;
+			$w("#InfoQuotePolicyNumber").value = FormRestoreFields.qDPolicyNumber;
+
+			$w("#InfoPropertyCode").value = FormRestoreFields.pDAddressCode;
+			$w("#InfoPropertyAddress").value = FormRestoreFields.pDAddress;
+			$w("#ProposalStreetAddressInput").value = FormRestoreFields.pDAddress;
+			$w("#InfoPropertyCity").text = FormRestoreFields.pDCity;
+			$w("#InfoPropertyState").text = FormRestoreFields.pDState;
+			$w("#InfoPropertyZipcode").text = FormRestoreFields.pDZipcode;
+			$w("#InfoPropertyCounty").text = FormRestoreFields.pDCounty;
+			$w("#InfoPropertyOwnershipEntity").value = FormRestoreFields.pDOwnershipEntity;
+			$w("#InfoPropertyYearBuilt").value = FormRestoreFields.pDYearBuilt;
+			$w("#InfoPropertyNumberUnits").text = FormRestoreFields.pDNumberUnits;
+			$w("#InfoPropertyNumberBedrooms").value = FormRestoreFields.pDNumberBedrooms;
+			$w("#InfoPropertyNumberBaths").value = FormRestoreFields.pDNumberBaths;
+			$w("#InfoPropertyNumberStories").value = FormRestoreFields.pDNumberStories;
+			$w("#InfoPropertySquareFootage").text = FormRestoreFields.pDSquareFootage;
+			$w("#InfoPropertyPricePerSqFt").text = FormRestoreFields.pDPricePerSqFt;
+			$w("#InfoPropertyConstructionType").value = FormRestoreFields.pDConstructionType;
+			$w("#InfoPropertyWiringType").value = FormRestoreFields.pDWiringType;
+			$w("#InfoPropertyCircuitBreakers").value = FormRestoreFields.pDCircuitBreakers;
+			$w("#InfoPropertyFuses").value = FormRestoreFields.pDFuses;
+			$w("#InfoPropertyRoofType").value = FormRestoreFields.pDRoofType;
+			$w("#InfoPropertyYearRoofUpdated").value = FormRestoreFields.pDYearRoofUpdated;
+			$w("#InfoPropertyYearPropertyUpdated").value = FormRestoreFields.pDYearPropertyUpdated;
+			$w("#InfoPropertyGarageType").value = FormRestoreFields.pDGarageType;
+			$w("#InfoPropertyPool").value = FormRestoreFields.pDPool;
+			$w("#InfoPropertyNumberPools").value = FormRestoreFields.pDNumberPools;
+			$w("#InfoPropertyPoolFencedGated").value = FormRestoreFields.pDPoolFencedGated;
+			$w("#InfoPropertyDivingBoard").value = FormRestoreFields.pDDivingBoard;
+			$w("#InfoPropertyFireplace").value = FormRestoreFields.pDFireplace;
+			$w("#InfoPropertySprinklered").value = FormRestoreFields.pDSprinklered;
+			$w("#InfoPropertyGasSmokeDetectors").value = FormRestoreFields.pDGasSmokeDetectors;
+			$w("#InfoPropertyBurglarAlarm").value = FormRestoreFields.pdBurglarAlarm;
+			$w("#InfoPropertySeasonalProperty").value = FormRestoreFields.pDSeasonalProperty;
+			$w("#InfoPropertyCommercialExposure").value = FormRestoreFields.pDCommercialExposure;
+			$w("#InfoPropertyPriorClaims").value = FormRestoreFields.pDPriorClaims;
+			$w("#InfoPropertyClaimDescription").value = FormRestoreFields.pDClaimDescription;
+			$w("#InfoPropertyCurrentInsuranceCompany").value = FormRestoreFields.pDCurrentInsuranceCompany;
+			$w("#InfoPropertyCurrentInsurancePremium").value = FormRestoreFields.pDCurrentInsurancePremium;
+			$w("#InfoPropertyLoanNumber").value = FormRestoreFields.pDLoanNumber;
+			$w("#InfoPropertyMortgageeClause1").value = FormRestoreFields.pDai1Clause1;
+			$w("#InfoPropertyMortgageeClause2").value = FormRestoreFields.pDai1Clause2;
+			$w("#InfoPropertyMortgageeStreetAddress").value = FormRestoreFields.pDai1StreetAddress;
+			$w("#InfoPropertyMortgageeCity").value = FormRestoreFields.pDai1City;
+			$w("#InfoPropertyMortgageeState").value = FormRestoreFields.pDai1State;
+			$w("#InfoPropertyMortgageeZipcode").value = FormRestoreFields.pDai1Zipcode;
+			$w("#InfoInitialPayment").value = FormRestoreFields.pDInitialPayment;
+			$w("#InfoRenewalPayment").value = FormRestoreFields.pDRenewalPayment;
+
+			if (SelectNumber !== '') {
+				QuoteSelectScreenFieldsSet(SelectNumber);
+			}
+			BindRequestLockUnlock();
+		}
+	})
+	.catch( (err) => {
+        let errorMsg = err;
+		$w("#ErrorMessageDisplay1").text = "PolicyQuoteRestore ErrorD-" + errorMsg;
+		$w("#ErrorMessageDisplay1").show()
+    });
+
+	console.log("PolicyQuoteRestore End - Address-" + StreetAddress)
+}
+
+export async function PolicyQuoteSave() {
+	var PremResult1;
+	var PremResult2;
+	var PremResult3;
+	var FloodResult;
+	var IsInstitutional;
+	var IsWindHail;
+	var FloodAccept;
+
+	console.log("PolicyQuoteSave Policy Quote Save Start");
+	
+	if (PremiumResult.length > 0) {
+		console.log("PolicyQuoteSave Premium Result 1, Premium-" + PremiumResult[0].TotalAmount);
+		PremResult1 = {
+			"QuoteRequestorEmail": PremiumResult[0].QuoteRequestorEmail,
+			"QuoteRequestorDate": PremiumResult[0].QuoteRequestorDate,
+            "Zipcode": PremiumResult[0].Zipcode,
+            "City": PremiumResult[0].City,
+            "County": PremiumResult[0].County,
+            "State": PremiumResult[0].State,
+            "InsuranceCompany": PremiumResult[0].InsuranceCompany,
+			"InsuranceCompanyNaic": PremiumResult[0].InsuranceCompanyNaic,
+            "RateStatus": PremiumResult[0].RateStatus,
+            "RateStatusReason": PremiumResult[0].RateStatusReason,
+            "DeductibleAmount": PremiumResult[0].DeductibleAmount,
+			"PropertyRate": PremiumResult[0].PropertyRate,
+			"UmbrellaCoverage": PremiumResult[0].UmbrellaCoverage,
+			"BusinessPersonalPropertyCoverage": PremiumResult[0].BusinessPersonalPropertyCoverage,
+            "AnnualRentCoverage": PremiumResult[0].AnnualRentCoverage,
+            "WaterBackupCoverage": PremiumResult[0].WaterBackupCoverage,
+            "FloodCoverage": PremiumResult[0].FloodCoverage,
+            "EarthquakeCoverage": PremiumResult[0].EarthquakeCoverage,
+            "WindHailCoverage": PremiumResult[0].WindHailCoverage,
+            "NamedStormDeductible": PremiumResult[0].NamedStormDeductible,
+			"TIV": PremiumResult[0].TIV,
+			"PropertyPremiumAmount": PremiumResult[0].PropertyPremiumAmount,
+			"LiabilityPremiumAmount": PremiumResult[0].LiabilityPremiumAmount,
+			"TotalPremiumAmount": PremiumResult[0].TotalPremiumAmount,
+			"TaxesFeesAmount": PremiumResult[0].TaxesFeesAmount,
+			"BrokerFeeAmount": PremiumResult[0].BrokerFeeAmount,
+			"TotalAmount": PremiumResult[0].TotalAmount
+        }
+	}
+	else {
+		PremResult1 = {
+			"QuoteRequestorEmail": '',
+			"QuoteRequestorDate": '',
+            "Zipcode": '',
+            "City": '',
+            "County": '',
+            "State": '',
+            "InsuranceCompany": '',
+			"InsuranceCompanyNaic": '',
+            "RateStatus": '',
+            "RateStatusReason": '',
+            "DeductibleAmount": '',
+			"PropertyRate": '',
+			"UmbrellaCoverage": '',
+			"BusinessPersonalPropertyCoverage": '',
+            "AnnualRentCoverage": '',
+            "WaterBackupCoverage": '',
+            "FloodCoverage": '',
+            "EarthquakeCoverage": '',
+            "WindHailCoverage": '',
+			"NamedStormDeductible": '',
+			"TIV": '',
+			"PropertyPremiumAmount": '',
+			"LiabilityPremiumAmount": '',
+			"TotalPremiumAmount": '',
+			"TaxesFeesAmount": '',
+			"BrokerFeeAmount": '',
+			"TotalAmount": '',
+        }
+	}
+	
+	if (PremiumResult.length > 1) {
+		console.log("PolicyQuoteSave Premium Result 2, Premium-" + PremiumResult[1].TotalAmount);
+		PremResult2 = {
+			"QuoteRequestorEmail": PremiumResult[1].QuoteRequestorEmail,
+			"QuoteRequestorDate": PremiumResult[1].QuoteRequestorDate,
+            "Zipcode": PremiumResult[1].Zipcode,
+            "City": PremiumResult[1].City,
+            "County": PremiumResult[1].County,
+            "State": PremiumResult[1].State,
+            "InsuranceCompany": PremiumResult[1].InsuranceCompany,
+			"InsuranceCompanyNaic": PremiumResult[1].InsuranceCompanyNaic,
+            "RateStatus": PremiumResult[1].RateStatus,
+            "RateStatusReason": PremiumResult[1].RateStatusReason,
+            "DeductibleAmount": PremiumResult[1].DeductibleAmount,
+			"PropertyRate": PremiumResult[1].PropertyRate,
+			"UmbrellaCoverage": PremiumResult[1].UmbrellaCoverage,
+			"BusinessPersonalPropertyCoverage": PremiumResult[1].BusinessPersonalPropertyCoverage,
+            "AnnualRentCoverage": PremiumResult[1].AnnualRentCoverage,
+            "WaterBackupCoverage": PremiumResult[1].WaterBackupCoverage,
+            "FloodCoverage": PremiumResult[1].FloodCoverage,
+            "EarthquakeCoverage": PremiumResult[1].EarthquakeCoverage,
+            "WindHailCoverage": PremiumResult[1].WindHailCoverage,
+            "NamedStormDeductible": PremiumResult[1].NamedStormDeductible,
+			"TIV": PremiumResult[1].TIV,
+			"PropertyPremiumAmount": PremiumResult[1].PropertyPremiumAmount,
+			"LiabilityPremiumAmount": PremiumResult[1].LiabilityPremiumAmount,
+			"TotalPremiumAmount": PremiumResult[1].TotalPremiumAmount,
+			"TaxesFeesAmount": PremiumResult[1].TaxesFeesAmount,
+			"BrokerFeeAmount": PremiumResult[1].BrokerFeeAmount,
+			"TotalAmount": PremiumResult[1].TotalAmount
+        }
+	}
+	else {
+		PremResult2 = {
+			"QuoteRequestorEmail": '',
+			"QuoteRequestorDate": '',
+            "Zipcode": '',
+            "City": '',
+            "County": '',
+            "State": '',
+            "InsuranceCompany": '',
+			"InsuranceCompanyNaic": '',
+            "RateStatus": '',
+            "RateStatusReason": '',
+            "DeductibleAmount": '',
+			"PropertyRate": '',
+			"UmbrellaCoverage": '',
+			"BusinessPersonalPropertyCoverage": '',
+            "AnnualRentCoverage": '',
+            "WaterBackupCoverage": '',
+            "FloodCoverage": '',
+            "EarthquakeCoverage": '',
+            "WindHailCoverage": '',
+			"NamedStormDeductible": '',
+			"TIV": '',
+			"PropertyPremiumAmount": '',
+			"LiabilityPremiumAmount": '',
+			"TotalPremiumAmount": '',
+			"TaxesFeesAmount": '',
+			"BrokerFeeAmount": '',
+			"TotalAmount": '',
+        }
+	}
+	
+	if (PremiumResult.length > 2) {
+		console.log("PolicyQuoteSave Premium Result 3, Premium-" + PremiumResult[2].TotalAmount);
+		PremResult3 = {
+			"QuoteRequestorEmail": PremiumResult[2].QuoteRequestorEmail,
+			"QuoteRequestorDate": PremiumResult[2].QuoteRequestorDate,
+            "Zipcode": PremiumResult[2].Zipcode,
+            "City": PremiumResult[2].City,
+            "County": PremiumResult[2].County,
+            "State": PremiumResult[2].State,
+            "InsuranceCompany": PremiumResult[2].InsuranceCompany,
+			"InsuranceCompanyNaic": PremiumResult[2].InsuranceCompanyNaic,
+            "RateStatus": PremiumResult[2].RateStatus,
+            "RateStatusReason": PremiumResult[2].RateStatusReason,
+            "DeductibleAmount": PremiumResult[2].DeductibleAmount,
+			"PropertyRate": PremiumResult[2].PropertyRate,
+			"UmbrellaCoverage": PremiumResult[2].UmbrellaCoverage,
+			"BusinessPersonalPropertyCoverage": PremiumResult[2].BusinessPersonalPropertyCoverage,
+            "AnnualRentCoverage": PremiumResult[2].AnnualRentCoverage,
+            "WaterBackupCoverage": PremiumResult[2].WaterBackupCoverage,
+            "FloodCoverage": PremiumResult[2].FloodCoverage,
+            "EarthquakeCoverage": PremiumResult[2].EarthquakeCoverage,
+            "WindHailCoverage": PremiumResult[2].WindHailCoverage,
+            "NamedStormDeductible": PremiumResult[2].NamedStormDeductible,
+			"TIV": PremiumResult[2].TIV,
+			"PropertyPremiumAmount": PremiumResult[2].PropertyPremiumAmount,
+			"LiabilityPremiumAmount": PremiumResult[2].LiabilityPremiumAmount,
+			"TotalPremiumAmount": PremiumResult[2].TotalPremiumAmount,
+			"TaxesFeesAmount": PremiumResult[2].TaxesFeesAmount,
+			"BrokerFeeAmount": PremiumResult[2].BrokerFeeAmount,
+			"TotalAmount": PremiumResult[2].TotalAmount
+        }
+	}
+	else {
+		PremResult3 = {
+			"QuoteRequestorEmail": '',
+			"QuoteRequestorDate": '',
+            "Zipcode": '',
+            "City": '',
+            "County": '',
+            "State": '',
+            "InsuranceCompany": '',
+			"InsuranceCompanyNaic": '',
+            "RateStatus": '',
+            "RateStatusReason": '',
+            "DeductibleAmount": '',
+			"PropertyRate": '',
+			"UmbrellaCoverage": '',
+			"BusinessPersonalPropertyCoverage": '',
+            "AnnualRentCoverage": '',
+            "WaterBackupCoverage": '',
+            "FloodCoverage": '',
+            "EarthquakeCoverage": '',
+            "WindHailCoverage": '',
+			"NamedStormDeductible": '',
+			"TIV": '',
+			"PropertyPremiumAmount": '',
+			"LiabilityPremiumAmount": '',
+			"TotalPremiumAmount": '',
+			"TaxesFeesAmount": '',
+			"BrokerFeeAmount": '',
+			"TotalAmount": '',
+        }
+	}
+
+	IsInstitutional = "No";
+	if ($w("#IsInstitutionalInput").checked == true) {
+		IsInstitutional = "Yes";
+	}
+	IsWindHail = "No";
+	if ($w("#IsWindHailInput").checked == true) {
+		IsWindHail = "Yes";
+	}
+	FloodAccept = "No";
+	if ($w("#FloodAcceptFloodQuote").checked == true) {
+		FloodAccept = "Yes"
+	}
+	console.log("PolicyQuoteSave Flood Total Premium-" + FloodQuote.QuoteInfo.policy.totalPremium + ", Optional Premium-" + FloodQuote.QuoteInfo.policy.optionalCoveragePremium);
+	if ((FloodQuote.QuoteInfo.quoteNumber === "") || (FloodQuote.QuoteInfo.policy.totalPremium === 0)) {
+		FloodResult = {
+			"FloodAccept": FloodAccept,
+			"BuildingCoverage": 0,
+			"ContentCoverage": 0,
+			"Deductible": 0,
+			"QuoteNumber": "",
+			"FloodLink": "",
+			"FloodZone": "",
+			"BasePremium": 0,
+			"OptionalPremium": 0,
+			"PolicyFee": 0,
+			"SurplusTax": 0,
+			"TotalPremium": 0,
+			"CoverageA": 0,
+			"CoverageB": 0
+		}
+	} else {
+		FloodResult = {
+			"FloodAccept": FloodAccept,
+			"BuildingCoverage": FloodQuote.QuoteInfo.application.buildingCoverage,
+			"ContentCoverage": FloodQuote.QuoteInfo.application.contentCoverage,
+			"Deductible": FloodQuote.QuoteInfo.application.deductible,
+			"QuoteNumber": FloodQuote.QuoteInfo.quoteNumber,
+			"FloodLink": FloodQuote.QuoteInfo.link,
+			"FloodZone": FloodQuote.QuoteInfo.application.floodZone,
+			"BasePremium": FloodQuote.QuoteInfo.policy.basePremium,
+			"OptionalPremium": FloodQuote.QuoteInfo.policy.optionalCoveragePremium,
+			"PolicyFee": FloodQuote.QuoteInfo.policy.policyFee,
+			"SurplusTax": FloodQuote.QuoteInfo.policy.surplusTax,
+			"TotalPremium": FloodQuote.QuoteInfo.policy.totalPremium,
+			"CoverageA": FloodQuote.QuoteInfo.policy.coverageA,
+			"CoverageB": FloodQuote.QuoteInfo.policy.coverageB
+		}
+	}
+
+	const FormSaveFields = {
+		"recordNumber": QuoteRecordNumber,
+		"iFPropertyZipcodeInput": $w("#PropertyZipcodeInput").value,
+		"iFPropertyUnitCountInput": $w("#PropertyUnitCountInput").value,
+		"iFPropertySqftInput": $w("#PropertySqftInput").value,
+		"iFPropertyDwellingAmountInput": $w("#PropertyDwellingAmountInput").value,
+		"iFPropertyPricePerSqftInput": $w("#PropertyPricePerSqFtInput").value,
+		"iFPropertyAdditionalBuildingInput": $w("#PropertyAdditionalBuildingInput").value,
+		"iFPropertyPersonalPropertyInput": $w("#PropertyPersonalPropertyInput").value,
+		"iFPropertyMonthlyRent": $w("#PropertyMonthlyRentInput").value,
+		"iFPropertyAnnualRent": $w("#PropertyAnnualRent").value,
+		"iSInstitutional": IsInstitutional,
+		"iSWindHail": IsWindHail,
+		"iFLowReplacementCost": $w("#LowReplacementCost").text,
+		"iFHighReplacementCost": $w("#HighReplacementCost").text,
+
+		"iFFloodAcceptFloodQuote": FloodResult.FloodAccept,
+		"iFFloodBuildingCoverage": FloodResult.BuildingCoverage,
+		"iFFloodPersonalProperty": FloodResult.ContentCoverage,
+		"iFFloodDeductible": FloodResult.Deductible,
+		"iFFloodQuoteNumber": FloodResult.QuoteNumber,
+		"iFFloodLink": FloodResult.FloodLink,
+		"iFFloodZoneInput": FloodResult.FloodZone,
+		"iFFloodBasePremium": FloodResult.BasePremium,
+		"iFFloodOptionalPremium": FloodResult.OptionalPremium,
+		"iFFloodPolicyFee": FloodResult.PolicyFee,
+		"iFFloodSurplusTax": FloodResult.SurplusTax,
+		"iFFloodTotalPremiumInput": FloodResult.TotalPremium,
+		"iFFloodCoverageA": FloodResult.CoverageA,
+		"iFFloodCoverageB": FloodResult.CoverageB,
+
+		"iFQuoteRequestorEmail": QuoteRequestorEmail,
+		"iFQuoteRequestorDate": QuoteRequestorDate,
+		"pR1QuoteRequestorEmail": PremResult1.QuoteRequestorEmail,
+		"pR1QuoteRequestorDate": PremResult1.QuoteRequestorDate,
+		"pR1Zipcode": PremResult1.Zipcode,
+		"pR1City": PremResult1.City,
+		"pR1County": PremResult1.County,
+		"pR1State": PremResult1.State,
+		"pR1InsuranceCompany": PremResult1.InsuranceCompany,
+		"pR1InsuranceCompanyNaic": PremResult1.InsuranceCompanyNaic,
+		"pR1RateStatus": PremResult1.RateStatus,
+		"pR1RateStatusReason": PremResult1.RateStatusReason,
+		"pR1DeductibleAmount": PremResult1.DeductibleAmount,
+		"pR1PropertyRate": PremResult1.PropertyRate,
+		"pR1UmbrellaCoverage": PremResult1.UmbrellaCoverage,
+		"pR1BusinessPersonalPropertyCoverage": PremResult1.BusinessPersonalPropertyCoverage,
+		"pR1AnnualRentCoverage": PremResult1.AnnualRentCoverage,
+		"pR1WaterBackupCoverage": PremResult1.WaterBackupCoverage,
+		"pR1FloodCoverage": PremResult1.FloodCoverage,
+		"pR1EarthquakeCoverage": PremResult1.EarthquakeCoverage,
+		"pR1WindHailCoverage": PremResult1.WindHailCoverage,
+		"pR1NamedStormDeductible": PremResult1.NamedStormDeductible,
+		"pR1Tiv": PremResult1.TIV,
+		"pR1PropertyPremiumAmount": PremResult1.PropertyPremiumAmount,
+		"pR1LiabilityPremiumAmount": PremResult1.LiabilityPremiumAmount,
+		"pR1TotalPremiumAmount": PremResult1.TotalPremiumAmount,
+		"pR1TaxesFeesAmount": PremResult1.TaxesFeesAmount,
+		"pR1BrokerFeeAmount": PremResult1.BrokerFeeAmount,
+		"pR1TotalAmount": PremResult1.TotalAmount,
+
+		"pR2QuoteRequestorEmail": PremResult2.QuoteRequestorEmail,
+		"pR2QuoteRequestorDate": PremResult2.QuoteRequestorDate,
+		"pR2Zipcode": PremResult2.Zipcode,
+		"pR2City": PremResult2.City,
+		"pR2County": PremResult2.County,
+		"pR2State": PremResult2.State,
+		"pR2InsuranceCompany": PremResult2.InsuranceCompany,
+		"pR2InsuranceCompanyNaic": PremResult2.InsuranceCompanyNaic,
+		"pR2RateStatus": PremResult2.RateStatus,
+		"pR2RateStatusReason": PremResult2.RateStatusReason,
+		"pR2DeductibleAmount": PremResult2.DeductibleAmount,
+		"pR2PropertyRate": PremResult2.PropertyRate,
+		"pR2UmbrellaCoverage": PremResult2.UmbrellaCoverage,
+		"pR2BusinessPersonalPropertyCoverage": PremResult2.BusinessPersonalPropertyCoverage,
+		"pR2AnnualRentCoverage": PremResult2.AnnualRentCoverage,
+		"pR2WaterBackupCoverage": PremResult2.WaterBackupCoverage,
+		"pR2FloodCoverage": PremResult2.FloodCoverage,
+		"pR2EarthquakeCoverage": PremResult2.EarthquakeCoverage,
+		"pR2WindHailCoverage": PremResult2.WindHailCoverage,
+		"pR2NamedStormDeductible": PremResult2.NamedStormDeductible,
+		"pR2Tiv": PremResult2.TIV,
+		"pR2PropertyPremiumAmount": PremResult2.PropertyPremiumAmount,
+		"pR2LiabilityPremiumAmount": PremResult2.LiabilityPremiumAmount,
+		"pR2TotalPremiumAmount": PremResult2.TotalPremiumAmount,
+		"pR2TaxesFeesAmount": PremResult2.TaxesFeesAmount,
+		"pR2BrokerFeeAmount": PremResult2.BrokerFeeAmount,
+		"pR2TotalAmount": PremResult2.TotalAmount,
+
+		"pR3QuoteRequestorEmail": PremResult3.QuoteRequestorEmail,
+		"pR3QuoteRequestorDate": PremResult3.QuoteRequestorDate,
+		"pR3Zipcode": PremResult3.Zipcode,
+		"pR3City": PremResult3.City,
+		"pR3County": PremResult3.County,
+		"pR3State": PremResult3.State,
+		"pR3InsuranceCompany": PremResult3.InsuranceCompany,
+		"pR3InsuranceCompanyNaic": PremResult3.InsuranceCompanyNaic,
+		"pR3RateStatus": PremResult3.RateStatus,
+		"pR3RateStatusReason": PremResult3.RateStatusReason,
+		"pR3DeductibleAmount": PremResult3.DeductibleAmount,
+		"pR3PropertyRate": PremResult3.PropertyRate,
+		"pR3UmbrellaCoverage": PremResult3.UmbrellaCoverage,
+		"pR3BusinessPersonalPropertyCoverage": PremResult3.BusinessPersonalPropertyCoverage,
+		"pR3AnnualRentCoverage": PremResult3.AnnualRentCoverage,
+		"pR3WaterBackupCoverage": PremResult3.WaterBackupCoverage,
+		"pR3FloodCoverage": PremResult3.FloodCoverage,
+		"pR3EarthquakeCoverage": PremResult3.EarthquakeCoverage,
+		"pR3WindHailCoverage": PremResult3.WindHailCoverage,
+		"pR3NamedStormDeductible": PremResult3.NamedStormDeductible,
+		"pR3Tiv": PremResult3.TIV,
+		"pR3PropertyPremiumAmount": PremResult3.PropertyPremiumAmount,
+		"pR3LiabilityPremiumAmount": PremResult3.LiabilityPremiumAmount,
+		"pR3TotalPremiumAmount": PremResult3.TotalPremiumAmount,
+		"pR3TaxesFeesAmount": PremResult3.TaxesFeesAmount,
+		"pR3BrokerFeeAmount": PremResult3.BrokerFeeAmount,
+		"pR3TotalAmount": PremResult3.TotalAmount,
+
+		"iLLastName":  $w("#InfoClientLastName").value,
+		"iLFirstName":  $w("#InfoClientFirstName").value,
+		"iLCompanyName":  $w("#InfoClientCompanyName").value,
+		"iLMailingAddress":  $w("#InfoClientMailingAddress").value,
+		"iLMailingCity":  $w("#InfoClientMailingCity").value,
+		"iLMailingState":  $w("#InfoClientMailingState").value,
+		"iLMailingZipcode":  $w("#InfoClientMailingZipcode").value,
+		"iLPhoneNumber":  $w("#InfoClientPhoneNumber").value,
+		"iLEmailAddress":  $w("#InfoClientEmailAddress").value,
+
+		"qDProposalRequestorEmail":  ProposalRequestorEmail,
+		"qDProposalRequestorDate":  ProposalRequestorDate,
+		"qDSelectNumber":  SelectNumber,
+		"qDSelectRequestorEmail":  SelectRequestorEmail,
+		"qDSelectRequestorDate":  SelectRequestorDate,
+		"qDPolicyIsBound":  PolicyIsBound,
+		"qDBindRequestorEmail":  BindRequestorEmail,
+		"qDBindRequestorDate":  BindRequestorDate,
+		"qDEvidenceRequestorEmail":  EvidenceRequestorEmail,
+		"qDEvidenceRequestorDate":  EvidenceRequestorDate,
+		"qDEffectiveDate":  $w("#InfoQuoteEffectiveDate").value,
+		"qDExpirationDate":  $w("#InfoQuoteExpirationDate").value,
+		"qDPolicyNumber":  QuotePolicyNumber,
+
+		"pDAddressCode":  $w("#InfoPropertyCode").value,
+		"pDAddress":  $w("#PropertyStreetAddressInput").value,
+		"pDCity":  $w("#InfoPropertyCity").text,
+		"pDState":  $w("#InfoPropertyState").text,
+		"pDZipcode":  $w("#InfoPropertyZipcode").text,
+		"pDCounty":  $w("#InfoPropertyCounty").text,
+		"pDOwnershipEntity":  $w("#InfoPropertyOwnershipEntity").value,
+		"pDYearBuilt":  $w("#InfoPropertyYearBuilt").value,
+		"pDNumberUnits":  $w("#InfoPropertyNumberUnits").text,
+		"pDNumberBedrooms":  $w("#InfoPropertyNumberBedrooms").value,
+		"pDNumberBaths":  $w("#InfoPropertyNumberBaths").value,
+		"pDNumberStories":  $w("#InfoPropertyNumberStories").value,
+		"pDSquareFootage":  $w("#InfoPropertySquareFootage").text,
+		"pDPricePerSqFt":  $w("#InfoPropertyPricePerSqFt").text,
+		"pDConstructionType":  $w("#InfoPropertyConstructionType").value,
+		"pDWiringType":  $w("#InfoPropertyWiringType").value,
+		"pDCircuitBreakers":  $w("#InfoPropertyCircuitBreakers").value,
+		"pDFuses":  $w("#InfoPropertyFuses").value,
+		"pDRoofType":  $w("#InfoPropertyRoofType").value,
+		"pDYearRoofUpdated":  $w("#InfoPropertyYearRoofUpdated").value,
+		"pDYearPropertyUpdated":  $w("#InfoPropertyYearPropertyUpdated").value,
+		"pDGarageType":  $w("#InfoPropertyGarageType").value,
+		"pDPool":  $w("#InfoPropertyPool").value,
+		"pDNumberPools":  $w("#InfoPropertyNumberPools").value,
+		"pDPoolFencedGated":  $w("#InfoPropertyPoolFencedGated").value,
+		"pDDivingBoard":  $w("#InfoPropertyDivingBoard").value,
+		"pDFireplace":  $w("#InfoPropertyFireplace").value,
+		"pDSprinklered":  $w("#InfoPropertySprinklered").value,
+		"pDGasSmokeDetectors":  $w("#InfoPropertyGasSmokeDetectors").value,
+		"pdBurglarAlarm":  $w("#InfoPropertyBurglarAlarm").value,
+		"pDSeasonalProperty":  $w("#InfoPropertySeasonalProperty").value,
+		"pDCommercialExposure":  $w("#InfoPropertyCommercialExposure").value,
+		"pDPriorClaims":  $w("#InfoPropertyPriorClaims").value,
+		"pDClaimDescription":  $w("#InfoPropertyClaimDescription").value,
+		"pDCurrentInsuranceCompany":  $w("#InfoPropertyCurrentInsuranceCompany").value,
+		"pDCurrentInsurancePremium":  $w("#InfoPropertyCurrentInsurancePremium").value,
+		"pDLoanNumber":  $w("#InfoPropertyLoanNumber").value,
+		"pDai1Clause1":  $w("#InfoPropertyMortgageeClause1").value,
+		"pDai1Clause2":  $w("#InfoPropertyMortgageeClause2").value,
+		"pDai1StreetAddress":  $w("#InfoPropertyMortgageeStreetAddress").value,
+		"pDai1City":  $w("#InfoPropertyMortgageeCity").value,
+		"pDai1State":  $w("#InfoPropertyMortgageeState").value,
+		"pDai1Zipcode":  $w("#InfoPropertyMortgageeZipcode").value,
+		"pDInitialPayment": $w("#InfoInitialPayment").value,
+		"pDRenewalPayment": $w("#InfoRenewalPayment").value
+	}
+	console.log("PolicyQuoteSave Before Record, QuoteSaveID-" + QuoteSaveID + ", QuoteRecordNumber-" + QuoteRecordNumber + ", QuotePolicyNumber-" + QuotePolicyNumber);
+	await PolicyQuoteAddUpdate(QuoteSaveID, FormSaveFields)
+			.then(function(ParamReturn) {
+        QuoteSaveID = ParamReturn.NewRecordID;
+		QuoteRecordNumber = ParamReturn.RecordNumber;
+		QuotePolicyNumber = ParamReturn.PolicyNumber;
+    })
+    .catch( (err) => {
+        let errorMsg = err;
+		$w("#ErrorMessageDisplay1").text = "ErrorE-" + errorMsg;
+		$w("#ErrorMessageDisplay1").show()
+    });
+	console.log("PolicyQuoteSave  End QuoteSaveID=" + QuoteSaveID + ", QuoteRecordNumber-" + QuoteRecordNumber + ", QuotePolicyNumber-" + QuotePolicyNumber);
+}
+
+export function PremiumResultScreenFieldsSet () {
+	console.log("PremiumResultScreenFieldsSet  Start  PremiumResult.length-" + PremiumResult.length)
+	if (PremiumResult.length > 0) {	
+		if (PremiumResult[0].DeductibleAmount > '') {
+			console.log("PremiumResultScreenFieldsSet Return 1  Deductible Amount -"+ PremiumResult[0].DeductibleAmount + ", Total Amount-" + PremiumResult[0].TotalAmount)
+
+			QuoteRequestorEmail = PremiumResult[0].QuoteRequestorEmail
+			QuoteRequestorDate = PremiumResult[0].QuoteRequestorDate
+
+			$w("#lblCityState").show();
+			$w("#lblTotalEstimate").show();
+			$w("#lblDeductibleTitle").show();
+
+			$w("#CityState").show();
+			$w("#CityState").text = PremiumResult[0].City + ', ' + PremiumResult[0].State;
+
+			$w("#lblCounty").show();
+			$w("#County").show();
+			$w("#County").text = PremiumResult[0].County;
+
+			$w("#Deductible1").value = PremiumResult[0].DeductibleAmount;
+			$w("#Deductible1").show();
+
+			$w("#TotalEstimate1").value = formatDollarsCents(PremiumResult[0].TotalAmount);
+			$w("#TotalEstimate1").show();
+			$w("#buttonSelect1").show();
+			$w("#buttonProposal").show();
+			$w("#QuoteUserEmail").text = QuoteRequestorEmail;
+			$w("#lblQuoteUserEmail").show();
+			$w("#QuoteUserEmail").show();
+
+			FloodQuoteShow();
+
+			$w("#InfoPropertyCity").text = PremiumResult[0].City;
+			$w("#InfoPropertyState").text = PremiumResult[0].State;
+			$w("#InfoPropertyZipcode").text = PremiumResult[0].Zipcode;
+			$w("#InfoPropertyCounty").text = PremiumResult[0].County;
+			$w("#InfoPropertyTIV").value = PremiumResult[0].TIV;
+			$w("#InfoPropertyNumberUnits").text = $w("#PropertyUnitCountInput").value;
+			$w("#InfoPropertySquareFootage").text = $w("#PropertySqftInput").value;
+			$w("#InfoPropertyPricePerSqFt").text = $w("#PropertyPricePerSqFtInput").value;
+
+			console.log("PremiumResultScreenFieldsSet Return 1 InsuranceCompany-" + PremiumResult[0].InsuranceCompany);
+
+			PolicyCount = 1;
+			QuoteCount = 1;
+					
+			PolicyAInsuranceCompany = PremiumResult[0].InsuranceCompany;
+			$w("#PolicyTitleInsCo1").text = 'Policy A';
+
+			$w("#DwellingInsCo1").text = $w("#PropertyDwellingAmountInput").value;
+			$w("#PersonalPropertyInsCo1").text = PremiumResult[0].BusinessPersonalPropertyCoverage;
+			$w("#LossRentsInsCo1").text = PremiumResult[0].AnnualRentCoverage;
+			$w("#RevFlowInsCo1").text = PremiumResult[0].WaterBackupCoverage;
+			$w("#EarthquakeInsCo1").text = PremiumResult[0].EarthquakeCoverage;
+			$w("#WindHailInsCo1").text = PremiumResult[0].WindHailCoverage;
+					
+			$w("#CompanyName1").text = 'Policy A';
+			$w("#DeductibleAmount1").text = PremiumResult[0].DeductibleAmount;
+			$w("#TotalAmount1").text = formatDollarsCents(PremiumResult[0].TotalAmount);
+					
+			$w("#ProposalCityStateZipAddress").text = PremiumResult[0].City + ', ' + PremiumResult[0].State + ' ' + PremiumResult[0].Zipcode;
+			ProposalExpandCollapse('Expand');
+
+			$w("#buttonClearQuote").show();
+			
+			console.log("PremiumResultScreenFieldsSet Return 1 - End")
+		}
+		else {
+			$w("#ErrorMessageDisplay1").text = PremiumResult[0].RateStatus + " - " + PremiumResult[0].RateStatusReason;
+			$w("#ErrorMessageDisplay1").show()
+		}
+	}
+			
+	if (PremiumResult.length > 1) {	
+		if (PremiumResult[1].DeductibleAmount > '') {
+			console.log("PremiumResultScreenFieldsSet Return 2  Deductible Amount -"+ PremiumResult[1].DeductibleAmount + ", Total Amount-" + PremiumResult[1].TotalAmount)
+
+			$w("#Deductible2").value = PremiumResult[1].DeductibleAmount;
+			$w("#Deductible2").show();
+
+			$w("#TotalEstimate2").value = formatDollarsCents(PremiumResult[1].TotalAmount);
+			$w("#TotalEstimate2").show();
+			$w("#buttonSelect2").show();
+					
+			console.log("PremiumResultScreenFieldsSet Return 2  Title1 InsCo-"+ $w("#PolicyTitleInsCo1").text + ",Title2 InsCo-"+ $w("#PolicyTitleInsCo2").text +", Result InsCo-" + PremiumResult[1].InsuranceCompany)
+			if ((PolicyAInsuranceCompany !== PremiumResult[1].InsuranceCompany) && ($w("#PolicyTitleInsCo2").text == 'InsCo2')) {
+				console.log("PremiumResultScreenFieldsSet Return 2 InsuranceCompany-" + PremiumResult[1].InsuranceCompany);
+
+				PolicyCount = PolicyCount + 1;
+						
+				PolicyBInsuranceCompany = PremiumResult[1].InsuranceCompany;
+						
+				$w("#PolicyTitleInsCo2").text = 'Policy B';
+				$w("#DwellingInsCo2").text = $w("#PropertyDwellingAmountInput").value;
+				$w("#PersonalPropertyInsCo2").text = PremiumResult[1].BusinessPersonalPropertyCoverage;
+				$w("#LossRentsInsCo2").text = PremiumResult[1].AnnualRentCoverage;
+				$w("#RevFlowInsCo2").text = PremiumResult[1].WaterBackupCoverage;
+				$w("#EarthquakeInsCo2").text = PremiumResult[1].EarthquakeCoverage;
+				$w("#WindHailInsCo2").text = PremiumResult[1].WindHailCoverage;
+				ProposalInsCo2ShowHide("Show");
+			}
+
+			$w("#PropertyLiabilityTitle2").show();
+			$w("#PropertyLiabilityTitle3").show();
+			if (PremiumResult[1].InsuranceCompany == PolicyAInsuranceCompany) {
+				$w("#CompanyName2").text = 'Policy A';
+			}
+			else {
+				$w("#CompanyName2").text = 'Policy B';
+			}
+			QuoteCount = QuoteCount + 1;
+			$w("#CompanyName2").show();
+			$w("#DeductibleAmount2").text = PremiumResult[1].DeductibleAmount;
+			$w("#DeductibleAmount2").show();
+			$w("#TotalAmount2").text = formatDollarsCents(PremiumResult[1].TotalAmount)
+			$w("#TotalAmount2").show();
+
+			console.log("PremiumResultScreenFieldsSet Return 2 - End")
+		}
+	}
+
+	if (PremiumResult.length > 2) {	
+		if (PremiumResult[2].DeductibleAmount > '') {
+			console.log("PremiumResultScreenFieldsSet Return 3  Deductible Amount -"+ PremiumResult[2].DeductibleAmount + ", Total Amount-" + PremiumResult[2].TotalAmount)
+
+			$w("#Deductible3").value = PremiumResult[2].DeductibleAmount;
+			$w("#Deductible3").show();
+
+			$w("#TotalEstimate3").value = formatDollarsCents(PremiumResult[2].TotalAmount);
+			$w("#TotalEstimate3").show();
+			$w("#buttonSelect3").show();
+					
+			console.log("PremiumResultScreenFieldsSet Return 3  Title1 InsCo-"+ $w("#PolicyTitleInsCo1").text + ",Title2 InsCo-"+ $w("#PolicyTitleInsCo2").text +", Result InsCo-" + PremiumResult[2].InsuranceCompany)
+			if ((PolicyAInsuranceCompany !== PremiumResult[2].InsuranceCompany) && ($w("#PolicyTitleInsCo2").text == 'InsCo2')) {
+				console.log("PremiumResultScreenFieldsSet Return 3 InsuranceCompany-" + PremiumResult[2].InsuranceCompany);
+						
+				PolicyCount = PolicyCount + 1;
+						
+				PolicyBInsuranceCompany = PremiumResult[2].InsuranceCompany;
+				$w("#PolicyTitleInsCo2").text = 'Policy B';
+
+				$w("#DwellingInsCo2").text = $w("#PropertyDwellingAmountInput").value;
+				$w("#PersonalPropertyInsCo2").text = PremiumResult[2].BusinessPersonalPropertyCoverage;
+				$w("#LossRentsInsCo2").text = PremiumResult[2].AnnualRentCoverage;
+				$w("#RevFlowInsCo2").text = PremiumResult[2].WaterBackupCoverage;
+				$w("#EarthquakeInsCo2").text = PremiumResult[2].EarthquakeCoverage;
+				$w("#WindHailInsCo2").text = PremiumResult[2].WindHailCoverage;
+				ProposalInsCo2ShowHide("Show");
+			}
+
+			$w("#PropertyLiabilityTitle3").show();
+			if (PremiumResult[2].InsuranceCompany == PolicyAInsuranceCompany) {
+				$w("#CompanyName3").text = 'Policy A';
+			}
+			else {
+				$w("#CompanyName3").text = 'Policy B';
+			}
+			QuoteCount = QuoteCount + 1;
+			$w("#CompanyName3").show();
+			$w("#DeductibleAmount3").text = PremiumResult[2].DeductibleAmount;
+			$w("#DeductibleAmount3").show();
+			$w("#TotalAmount3").text = formatDollarsCents(PremiumResult[2].TotalAmount)
+			$w("#TotalAmount3").show();
+
+			console.log("PremiumResultScreenFieldsSet Return 3 - End")
+		}
+	}
+}
+
+export function PropertyAddtionalBuildingInput_change(event) {
+	$w("#PropertyAdditionalBuildingInput").value = formatDollarsOnly(cleanstring($w("#PropertyAdditionalBuildingInput").value))
+}
+
+export function PropertyDwellingAmountInput_change(event) {
+	
+	console.log("PDAIC Change Event")
+	if (BeforeFieldValue !== $w("#PropertyDwellingAmountInput").value) {
+		console.log("PDAIC Field Changed")
+		ErrorMessageDisplayClear();
+		PolicyQuoteClear();
+
+		$w("#PropertyDwellingAmountInput").value = formatDollarsOnly(cleanstring($w("#PropertyDwellingAmountInput").value))
+		if ($w("#PropertyDwellingAmountInput").value !== "" && $w("#PropertySqftInput").value !== "") {
+			//console.log("PDA PricePerSqFt-"+ Number(cleanstring($w("#PropertyDwellingAmountInput").value)) / Number(cleanstring($w("#PropertySqftInput").value)))
+			$w("#PropertyPricePerSqFtInput").value = formatDollarsOnly(Number(cleanstring($w("#PropertyDwellingAmountInput").value)) / Number(cleanstring($w("#PropertySqftInput").value)));
+		}
+	}
+
+	if ($w("#PropertyDwellingAmountInput").value !== "") {
+		$w("#buttonClearQuote").show();
+	}
+}
+
+export function PropertyPricePerSqFtInput_change(event) {
+	
+	console.log("PPPSIC Sqft Change Event")
+	if (BeforeFieldValue !== $w("#PropertyPricePerSqFtInput").value) {
+		console.log("PPPSIC Field Changed")
+		ErrorMessageDisplayClear();
+		PolicyQuoteClear();
+	
+		$w("#PropertyPricePerSqFtInput").value = formatDollarsOnly(cleanstring($w("#PropertyPricePerSqFtInput").value))
+		if ($w("#PropertyPricePerSqFtInput").value !== "" && $w("#PropertySqftInput").value !== "") {
+			//console.log("PPPSF DwellingAmount-"+ Number(cleanstring($w("#PropertyPricePerSqFtInput").value)) * Number(cleanstring($w("#PropertySqftInput").value)))
+			$w("#PropertyDwellingAmountInput").value = formatDollarsOnly(Number(cleanstring($w("#PropertyPricePerSqFtInput").value)) * Number(cleanstring($w("#PropertySqftInput").value)));
+		}
+	}
+
+	if ($w("#PropertyPricePerSqFtInput").value !== "") {
+		$w("#buttonClearQuote").show();
+	}
+}
+
+export function PropertySqftInput_change(event) {
+	
+	console.log("PSIC Sqft Change Event")
+	if (BeforeFieldValue !== $w("#PropertySqftInput").value) {
+		console.log("PSIC Sqft Field Changed")
+		ErrorMessageDisplayClear();
+		PolicyQuoteClear();
+		SquareFootChange();
+	}
+	
+	if ($w("#PropertySqftInput").value !== "") {
+		$w("#buttonClearQuote").show();
+	}
+}
+
+export function PropertyUnitCountInput_change(event) {
+	console.log("PUCI Change Event")
+	if (BeforeFieldValue !== $w("#PropertyUnitCountInput").value) {
+		console.log("PUCI Field Changed")
+		ErrorMessageDisplayClear();
+		PolicyQuoteClear();
+		$w("#PropertyUnitCountInput").value = formatNumberComma(cleanstring($w("#PropertyUnitCountInput").value))
+	}
+}
+
+
+export function ProposalInsCo2ShowHide(Action) {
+	if (Action == "Show") {
+		console.log("Proposal InsCo2 Show");
+		$w("#PolicyTitleInsCo2").show();
+		$w("#PolicyTermInsCo2").show();
+		$w("#DwellingInsCo2").show();
+		$w("#ReplacementCostInsCo2").show();
+		// $w("#OtherStructuresInsCo2").show();
+		$w("#PersonalPropertyInsCo2").show();
+		$w("#BacterialCoverageInsCo2").show();
+		$w("#LossRentsInsCo2").show();
+		$w("#OrdLawAInsCo2").show();
+		$w("#OrdLawBInsCo2").show();
+		$w("#OrdLawCInsCo2").show();
+		$w("#RevFlowInsCo2").show();
+		$w("#VacancyClauseInsCo2").show();
+		$w("#HabitabilityInsCo2").show();
+		$w("#BurglaryTheftInsCo2").show();
+		$w("#AssaultInsCo2").show();
+		$w("#DogBiteInsCo2").show();
+		$w("#WindHailInsCo2").show();
+		$w("#EarthquakeInsCo2").show();
+		$w("#EachOccurrenceInsCo2").show();
+		$w("#GeneralAggregateInsCo2").show();
+	}
+	else {
+		console.log("Proposal InsCo2 Hide");
+		$w("#PolicyTitleInsCo2").hide();
+		$w("#PolicyTermInsCo2").hide();
+		$w("#DwellingInsCo2").hide();
+		$w("#ReplacementCostInsCo2").hide();
+		// $w("#OtherStructuresInsCo2").hide();
+		$w("#PersonalPropertyInsCo2").hide();
+		$w("#BacterialCoverageInsCo2").hide();
+		$w("#LossRentsInsCo2").hide();
+		$w("#OrdLawAInsCo2").hide();
+		$w("#OrdLawBInsCo2").hide();
+		$w("#OrdLawCInsCo2").hide();
+		$w("#RevFlowInsCo2").hide();
+		$w("#VacancyClauseInsCo2").hide();
+		$w("#HabitabilityInsCo2").hide();
+		$w("#BurglaryTheftInsCo2").hide();
+		$w("#AssaultInsCo2").hide();
+		$w("#DogBiteInsCo2").hide();
+		$w("#WindHailInsCo2").hide();
+		$w("#EarthquakeInsCo2").hide();
+		$w("#EachOccurrenceInsCo2").hide();
+		$w("#GeneralAggregateInsCo2").hide();
+	}
+}
+
+export function ProposalMessageClear() {
+	$w("#ProposalMessage").text = '';
+	$w("#ProposalMessage").hide();
+}
+
+export function ProposalExpandCollapse(Action) {
+	if (Action == "Expand") {
+		console.log("EB Proposal Show");
+		$w("#section2").expand();
+
+	} else {
+		console.log("EB Proposal Hide");
+		$w("#section2").collapse();
+	}
+}
+
+export function ProposalClientFirstNameInput_change(event) {
+	console.log("PCFNI PolicyIsBound:"+ PolicyIsBound)
+	ProposalMessageClear();
+	BindRequestClear();
+	$w("#InfoClientFirstName").value = $w("#ProposalClientFirstNameInput").value;
+}
+
+export function ProposalClientLastNameInput_change(event) {
+	console.log("PCLNI PolicyIsBound:"+ PolicyIsBound)
+	ProposalMessageClear();
+	BindRequestClear();
+	$w("#InfoClientLastName").value = $w("#ProposalClientLastNameInput").value;
+}
+
+export function ProposalStreetAddressInput_change(event) {
+	ProposalMessageClear();
+	BindMessageClear();
+	$w("#InfoPropertyAddress").value = $w("#ProposalStreetAddressInput").value;
+}
+
+export function InfoQuoteEffectiveDate_change(event) {
+	console.log("IQEffDChg BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoQuoteEffectiveDate").value +"x")
+	if (BeforeFieldValue !== $w("#InfoQuoteEffectiveDate").value) {
+		console.log("ICEffDChg Field Changed")
+		var ED = new Date($w("#InfoQuoteEffectiveDate").value);
+		ED.setFullYear(ED.getFullYear()+1);
+		$w("#InfoQuoteExpirationDate").value = ED.toLocaleDateString();
+		BindMessageClear();
+		BindRequestClear();
+	}
+}
+
+export function InfoQuoteExpirationDate_change(event) {
+	console.log("IQEffDChg BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoQuoteExpirationDate").value +"x")
+	if (BeforeFieldValue !== $w("#InfoQuoteExpirationDate").value) {
+		console.log("ICExpDChg Field Changed")
+		BindMessageClear();
+		console.log("ICExpDC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+
+export function QuoteSelectScreenFieldsSet(QuoteNumberSelected) {
+	if (isNaN(Number(QuoteNumberSelected))) {
+		QuoteNumberSelected = '';
+	}
+	if (QuoteNumberSelected !== '') {
+
+		const ResultIndex = Number(QuoteNumberSelected) - 1;
+
+		console.log("QuoteSelectScreenFieldsSet Result Index:"+ ResultIndex)
+		console.log("QuoteSelectScreenFieldsSet Insurance Company:" + PremiumResult[ResultIndex].InsuranceCompany);
+
+		$w("#InfoQuoteInsuranceCompany").value = PremiumResult[ResultIndex].InsuranceCompany;
+		$w("#InfoQuoteInsuranceCompanyNaic").value = PremiumResult[ResultIndex].InsuranceCompanyNaic;
+		$w("#InfoQuoteRateStatus").value = PremiumResult[ResultIndex].RateStatus;
+		$w("#InfoQuoteRateStatusReason").value = PremiumResult[ResultIndex].RateStatusReason;
+		$w("#InfoQuoteUmbrellaCoverage").value = PremiumResult[ResultIndex].UmbrellaCoverage;
+		$w("#InfoQuoteBusinessPersonalPropertyCoverage").value = PremiumResult[ResultIndex].BusinessPersonalPropertyCoverage;
+		$w("#InfoQuoteAnnualRentCoverage").value = PremiumResult[ResultIndex].AnnualRentCoverage;
+		$w("#InfoQuoteWaterBackupCoverage").value = PremiumResult[ResultIndex].WaterBackupCoverage;
+		$w("#InfoQuoteFloodCoverage").value = PremiumResult[ResultIndex].FloodCoverage;
+		$w("#InfoQuoteEarthquakeCoverage").value = PremiumResult[ResultIndex].EarthquakeCoverage;
+		$w("#InfoQuoteWindHailCoverage").value = PremiumResult[ResultIndex].WindHailCoverage;
+		$w("#InfoQuoteNamedStormDeductible").value = PremiumResult[ResultIndex].NamedStormDeductible;
+
+		$w("#InfoQuoteDeductible").value = PremiumResult[ResultIndex].DeductibleAmount;
+		$w("#InfoQuotePropertyRate").value = PremiumResult[ResultIndex].PropertyRate;
+		$w("#InfoQuotePropertyPremiumAmount").value = PremiumResult[ResultIndex].PropertyPremiumAmount;
+		$w("#InfoQuoteLiabilityPremiumAmount").value = PremiumResult[ResultIndex].LiabilityPremiumAmount;
+		$w("#InfoQuoteTotalPremiumAmount").value = PremiumResult[ResultIndex].TotalPremiumAmount;
+		$w("#InfoQuoteTaxesFeesAmount").value = PremiumResult[ResultIndex].TaxesFeesAmount;
+		$w("#InfoQuoteBrokerFeeAmount").value = PremiumResult[ResultIndex].BrokerFeeAmount;
+		$w("#InfoQuoteTotalAmount").value = PremiumResult[ResultIndex].TotalAmount;
+		
+		console.log("QuoteSelectScreenFieldsSet Policy Number:" + QuotePolicyNumber);
+		$w("#InfoQuotePolicyNumber").value = QuotePolicyNumber;
+
+
+		ClientPropertyInfoExpandCollapse('Expand');
+		$w("#InfoClientCompanyName").focus();
+
+	}
+}
+
+export function PropertyZipcodeInput_change(event) {
+	console.log("PZI Zipcode Change, Field Value-" + $w("#PropertyZipcodeInput").value)
+
+	if (BeforeFieldValue !== $w("#PropertyZipcodeInput").value) {
+		ErrorMessageDisplayClear();
+		PolicyQuoteClear();
+		if ($w("#PropertyStreetAddressInput").value == "") {
+			$w("#ErrorMessageDisplay1").text = 'Property Street Address MUST Be Set.';
+			$w("#ErrorMessageDisplay1").show()
+		} else {
+			SquareFootGet();
+		}
+		if ($w("#PropertyZipcodeInput").value !== "") {
+			$w("#buttonClearQuote").show();
+		}
+	}
+}
+
+export function PropertyZipcodeInput_focus(event) {
+	console.log("PZI Focus, BeforeFieldValue:x"+ BeforeFieldValue + "x,BeforeZipcodeValue:x" + $w("#PropertyZipcodeInput").value +"x")
+	BeforeFieldValue = $w('#PropertyZipcodeInput').value
+}
+
+export function buttonSave1_click(event) {
+	if ($w("#ProposalClientFirstNameInput").value == "") {
+		console.log("Proposal Client Name Empty");
+		$w("#ProposalMessage").text = "Client First Name MUST Be Entered.";
+		$w("#ProposalMessage").show();
+	} else if ($w("#ProposalClientLastNameInput").value == "") {
+		console.log("Proposal Client Name Empty");
+		$w("#ProposalMessage").text = "Client Last Name MUST Be Entered.";
+		$w("#ProposalMessage").show();
+	} else if ($w("#ProposalStreetAddressInput").value == '') {
+		$w("#ProposalMessage").text = 'Property Street Address MUST Be Entered.';
+		$w("#ProposalMessage").show()
+	}
+	else if ($w("#RequestorEmail").value == '') {
+		$w("#ProposalMessage").text = 'Requestor Email Address MUST Be Set.';
+		$w("#ProposalMessage").show();
+	}
+	else {
+		$w("#ProposalMessage").hide()
+		PolicyQuoteSave();
+		wixWindow.openLightbox("Mynd Saved");
+	}
+}
+
+export function buttonSave2_click(event) {
+	if ($w("#ProposalStreetAddressInput").value == '') {
+		$w("#BindMessageDisplay").text = 'Property Street Address MUST Be Entered.';
+		$w("#BindMessageDisplay").show()
+	}
+	else if ($w("#RequestorEmail").value == '') {
+		$w("#BindMessageDisplay").text = 'Requestor Email Address MUST Be Set.';
+		$w("#BindMessageDisplay").show();
+	}
+	else {
+		$w("#BindMessageDisplay").hide()
+		wixWindow.openLightbox("Mynd Saved");
+		PolicyQuoteSave();
+	}
+}
+
+export function buttonFind_click(event) {
+	if ($w("#findStreetAddressInput").value == '') {
+		$w("#ErrorMessageDisplay1").text = 'Street Address MUST Be Entered.';
+		$w("#ErrorMessageDisplay1").show()
+	}
+	else if ($w("#RequestorEmail").value == '') {
+		$w("#ErrorMessageDisplay1").text = 'Requestor Email Address MUST Be Set.';
+		$w("#ErrorMessageDisplay1").show()
+	}
+	else {
+		const StreetAddressSave = $w("#findStreetAddressInput").value
+		PolicyQuoteRestore($w("#findStreetAddressInput").value);
+		$w("#findStreetAddressInput").value = StreetAddressSave;
+	}
+
+	if ($w("#findStreetAddressInput").value !== "") {
+		$w("#buttonClearQuote").show();
+	}
+}
+
+export function RequestorEmail_change(event) {
+	$w("#ErrorMessageDisplay1").text = '';
+	$w("#ErrorMessageDisplay1").hide();
+
+	$w("#ProposalMessage").text = '';'';
+	$w("#ProposalMessage").hide();
+
+	$w("#BindMessageDisplay").text = '';
+	$w("#BindMessageDisplay").hide();
+
+}
+
+export function buttonDwellingAmountHighSet_click(event) {
+	$w("#PropertyDwellingAmountInput").value = $w("#HighReplacementCost").text;
+	PropertyDwellingAmountInput_change();
+}
+
+export function buttonDwellingAmountLowSet_click(event) {
+	$w("#PropertyDwellingAmountInput").value = $w("#LowReplacementCost").text;
+	PropertyDwellingAmountInput_change();
+}
+
+// Event to update values in the database
+export function buttonQuery_click(event) {
+	MYNDDatabaseFunction();
+}
+
+
+export function buttonSendToICSS_click(event) {
+	console.log("buttonSendToICSS Start");
+
+
+
+	BindRequestorEmail = $w("#RequestorEmail").value;
+	BindRequestorDate = new Date().toLocaleDateString();
+
+	IsInstitutional = "No";
+	if ($w("#IsInstitutionalInput").checked == true) {
+		IsInstitutional = "Yes";
+	}
+	IsWindHail = "No";
+	if ($w("#IsWindHailInput").checked == true) {
+		IsWindHail = "Yes";
+	}
+	const BindObject = {
+		"BrokerInformation": {
+			"BrokerName": "Ives Insurance Services Inc",
+    		"MailingAddress": "2150 Chatsworth Blvd",
+    		"MailingCity": "San Diego",
+    		"MailingState": "CA",
+    		"MailingZipcode": "92107",
+    		"PhoneNumber": "619-224-5337",
+    		"EmailAddress": "companymailbox@ivesins.com",
+    		"AgentNumber":  "X12345678"
+		},
+		"InsuranceRequest": {
+			"Insured": {
+				"FirstName": $w("#InfoClientFirstName").value,
+				"LastName": $w("#InfoClientLastName").value,
+				"InsuredFullName": $w("#InfoClientFirstName").value + " " + $w("#InfoClientLastName").value,
+				"CompanyName": $w("#InfoClientCompanyName").value,
+				"MailingAddress": $w("#InfoClientMailingAddress").value,
+				"MailingCity": $w("#InfoClientMailingCity").value,
+				"MailingState": $w("#InfoClientMailingState").value,
+				"MailingZipcode": $w("#InfoClientMailingZipcode").value,
+				"PhoneNumber": $w("#InfoClientPhoneNumber").value,
+				"EmailAddress": $w("#InfoClientEmailAddress").value,
+				"ProgramName": ""
+			},
+			"InsuranceQuote": {
+				"QuoteDetail": {
+					"PropertyNumber": "1",
+					"QuoteRequestorEmail": QuoteRequestorEmail,
+					"QuoteRequestorDate": QuoteRequestorDate,
+					"ProposalRequestorEmail": ProposalRequestorEmail,
+					"ProposalRequestorDate": ProposalRequestorDate,
+					"SelectNumber": SelectNumber,
+					"SelectRequestorEmail": SelectRequestorEmail,
+					"SelectRequestorDate": SelectRequestorDate,
+					"BindRequestorEmail": BindRequestorEmail,
+					"BindRequestorDate": BindRequestorDate,
+					"EvidenceRequestorEmail": EvidenceRequestorEmail,
+					"EvidenceRequestorDate": EvidenceRequestorDate,
+        			"InsuranceCompany":  $w("#InfoQuoteInsuranceCompany").value,
+					"InsuranceCompanyNaic":  $w("#InfoQuoteInsuranceCompanyNaic").value,
+					"MailingAddress": "",
+    				"MailingCity": "",
+    				"MailingState": "",
+    				"MailingZipcode": "",
+    				"ProductName": "Dwelling Fire",
+        			"RateStatus":  $w("#InfoQuoteRateStatus").value,
+        			"RateStatusReason": $w("#InfoQuoteRateStatusReason").value,
+					"IsInstitutional": IsInstitutional,
+					"IsWindHail": IsWindHail,
+					"ActionType": "Add Asset",
+					"EffectiveDate": $w("#InfoQuoteEffectiveDate").value,
+    				"ExpirationDate": $w("#InfoQuoteExpirationDate").value,
+	    			"PolicyNumber": $w("#InfoQuotePolicyNumber").value,
+					"DwellingAmount": cleanstring($w("#PropertyDwellingAmountInput").value),
+					"AdditionalBuildings": cleanstring($w("#PropertyAdditionalBuildingInput").value),
+					"PersonalProperty": cleanstring($w("#PropertyPersonalPropertyInput").value),
+					"AnnualRent": cleanstring($w("#PropertyAnnualRent").value),
+					"TotalInsuredValue": $w("#InfoPropertyTIV").value,
+					"PropertyRate": $w("#InfoQuotePropertyRate").value,
+					"ReplacementCost": "Yes",
+					"MoldFungi": "$15,000",
+					"AnnualRentsCoverage": "12M-ALS - Reported",
+					"OrdLawA": "Up To Building Limit",
+					"OrdLawB": "10% of Cov A",
+					"OrdLawC": "10% of Cov A",
+					"WaterBackupCoverage": $w("#InfoQuoteWaterBackupCoverage").value,
+					"VacancyClause": "Unlimited w/Notify",
+					"BurglaryTheft": "Included",
+					"WindHailCoverage":  $w("#InfoQuoteWindHailCoverage").value, 
+					"FloodCoverage":  $w("#InfoQuoteFloodCoverage").value,
+					"EarthquakeCoverage":  $w("#InfoQuoteEarthquakeCoverage").value,
+					"UmbrellaCoverage": $w("#InfoQuoteUmbrellaCoverage").value,
+					"NamedStormDeductible":  $w("#InfoQuoteNamedStormDeductible").value,
+					"GeneralAggregate": "$2,000,000",
+					"EachOccurrence": "$1,000,000",
+					"PropertyDeductibleAmount": $w("#InfoQuoteDeductible").value,
+					"LiabilityDeductibleAmount": "$0",
+					"PropertyPremium": $w("#InfoQuotePropertyPremiumAmount").value,
+					"LiabilityPremium": $w("#InfoQuoteLiabilityPremiumAmount").value,
+					"TotalPremium": $w("#InfoQuoteTotalPremiumAmount").value,
+					"TaxesAmount": $w("#InfoQuoteTaxesFeesAmount").value,
+            		"FeesAmount": "0.00",
+            		"BrokerFeeAmount": $w("#InfoQuoteBrokerFeeAmount").value,
+					"TotalAmount": cleanstring($w("#InfoQuoteTotalAmount").value)
+				},
+				"PropertyDetail": {
+					"PropertyNumber": "1",
+					"PropertyDetailComplete": "No",
+					"PropertyTitle": $w("#InfoPropertyAddress").value + " " + $w("#InfoPropertyCity").text + " " + $w("#InfoPropertyState").text + " " + $w("#InfoPropertyZipcode").text,
+					"PropertyTypeCode": "MYND-HOME",
+					"PropertyCode": $w("#InfoPropertyCode").value,
+					"Address": $w("#InfoPropertyAddress").value,
+        			"City": $w("#InfoPropertyCity").text,
+        			"State": $w("#InfoPropertyState").text,
+					"Zipcode": $w("#InfoPropertyZipcode").text,
+					"County": $w("#InfoPropertyCounty").text,
+					"FloodZone" : $w("#FloodZoneInput").value,
+        			"DwellingAmount": cleanstring($w("#PropertyDwellingAmountInput").value),
+					"AdditionalBuildings": cleanstring($w("#PropertyAdditionalBuildingInput").value),
+					"PersonalProperty": cleanstring($w("#PropertyPersonalPropertyInput").value),
+					"MonthlyRent": cleanstring($w("#PropertyMonthlyRentInput").value),
+					"AnnualRent": cleanstring($w("#PropertyAnnualRent").value),
+					"TotalInsuredValue": $w("#InfoPropertyTIV").value,						
+					"OwnershipEntity": $w("#InfoPropertyOwnershipEntity").value,
+					"YearBuilt": $w("#InfoPropertyYearBuilt").value,
+					"NumberUnits": $w("#InfoPropertyNumberUnits").text,
+					"NumberBedrooms": $w("#InfoPropertyNumberBedrooms").value,
+					"NumberBaths": $w("#InfoPropertyNumberBaths").value,
+					"NumberStories": $w("#InfoPropertyNumberStories").value,
+					"SquareFootage": $w("#InfoPropertySquareFootage").text,
+					"PricePerSqFt": cleanstring($w("#InfoPropertyPricePerSqFt").text),
+					"ConstructionType": $w("#InfoPropertyConstructionType").value,
+					"WiringType": $w("#InfoPropertyWiringType").value,
+					"CircuitBreakers": $w("#InfoPropertyCircuitBreakers").value,
+					"Fuses": $w("#InfoPropertyFuses").value,
+					"RoofType": $w("#InfoPropertyRoofType").value,
+					"YearRoofUpdated": $w("#InfoPropertyYearRoofUpdated").value,
+					"YearPropertyUpdated": $w("#InfoPropertyYearPropertyUpdated").value,
+					"GarageType": $w("#InfoPropertyGarageType").value,
+					"Pool": $w("#InfoPropertyPool").value,
+					"NumberPools": $w("#InfoPropertyNumberPools").value,
+					"PoolFencedGated": $w("#InfoPropertyPoolFencedGated").value,
+					"DivingBoard": $w("#InfoPropertyDivingBoard").value,
+					"Fireplace": $w("#InfoPropertyFireplace").value,
+					"Sprinklered": $w("#InfoPropertySprinklered").value,
+					"GasSmokeDetectors": $w("#InfoPropertyGasSmokeDetectors").value,
+					"BurglarAlarm": $w("#InfoPropertyBurglarAlarm").value,
+					"SeasonalProperty": $w("#InfoPropertySeasonalProperty").value,
+					"CommercialExposure": $w("#InfoPropertyCommercialExposure").value,
+					"PriorClaims": $w("#InfoPropertyPriorClaims").value,
+					"ClaimDescription": $w("#InfoPropertyClaimDescription").value,
+					"CurrentInsuranceCompany": $w("#InfoPropertyCurrentInsuranceCompany").value,
+					"CurrentInsurancePremium": $w("#InfoPropertyCurrentInsurancePremium").value,
+					"LoanNumber": $w("#InfoPropertyLoanNumber").value,
+					"AI1Clause1": $w("#InfoPropertyMortgageeClause1").value,
+					"AI1Clause2": $w("#InfoPropertyMortgageeClause2").value,
+					"AI1StreetAddress": $w("#InfoPropertyMortgageeStreetAddress").value,
+					"AI1City": $w("#InfoPropertyMortgageeCity").value,
+					"AI1State": $w("#InfoPropertyMortgageeState").value,
+					"AI1Zipcode": $w("#InfoPropertyMortgageeZipcode").value,
+					"AI1CityStateZipcode": $w("#InfoPropertyMortgageeCity").value + " " + $w("#InfoPropertyMortgageeState").value + " " + $w("#InfoPropertyMortgageeZipcode").value,
+					"InitialPayment": $w("#InfoInitialPayment").value,
+					"RenewalPayment": $w("#InfoRenewalPayment").value
+				}
+			}
+		}
+	}
+
+	if ($w("#FloodAcceptFloodQuote").checked == true) {
+		FloodBindRequest(BindObject, FloodQuote,"Y").then(function(BindResult) {
+			if (BindResult.BindStatus == 'Error') {
+				$w("#BindMessageDisplay").text = BindResult.BindStatusReason;
+				$w("#BindMessageDisplay").show();
+			}
+		});
+	}
+
+	PolicyBindRequest(BindObject,'Y').then(function(BindResult) {
+
+		console.log ('buttonBindRequest Bind Status:' + BindResult.BindStatus + ' Bind Status Reason:' + BindResult.BindStatusReason)
+
+		if (BindResult.BindStatus == 'Error') {
+			$w("#BindMessageDisplay").text = BindResult.BindStatusReason;
+			$w("#BindMessageDisplay").show();
+		} else {
+			PolicyIsBound = 'Yes';
+			BindRequestLockUnlock();
+			PolicyQuoteSave()
+			.then(function(ParamReturn) {
+				$w("#BindMessageDisplay").text = "Property Acceptance Requested.";
+				$w("#IsRenewalQuote").hide();
+				$w("#buttonBindRequest").hide();
+				$w("#buttonEvidence").show();
+				$w("#buttonBindClear").show();
+				wixWindow.openLightbox("Mynd Thank You Submission");
+			})
+		}
+	});
+}
+
+export function InfoClientCompanyName_change(event) {
+	console.log("ICCNC BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientCompanyName").value +"x")
+	if (BeforeFieldValue !== $w("#InfoClientCompanyName").value) {
+		BindMessageClear();
+		console.log("ICCNC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+export function InfoPropertyOwnershipEntity_change(event) {
+	console.log("IPOEC BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyOwnershipEntity").value +"x")
+	if (BeforeFieldValue !== $w("#InfoPropertyOwnershipEntity").value) {
+		BindMessageClear();
+		console.log("IPOEC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+export function InfoPropertyLoanNumber_change(event) {
+	console.log("IPLNC BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyLoanNumber").value +"x")
+	if (BeforeFieldValue !== $w("#InfoPropertyLoanNumber").value) {
+		BindMessageClear();
+		console.log("IPLNC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+export function InfoPropertyMortgageeClause1_change(event) {
+	console.log("IPMC1C BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyMortgageeClause1").value +"x")
+	if (BeforeFieldValue !== $w("#InfoPropertyMortgageeClause1").value) {
+		BindMessageClear();
+		console.log("IPMC1 PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+export function InfoPropertyMortgageeClause2_change(event) {
+	console.log("IPMC2C BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyMortgageeClause2").value +"x")
+	if (BeforeFieldValue !== $w("#InfoPropertyMortgageeClause2").value) {
+		BindMessageClear();
+		console.log("IPMC2 PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+
+export function InfoPropertyMortgageeStreetAddress_change(event) {
+	console.log("IPMSAC BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyMortgageeStreetAddress").value +"x")
+	if (BeforeFieldValue !== $w("#InfoPropertyMortgageeStreetAddress").value) {
+		BindMessageClear();
+		console.log("IPMSAC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+
+export function InfoPropertyMortgageeCity_change(event) {
+	console.log("IPMCC BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyMortgageeCity").value +"x")
+	if (BeforeFieldValue !== $w("#InfoPropertyMortgageeCity").value) {
+		BindMessageClear();
+		console.log("IPMCC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+
+export function InfoPropertyMortgageeState_change(event) {
+	console.log("IPMSC BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyMortgageeState").value +"x")
+	if (BeforeFieldValue !== $w("#InfoPropertyMortgageeState").value) {
+		BindMessageClear();
+		console.log("IPMSC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+
+export function InfoPropertyMortgageeZipcode_change(event) {
+		console.log("IPMC1C BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyMortgageeZipcode").value +"x")
+	if (BeforeFieldValue !== $w("#InfoPropertyMortgageeZipcode").value) {
+		BindMessageClear();
+		console.log("IPMZ PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+export function InfoInitialPayment_change(event) {
+	console.log("IIPC BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoInitialPayment").value +"x")
+	if (BeforeFieldValue !== $w("#InfoInitialPayment").value) {
+		BindMessageClear();
+		console.log("IIPC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+export function InfoRenewalPayment_change(event) {
+	console.log("IRPC BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoRenewalPayment").value +"x")
+	if (BeforeFieldValue !== $w("#InfoRenewalPayment").value) {
+		BindMessageClear();
+		console.log("IRPC PolicyIsBound:"+ PolicyIsBound)
+		BindRequestClear();
+	}
+}
+
+export function InfoPropertyMortgageeClause1_focus(event) {
+	console.log("IPMC1F BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyMortgageeClause1").value +"x")
+	BeforeFieldValue = $w('#InfoPropertyMortgageeClause1').value
+}
+
+export function InfoQuoteEffectiveDate_focus(event) {
+	console.log("IQEffDFoc BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoQuoteEffectiveDate").value +"x")
+	BeforeFieldValue = $w('#InfoQuoteEffectiveDate').value
+}
+
+export function InfoQuoteExpirationDate_focus(event) {
+	console.log("IQExpDFoc BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoQuoteExpirationDate").value +"x")
+	BeforeFieldValue = $w('#InfoQuoteExpirationDate').value
+}
+
+export function InfoClientCompanyName_focus(event) {
+	console.log("ICCNF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientCompanyName").value +"x")
+	BeforeFieldValue = $w('#InfoClientCompanyName').value
+}
+
+
+export function InfoPropertyLoanNumber_focus(event) {
+	console.log("IPLNF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyLoanNumber").value +"x")
+	BeforeFieldValue = $w('#InfoPropertyLoanNumber').value
+}
+
+
+export function InfoPropertyMortgageeClause2_focus(event) {
+	console.log("IPMC2F BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyMortgageeClause2").value +"x")
+	BeforeFieldValue = $w('#InfoPropertyMortgageeClause2').value
+}
+
+
+export function InfoPropertyMortgageeStreetAddress_focus(event) {
+	console.log("IPMSAF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyMortgageeStreetAddress").value +"x")
+	BeforeFieldValue = $w('#InfoPropertyMortgageeStreetAddress').value
+}
+
+
+export function InfoPropertyMortgageeCity_focus(event) {	
+	console.log("IPMCF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyMortgageeCity").value +"x")
+	BeforeFieldValue = $w('#InfoPropertyMortgageeCity').value
+}
+
+
+export function InfoPropertyMortgageeState_focus(event) {
+	console.log("IPMSF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyMortgageeState").value +"x")
+	BeforeFieldValue = $w('#InfoPropertyMortgageeState').value
+}
+
+
+export function InfoPropertyMortgageeZipcode_focus(event) {
+	console.log("IPMZF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyMortgageeZipcode").value +"x")
+	BeforeFieldValue = $w('#InfoPropertyMortgageeZipcode').value 
+}
+
+
+export function InfoClientFirstName_focus(event) {
+	console.log("ICFNF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientFirstName").value +"x")
+	BeforeFieldValue = $w('#InfoClientFirstName').value
+}
+
+
+export function InfoClientLastName_focus(event) {
+	console.log("ICLNF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientLastName").value +"x")
+	BeforeFieldValue = $w('#InfoClientLastName').value
+}
+
+
+export function InfoClientMailingAddress_focus(event) {
+	console.log("ICMAF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientMailingAddress").value +"x")
+	BeforeFieldValue = $w('#InfoClientMailingAddress').value
+}
+
+
+export function InfoClientMailingCity_focus(event) {
+	console.log("ICMCF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientMailingCity").value +"x")
+	BeforeFieldValue = $w('#InfoClientMailingCity').value
+}
+
+
+export function InfoClientMailingState_focus(event) {
+	console.log("ICMSF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientMailingState").value +"x")
+	BeforeFieldValue = $w('#InfoClientMailingState').value
+}
+
+
+export function InfoClientMailingZipcode_focus(event) {
+	console.log("ICMZF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientMailingZipcode").value +"x")
+	BeforeFieldValue = $w('#InfoClientMailingZipcode').value
+}
+
+
+export function InfoPropertyOwnershipEntity_focus(event) {
+	console.log("IPWEF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoPropertyOwnershipEntity").value +"x")
+	BeforeFieldValue = $w('#InfoPropertyOwnershipEntity').value
+}
+
+
+export function InfoClientEmailAddress_focus(event) {
+	console.log("ICEAF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientEmailAddress").value +"x")
+	BeforeFieldValue = $w('#InfoClientEmailAddress').value
+}
+
+
+export function InfoClientPhoneNumber_focus(event) {
+	console.log("ICPNF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoClientPhoneNumber").value +"x")
+	BeforeFieldValue = $w('#InfoClientPhoneNumber').value
+}
+
+
+export function ProposalClientFirstNameInput_focus(event) {	
+	console.log("ICFNIF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#ProposalClientFirstNameInput").value +"x")
+	BeforeFieldValue = $w('#ProposalClientFirstNameInput').value 
+}
+
+
+export function ProposalClientLastNameInput_focus(event) {
+	console.log("IPCLNUF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#ProposalClientLastNameInput").value +"x")
+	BeforeFieldValue = $w('#ProposalClientLastNameInput').value
+}
+
+
+export function InfoInitialPayment_focus(event) {
+	console.log("IIPF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoInitialPayment").value +"x")
+	BeforeFieldValue = $w('#InfoInitialPayment').value
+}
+
+
+export function InfoRenewalPayment_focus(event) {
+	console.log("IRPF BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#InfoRenewalPayment").value +"x")
+	BeforeFieldValue = $w('#InfoRenewalPayment').value
+}
+
+export function PropertyStreetAddressInput_change(event) {
+	console.log("PSAI Street Address Change, Field Value-" + $w("#PropertyStreetAddressInput").value)
+	if (BeforeFieldValue !== $w("#PropertyStreetAddressInput").value) {
+		PolicyQuoteClear();
+		$w("#InfoPropertyAddress").value = $w("#PropertyStreetAddressInput").value;
+		$w("#ProposalStreetAddressInput").value = $w("#PropertyStreetAddressInput").value;
+		SquareFootGet();
+		if ($w("#PropertyStreetAddressInput").value !== "") {
+			$w("#buttonClearQuote").show();
+		}
+	}
+}
+
+export function PropertyStreetAddressInput_focus(event) {
+	console.log("PSAI BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#PropertyStreetAddressInput").value +"x")
+	BeforeFieldValue = $w('#PropertyStreetAddressInput').value
+}
+
+export function SquareFootChange() {
+	console.log("SquareFootChange  Start");
+	$w("#PropertySqftInput").value = formatNumberComma(cleanstring($w("#PropertySqftInput").value))
+	console.log("SquareFootChange Sqft-" + $w("#PropertySqftInput").value)
+
+	if ($w("#PropertyPricePerSqFtInput").value !== "" && $w("#PropertySqftInput").value !== "") {
+		$w("#PropertyDwellingAmountInput").value = formatDollarsOnly(Number(cleanstring($w("#PropertyPricePerSqFtInput").value)) * Number(cleanstring($w("#PropertySqftInput").value)));
+		PolicyQuoteClear();
+	}
+
+	if ($w("#PropertyZipcodeInput").value !== '' && $w("#PropertySqftInput").value !== '') {
+
+ 		ReplacementCostCalculation(1, cleanstring($w("#PropertySqftInput").value), $w("#PropertyZipcodeInput").value).then(function(ParmReturn) {
+			const ReplacementCostResult = ParmReturn;
+			console.log("SFC LowReplacementCost-" + ReplacementCostResult.LowReplacementCost + ", HighReplacementCost-" + ReplacementCostResult.HighReplacementCost)
+			$w("#LowReplacementCost").text = formatDollarsCents(ReplacementCostResult.LowReplacementCost);
+			$w("#HighReplacementCost").text = formatDollarsCents(ReplacementCostResult.HighReplacementCost);
+
+			}
+		)
+	}
+	console.log("SquareFootChange  End");
+}
+
+export function SquareFootGet() {
+	var City = "";
+	var State = "";
+	
+	console.log("SquareFootGet  Start");
+	if (($w('#PropertyStreetAddressInput').value !== "") && ($w('#PropertyZipcodeInput').value !== "")) {
+		let StreetAddress = $w('#PropertyStreetAddressInput').value;
+		let Zipcode = $w('#PropertyZipcodeInput').value;
+		CityStateGet(Zipcode)
+		.then(Result => {
+			var CityStateReturn = Result;
+			console.log("SquareFootGet - CityStateReturn-" + CityStateReturn.City);
+			if (CityStateReturn.City == "") {
+				$w("#ErrorMessageDisplay1").text = 'Error - Zipcode Not Found';
+				$w("#ErrorMessageDisplay1").show()
+			} else {
+				City = CityStateReturn.City;
+				State = CityStateReturn.State;
+				
+				console.log("SquareFootGet  City-" + City + ", State-" + State);
+
+				FloodSquareFootGet(StreetAddress,City,State, Zipcode) 
+				.then(Result => {
+					FloodQuote = Result;
+					console.log("SquareFootGet Flood Returned-" + JSON.stringify(FloodQuote.QuoteInfo));
+					if (FloodQuote.QuoteInfo.errorList.length === 0) {
+						console.log("SquareFootGet Flood SqFt-" + FloodQuote.QuoteInfo.application.squareFeet);
+						$w('#PropertySqftInput').value = FloodQuote.QuoteInfo.application.squareFeet;
+						SquareFootChange();
+
+					} else {
+						console.log("SquareFootGet Error Returned");
+						console.log("SquareFootGet Error-" + FloodQuote.QuoteInfo.errorList[0].Error);
+						$w("#ErrorMessageDisplay1").text = 'Flood Error' + " - " + FloodQuote.QuoteInfo.errorList[0].Error;
+						$w("#ErrorMessageDisplay1").show()
+					}
+				})
+				.catch (error => console.log('SquareFoodGet Call CError-' + error))
+			}
+
+		})
+		.catch (error => console.log('CityStateGet Call CError-' + error))
+	}
+	console.log("SquareFootGet  End");
+}
+
+export function findStreetAddressInput_change(event) {
+	if ($w("#findStreetAddressInput").value !== "") {
+		$w("#buttonClearQuote").show();
+	}
+}
+
+export function PropertyMonthlyRentInput_change(event) {
+	
+	console.log("PMRI Change Event")
+	if (BeforeFieldValue !== $w("#PropertyMonthlyRentInput").value) {
+		console.log("PDAIC Field Changed")
+		ErrorMessageDisplayClear();
+		PolicyQuoteClear();
+
+		$w("#PropertyMonthlyRentInput").value = formatDollarsOnly(cleanstring($w("#PropertyMonthlyRentInput").value))
+		$w("#PropertyAnnualRent").value = formatDollarsOnly(Number(cleanstring($w("#PropertyMonthlyRentInput").value)) * 12)
+	}
+	
+	if ($w("#PropertyMonthlyRentInput").value !== "") {
+		$w("#buttonClearQuote").show();
+	}
+}
+
+export function FloodAcceptFloodQuote_change(event) {
+	FloodAcceptFloodQuoteMessageSet();
+}
+
+export function PropertyPersonalPropertyInput_change(event) {
+	console.log("PPPIC Change")
+	if (BeforeFieldValue !== $w("#PropertyPersonalPropertyInput").value) {
+		console.log("PPPIC Field Changed")
+		ErrorMessageDisplayClear();
+		PolicyQuoteClear();
+	}
+	if ($w("#PropertyPersonalPropertyInput").value !== "") {
+		$w("#buttonClearQuote").show();
+	}
+}
+
+export function PropertyUnitCountInput_focus(event) {
+	console.log("PUCIFoc BeforeFieldValue:x"+ BeforeFieldValue + "x,BeforeZipcodeValue:x" + $w("#PropertyUnitCountInput").value +"x")
+	BeforeFieldValue = $w('#PropertyUnitCountInput').value
+}
+
+export function PropertySqftInput_focus(event) {
+	console.log("PSFIFoc BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#PropertySqftInput").value +"x")
+	BeforeFieldValue = $w('#PropertySqftInput').value
+}
+
+export function PropertyPricePerSqFtInput_focus(event) {
+	console.log("PSFIFoc BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#PropertyPricePerSqFtInput").value +"x")
+	BeforeFieldValue = $w('#PropertyPricePerSqFtInput').value
+}
+
+export function PropertyDwellingAmountInput_focus(event) {
+	console.log("PSFIFoc BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#PropertyDwellingAmountInput").value +"x")
+	BeforeFieldValue = $w('#PropertyDwellingAmountInput').value
+}
+
+export function PropertyMonthlyRentInput_focus(event) {
+	console.log("PSFIFoc BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#PropertyMonthlyRentInput").value +"x")
+	BeforeFieldValue = $w('#PropertyMonthlyRentInput').value 
+}
+
+export function PropertyPersonalPropertyInput_focus(event) {
+	console.log("PSFIFoc BeforeFieldValue:x"+ BeforeFieldValue + "x,AfterFieldValue:x" + $w("#PropertyPersonalPropertyInput").value +"x")
+	BeforeFieldValue = $w('#PropertyPersonalPropertyInput').value 
+}

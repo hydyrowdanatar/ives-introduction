@@ -3,16 +3,18 @@ import { create } from "zustand";
 
 export type QuoteType = "basic" | "enchanced" | "mynd managed";
 
+type PremiumAmounts = Record<"basic" | "mynd managed", string | null>;
+
 interface QuoteState {
   selectedQuote: QuoteType;
   isPopupOpen: boolean;
-  premiumAmount: string | null;
+  premiumAmounts: PremiumAmounts;
   premiumLoading: boolean;
   premiumError: string | null;
   setSelectedQuote: (quote: QuoteType) => void;
   openPopup: () => void;
   closePopup: () => void;
-  setPremiumAmount: (amount: string | null) => void;
+  setPremiumAmounts: (amounts: PremiumAmounts) => void;
   setPremiumLoading: (loading: boolean) => void;
   setPremiumError: (error: string | null) => void;
 }
@@ -20,13 +22,13 @@ interface QuoteState {
 export const useQuoteStore = create<QuoteState>((set) => ({
   selectedQuote: "basic",
   isPopupOpen: false,
-  premiumAmount: null,
+  premiumAmounts: { basic: null, "mynd managed": null },
   premiumLoading: false,
   premiumError: null,
   setSelectedQuote: (quote) => set({ selectedQuote: quote }),
   openPopup: () => set({ isPopupOpen: true }),
   closePopup: () => set({ isPopupOpen: false }),
-  setPremiumAmount: (amount) => set({ premiumAmount: amount }),
+  setPremiumAmounts: (amounts) => set({ premiumAmounts: amounts }),
   setPremiumLoading: (loading) => set({ premiumLoading: loading }),
   setPremiumError: (error) => set({ premiumError: error }),
 }));

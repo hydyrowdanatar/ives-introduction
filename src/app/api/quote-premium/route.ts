@@ -77,11 +77,15 @@ export async function POST(req: NextRequest) {
     }
 
     const rate = result.rows[0];
+    // numeric(19,2) columns come back as strings from node-postgres — parse them
+    const generalLiabilityRate = parseFloat(String(rate.generalliabilityrate));
+    const brokerFee = parseFloat(String(rate.brokerfee));
+    const pricePerSqFtMin = parseFloat(String(rate.pricepersqftmin));
 
     const pricePerSqFt = dwelling / sqftVal;
-    if (pricePerSqFt < rate.pricepersqftmin) {
+    if (pricePerSqFt < pricePerSqFtMin) {
       return NextResponse.json(
-        { error: `Dwelling amount too low — minimum $${rate.pricepersqftmin}/sq ft` },
+        { error: `Dwelling amount too low — minimum $${pricePerSqFtMin}/sq ft` },
         { status: 400 }
       );
     }
@@ -106,26 +110,31 @@ export async function POST(req: NextRequest) {
     const propertyPremium = Math.round((calcTIV / 100) * propertyRate);
 
     const liabilityPremium =
-      rate.generalliabilityrate +
-      (units - 1) * rate.generalliabilityrate * rate.additionalliabilityratio;
+      generalLiabilityRate +
+      (units - 1) * generalLiabilityRate * rate.additionalliabilityratio;
 
     const triaPremium = Math.round((propertyPremium + liabilityPremium) * rate.triarate);
 
     const totalPropertyPremium = propertyPremium + triaPremium;
     const totalPremium = totalPropertyPremium + liabilityPremium;
     const taxesFees = totalPremium * rate.taxrate;
-    const totalAmount = Math.round(totalPremium + taxesFees + rate.brokerfee);
+    const totalAmount = Math.round(totalPremium + taxesFees + brokerFee);
+
+    const myndManagedAmount = totalAmount;
+    const basicAmount = Math.round(totalAmount * 0.85);
 
     return NextResponse.json({
-      totalAmount,
+      myndManagedAmount,
+      basicAmount,
       breakdown: {
         propertyPremium,
         liabilityPremium,
         triaPremium,
         taxesFees: Math.round(taxesFees),
-        brokerFee: rate.brokerfee,
+        brokerFee: brokerFee,
         totalPremium,
-        totalAmount,
+        myndManagedAmount,
+        basicAmount,
       },
     });
   } catch (err) {

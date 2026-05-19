@@ -430,14 +430,14 @@ interface IProps {
 }
 
 const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
-  const { setSelectedQuote, premiumAmount, premiumLoading, premiumError } = useQuoteStore();
+  const { setSelectedQuote, premiumAmounts, premiumLoading, premiumError } = useQuoteStore();
   const { coverage } = useFormStore();
 
   const displayPremium = premiumLoading
     ? "Calculating..."
     : premiumError
     ? "—"
-    : premiumAmount ?? "—";
+    : premiumAmounts[type as "basic" | "mynd managed"] ?? "—";
 
   const ROWS: Row[] = [
     {
