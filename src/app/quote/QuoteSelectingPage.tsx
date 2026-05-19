@@ -1,12 +1,66 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import QuoteTitle from "@/shared/ui/titles/quoteTitle";
 import Quotes from "@/widgets/quote-page/Quotes";
+import { useFormStore } from "@/shared/store/formStore";
+import { useQuoteStore } from "@/shared/store/quotesStore";
 
 export default function QuoteSelectingPage() {
   const [deductible, setDeductible] = useState("10000");
+  const { propertyDetails, coverage } = useFormStore();
+  const { setPremiumAmount, setPremiumLoading, setPremiumError } = useQuoteStore();
+
+  useEffect(() => {
+    const { zipcode, squareFootage, numberOfUnits } = propertyDetails;
+    const { propertyRebuildCost, lossOfUseMonthlyRents } = coverage;
+
+    if (!zipcode || !squareFootage || !numberOfUnits || !propertyRebuildCost || !lossOfUseMonthlyRents) {
+      setPremiumAmount(null);
+      setPremiumError(null);
+      return;
+    }
+
+    let cancelled = false;
+    setPremiumLoading(true);
+    setPremiumError(null);
+
+    fetch("/api/quote-premium", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        zipcode,
+        deductible,
+        dwellingAmount: propertyRebuildCost,
+        monthlyRents: lossOfUseMonthlyRents,
+        unitCount: numberOfUnits,
+        sqft: squareFootage,
+        isWindHail: true,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data.error) {
+          setPremiumError(data.error);
+          setPremiumAmount(null);
+        } else {
+          setPremiumAmount(
+            "$" + Number(data.totalAmount).toLocaleString("en-US")
+          );
+          setPremiumError(null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setPremiumError("Failed to calculate premium");
+      })
+      .finally(() => {
+        if (!cancelled) setPremiumLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [deductible, propertyDetails, coverage]);
 
   return (
     <div className="pt-[75px] lg:pt-[110px] pb-[75px] w-full bg-bright">

@@ -218,7 +218,7 @@
 //               Annual Premium
 //             </span>
 //             <span className="font-bold text-primary text-[13px]">
-//               {ANNUAL_PREMIUM[type]}
+//               {displayPremium}
 //             </span>
 //           </div>
 //         </div>
@@ -323,7 +323,7 @@
 //               "text-[11px] xl:text-[13px] 2xl:text-[14px] 3xl:text-[17px]",
 //             ].join(" ")}
 //           >
-//             {ANNUAL_PREMIUM[type]}
+//             {displayPremium}
 //           </span>
 //         </div>
 //       </div>
@@ -421,11 +421,6 @@ const TITLES: Record<QuoteType, string> = {
   "mynd managed": "Mynd Managed",
 };
 
-const ANNUAL_PREMIUM: Record<QuoteType, string> = {
-  basic: "$10,000",
-  enchanced: "<Amount>",
-  "mynd managed": "$100,000",
-};
 
 interface IProps {
   type: QuoteType;
@@ -435,8 +430,14 @@ interface IProps {
 }
 
 const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
-  const { setSelectedQuote } = useQuoteStore();
+  const { setSelectedQuote, premiumAmount, premiumLoading, premiumError } = useQuoteStore();
   const { coverage } = useFormStore();
+
+  const displayPremium = premiumLoading
+    ? "Calculating..."
+    : premiumError
+    ? "—"
+    : premiumAmount ?? "—";
 
   const ROWS: Row[] = [
     {
@@ -640,7 +641,7 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
               Annual Premium
             </span>
             <span className="font-bold text-primary text-[13px]">
-              {ANNUAL_PREMIUM[type]}
+              {displayPremium}
             </span>
           </div>
         </div>
@@ -746,7 +747,7 @@ const Quote: FC<IProps> = ({ type, isMobile = false, onPrev, onNext }) => {
               "text-[11px] xl:text-[13px] 2xl:text-[14px] 3xl:text-[17px]",
             ].join(" ")}
           >
-            {ANNUAL_PREMIUM[type]}
+            {displayPremium}
           </span>
         </div>
       </div>
