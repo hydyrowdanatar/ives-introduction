@@ -12,7 +12,7 @@ import SelectedQuotePopup from "./SelectedQuotePopup";
 
 const QUOTE_TYPES: QuoteType[] = ["basic", "mynd managed"];
 
-const Quotes = ({ deductible: _deductible }: { deductible: string }) => {
+const Quotes = ({ deductible }: { deductible: string }) => {
   const router = useRouter();
   const { openPopup, setSelectedQuote } = useQuoteStore();
   const [mobileIndex, setMobileIndex] = useState(0);
