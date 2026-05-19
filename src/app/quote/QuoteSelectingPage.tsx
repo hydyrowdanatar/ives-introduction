@@ -74,7 +74,7 @@ export default function QuoteSelectingPage() {
         <QuoteTitle
           titleWidth="xl:w-[411px] 2xl:w-[500px]"
           subTitleWidth="lg:w-[500px] xl:w-[646px] 2xl:w-[770px] 3xl:w-[1000px]"
-          title="We’ve put together three quotes for you."
+          title="We’ve put together two quotes for you."
           subTitle_1="We’ve created two landlord coverage packages to simplify the process
           so you can compare protection levels and choose the option that best
           fits your property and investment strategy."

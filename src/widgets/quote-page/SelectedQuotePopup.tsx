@@ -6,7 +6,7 @@
 //     <div className="w-[460px] xl:w-[580px] 2xl:w-[685px] 3xl:w-[895px] h-[430px] xl:h-[545px] 2xl:h-[645px] 3xl:h-[840px] py-[36px] xl:py-[45px] 2xl:py-[54px] 3xl:py-[70px] px-10 xl:px-[50px] 2xl:px-[60px] 3xl:px-[77px] bg-primary flex flex-col items-center justify-center gap-4">
 //       <QuoteTitle
 //         title="Mynd Managed Advantage Has Best Coverage"
-//         subTitle_1="We’ve created three landlord coverage packages to simplify the process so you can compare protection levels and choose the option that best fits your property and investment strategy. Owners with properties managed by Mynd receive access to the exclusive Mynd Managed Advantage — our most comprehensive coverage option."
+//         subTitle_1="We’ve created two landlord coverage packages to simplify the process so you can compare protection levels and choose the option that best fits your property and investment strategy. Owners with properties managed by Mynd receive access to the exclusive Mynd Managed Advantage — our most comprehensive coverage option."
 //         titleWidth=""
 //         subTitleWidth=""
 //       />
@@ -102,7 +102,7 @@ const SelectedQuotePopup = () => {
         {/* Title block */}
         <QuoteTitle
           title="Mynd Managed Advantage Has Best Coverage"
-          subTitle_1="We've created three landlord coverage packages to simplify the process so you can compare protection levels and choose the option that best fits your property and investment strategy. Owners with properties managed by Mynd receive access to the exclusive Mynd Managed Advantage — our most comprehensive coverage option."
+          subTitle_1="We've created two landlord coverage packages to simplify the process so you can compare protection levels and choose the option that best fits your property and investment strategy. Owners with properties managed by Mynd receive access to the exclusive Mynd Managed Advantage — our most comprehensive coverage option."
           titleWidth="text-white"
           subTitleWidth="text-white"
         />
