@@ -1,8 +1,16 @@
+"use client";
+
 import Hero from "@/shared/ui/hero";
 import heroBackImage from "@/shared/assets/landing/heroBG.png";
 import Button from "@/shared/ui/btn";
 
 const Conclusion = () => {
+  const handleDownloadEvidence = () => {
+    const link = document.createElement("a");
+    link.href = "/doc/MyndEOIWebsite2026.pdf";
+    link.download = "MyndEOIWebsite2026.pdf";
+    link.click();
+  };
   return (
     <div className="w-full">
       <Hero
@@ -40,6 +48,7 @@ const Conclusion = () => {
           <Button
             title="DOWNLOAD EVIDENCE"
             className="text-white bg-primary hover:bg-secondary hover:text-primary"
+            onClick={handleDownloadEvidence}
           />
           {/* <Button
             title="DOWNLOAD INVOICE"

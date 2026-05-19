@@ -5,11 +5,13 @@ import logo from "@/shared/assets/logoIcon.svg";
 import miniLogo from "@/shared/assets/mobileLogoIcon.svg";
 import Image from "next/image";
 import useGetIcons from "@/shared/icons/getIcons";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const Navbar = () => {
   const { closeIcon, miniCloseIcon } = useGetIcons();
   const router = useRouter();
+  const pathname = usePathname();
+  const isIntroPage = pathname === "/intro";
 
   return (
     <div
@@ -32,8 +34,8 @@ const Navbar = () => {
           className="flex lg:hidden"
           onClick={() => router.push("/landing")}
         />
-        <div className="hidden lg:flex">{closeIcon}</div>
-        <div className="flex lg:hidden">{miniCloseIcon}</div>
+        {isIntroPage && <div className="hidden lg:flex">{closeIcon}</div>}
+        {isIntroPage && <div className="flex lg:hidden">{miniCloseIcon}</div>}
       </div>
     </div>
   );

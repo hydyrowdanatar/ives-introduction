@@ -6,33 +6,40 @@ import Quote from "@/shared/ui/quotes/quote";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import SelectedQuotePopup from "./SelectedQuotePopup";
-import { useFormStore } from "@/shared/store/formStore";
-import { pdf } from "@react-pdf/renderer";
-import ProposalDocument from "@/shared/pdf/ProposalDocument";
+// import { useFormStore } from "@/shared/store/formStore";
+// import { pdf } from "@react-pdf/renderer";
+// import ProposalDocument from "@/shared/pdf/ProposalDocument";
 
 const QUOTE_TYPES: QuoteType[] = ["basic", "mynd managed"];
 
-const Quotes = ({ deductible }: { deductible: string }) => {
+const Quotes = ({ deductible: _deductible }: { deductible: string }) => {
   const router = useRouter();
   const { openPopup, setSelectedQuote } = useQuoteStore();
   const [mobileIndex, setMobileIndex] = useState(0);
-  const { aboutYou, propertyDetails, coverage } = useFormStore();
+  // const { aboutYou, propertyDetails, coverage } = useFormStore();
 
-  const handleDownloadProposal = async () => {
-    const blob = await pdf(
-      <ProposalDocument
-        aboutYou={aboutYou}
-        propertyDetails={propertyDetails}
-        coverage={coverage}
-        deductible={deductible}
-      />,
-    ).toBlob();
-    const url = URL.createObjectURL(blob);
+  // const handleDownloadProposal = async () => {
+  //   const blob = await pdf(
+  //     <ProposalDocument
+  //       aboutYou={aboutYou}
+  //       propertyDetails={propertyDetails}
+  //       coverage={coverage}
+  //       deductible={deductible}
+  //     />,
+  //   ).toBlob();
+  //   const url = URL.createObjectURL(blob);
+  //   const link = document.createElement("a");
+  //   link.href = url;
+  //   link.download = "ives-insurance-proposal.pdf";
+  //   link.click();
+  //   URL.revokeObjectURL(url);
+  // };
+
+  const handleDownloadProposal = () => {
     const link = document.createElement("a");
-    link.href = url;
-    link.download = "ives-insurance-proposal.pdf";
+    link.href = "/doc/MyndProposalWebsite2026.pdf";
+    link.download = "MyndProposalWebsite2026.pdf";
     link.click();
-    URL.revokeObjectURL(url);
   };
 
   const handleSelectQuote = (type: QuoteType) => {
